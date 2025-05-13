@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>1- Map Guessr</title>
+  <title>2 - Map Guessr</title>
   <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptiler-sdk.umd.min.js"></script>
   <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptilersdk.css" rel="stylesheet" />
   <style>
@@ -13,9 +13,6 @@
       margin: 0;
       padding: 0;
       color: #333;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
     }
     header {
       background-color: #0cc0df;
@@ -48,9 +45,8 @@
       border-radius: 5px;
       overflow: hidden;
       background-color: #eaeaea;
-      cursor: none; /* Hide the default map cursor */
     }
-    #google-map {
+    #reference-map {
       position: absolute;
       bottom: 20px;
       right: 20px;
@@ -84,55 +80,60 @@
       background-color: #0cc0df;
       padding: 10px;
       text-align: center;
-      border-radius: 5px 5px 0 0;
+      border-radius: 5px;
       font-size: 0.9em;
-      margin-top: auto;
+      margin-top: 40px;
     }
     
-    /* Hide default MapTiler controls */
     .maptiler-ctrl-group,
     .maptiler-ctrl,
     .maplibregl-ctrl-group,
     .maplibregl-ctrl {
       display: none !important;
     }
-
-    #locationText {
-      text-align: center;
-      font-weight: bold;
-      margin: 10px 0;
+    
+    #map-container {
+      width: 80%;
+      max-width: 800px;
+      height: 60vh;
+      max-height: 600px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 2px 22px 12px rgba(0,0,0,0.1);
+      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
     }
-
+    
     .controls {
       margin-top: 20px;
       padding: 10px;
       display: flex;
       gap: 10px;
       align-items: center;
-      justify-content: center;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Map Guessr</h1>
-    <p>Test your geography knowledge!</p>
+    <h1>Test</h1>
+    <p>TTTT</p>
   </header>
   <main>
     <section>
       <h2>About</h2>
-      <p id="locationText">Click the button to find a random city and spot, then right-click on the map to guess.</p>
-      
-      <div class="controls">
-        <button id="findSpotButton">Find Random City & Spot</button>
-      </div>
+      <p>Game Rules.</p>
     </section>
     <section>
       <h2>Maps</h2>
       <div class="maps-container">
         <div class="map-embed" id="maptiler-map"></div>
-        <div class="map-embed" id="google-map"></div>
+        <div class="map-embed" id="reference-map"></div>
       </div>
+      <div class="controls">
+        <button id="findSpotButton">Find Random City & Spot</button>
+      </div>
+      <p id="locationText">Click the button to find a random city and spot.</p>
       <div class="submit-container">
         <button class="submit-btn" id="submit-guess">Submit</button>
       </div>
@@ -140,11 +141,11 @@
     <section>
       <h2>Game Answers</h2>
       <ul>
-        <li>The location label/place: <span id="cityName">Not selected yet</span></li>
-        <li>Your guessed coordinates: <span id="guessedCoords">None yet</span></li>
-        <li>Submit status: <span id="submitStatus">Not submitted</span></li>
-        <li>Score: <span id="score">0</span></li>
-        <li>Round: <span id="round">1</span> of 5</li>
+        <li>The location label/place goes here</li>
+        <li>The guessed coordinates</li>
+        <li>Submit button clicked? status goes here</li>
+        <li>Future points/scores system goes here</li>
+        <li>Round count goes here</li>
       </ul>
     </section>
   </main>
@@ -152,260 +153,242 @@
     <p>Made by Nathan</p>
   </footer>
 
-  <script>
+<script>
     // --- Configuration ---
-    // Use environment variable for API key instead of hardcoding
-    // This assumes you'll set MAPTILER_API_KEY in your Cloudflare environment
-    const apiKey = 'ZS9RHHRim7f1OZRKuI6n'; // This will be replaced by Cloudflare environment variable
-
-    // Initialize the MapTiler SDK
+    const apiKey = ''; // Ensure your MapTiler API key is correct and active
     maptilersdk.config.apiKey = apiKey;
 
     // API endpoint for the Random City API
     const randomCityApiUrl = 'https://random-city-api.vercel.app/api/random-city';
 
-    const MAX_RETRIES = 5; // Maximum number of attempts to find a valid city location
-    const zoomLevel = 15; // Adjust initial zoom level as desired
-
-    // Using custom vector style URL
-    const customStyleUrl = `https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=${apiKey}`;
+    const MAX_RETRIES = Infinity; // Maximum number of attempts to find a valid city location
 
     let currentMarker = null; // Variable to hold the current marker
-    let userMarker = null; // Variable to hold the user's guess marker
     let map = null; // Variable to hold the map instance
-    let currentLngLat = null; // Store the current random location
+
+    const zoomLevel = 15; // Adjust initial zoom level as desired
+
+    // Using the provided custom vector style URL
+    const customStyleUrl = 'https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=' + apiKey;
 
     // Function to generate a random coordinate within a bounding box
     function getRandomCoordinateInBounds(bounds) {
-      const minLng = bounds[0];
-      const minLat = bounds[1];
-      const maxLng = bounds[2];
-      const maxLat = bounds[3];
+        const minLng = bounds[0];
+        const minLat = bounds[1];
+        const maxLng = bounds[2];
+        const maxLat = bounds[3];
 
-      // Add a small buffer to avoid being exactly on the edge
-      const buffer = 0.001; // Adjust buffer size as needed
-      const bufferedMinLng = minLng + (maxLng - minLng) * buffer;
-      const bufferedMinLat = minLat + (maxLat - minLat) * buffer;
-      const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer;
-      const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
+        // Add a small buffer to avoid being exactly on the edge
+        const buffer = 0.001; // Adjust buffer size as needed
+        const bufferedMinLng = minLng + (maxLng - minLng) * buffer;
+        const bufferedMinLat = minLat + (maxLat - minLat) * buffer;
+        const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer;
+        const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
 
-      const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
-      const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
+        const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
+        const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
 
-      return [randomLng, randomLat];
+        return [randomLng, randomLat];
     }
 
     // Function to add or update the marker on the map
     function addOrUpdateMarker(lngLat) {
-      if (currentMarker) {
-        currentMarker.remove(); // Remove the previous marker if it exists
-      }
-      currentMarker = new maptilersdk.Marker()
-        .setLngLat(lngLat)
-        .addTo(map);
-      
-      // Store the current location
-      currentLngLat = lngLat;
+        if (currentMarker) {
+            currentMarker.remove(); // Remove the previous marker if it exists
+        }
+        currentMarker = new maptilersdk.Marker()
+            .setLngLat(lngLat)
+            .addTo(map);
     }
 
     // --- Initialize Map ---
     const mapContainer = document.getElementById('maptiler-map');
-    const locationText = document.getElementById('locationText');
 
     if (!mapContainer) {
-      console.error("Map container element not found!");
-      locationText.textContent = "Error: Map container element not found.";
+        console.error("Map container element not found!");
     } else {
-      map = new maptilersdk.Map({
-        container: 'maptiler-map',
-        style: customStyleUrl,
-        center: [0, 0], // Initial center can be anywhere, it will be updated
-        zoom: 1, // Initial low zoom
-        interactive: true // Allow interaction for user guessing
-      });
+         map = new maptilersdk.Map({
+            container: 'maptiler-map',
+            style: customStyleUrl,
+            center: [0, 0], // Initial center can be anywhere, it will be updated
+            zoom: 1, // Initial low zoom
+            interactive: false
+        });
 
-      // Add an error listener to the map
-      map.on('error', (e) => {
-        console.error('Map loading error:', e.error);
-        locationText.textContent = "Error loading map. Check console.";
-      });
+        // Add an error listener to the map
+        map.on('error', (e) => {
+            console.error('Map loading error:', e.error);
+            document.getElementById('locationText').textContent = "Error loading map. Check console.";
+        });
 
-      // Remove default controls once the style is loaded
-      map.on('style.load', () => {
-        console.log('Map style loaded.');
-        // Call the function to find a random city and spot on map load
-        findRandomCityAndSpot();
+         // Remove default controls once the style is loaded
+         map.on('style.load', () => {
+             console.log('Map style loaded.');
+             // Call the function to find a random city and spot on map load
+             findRandomCityAndSpot();
 
-        try {
-          const navControl = map.getContainer().querySelector('.maptiler-ctrl-nav');
-          if (navControl) navControl.remove();
-          const fullscreenControl = map.getContainer().querySelector('.maptiler-ctrl-fullscreen');
-          if (fullscreenControl) fullscreenControl.remove();
-          const maplibreNavControl = map.getContainer().querySelector('.maplibregl-ctrl-nav');
-          if (maplibreNavControl) maplibreNavControl.remove();
-          const maplibreFullscreenControl = map.getContainer().querySelector('.maplibregl-ctrl-fullscreen');
-          if (maplibreFullscreenControl) maplibreFullscreenControl.remove();
-        } catch (e) {
-          console.warn("Could not remove controls programmatically:", e);
-          console.warn("CSS rules should still hide them.");
-        }
-      });
+             try {
+                 const navControl = map.getContainer().querySelector('.maptiler-ctrl-nav');
+                 if (navControl) navControl.remove();
+                 const fullscreenControl = map.getContainer().querySelector('.maptiler-ctrl-fullscreen');
+                 if (fullscreenControl) fullscreenControl.remove();
+                 const maplibreNavControl = map.getContainer().querySelector('.maplibregl-ctrl-nav');
+                 if (maplibreNavControl) maplibreNavControl.remove();
+                 const maplibreFullscreenControl = map.getContainer().querySelector('.maplibregl-ctrl-fullscreen');
+                 if (maplibreFullscreenControl) maplibreFullscreenControl.remove();
+             } catch (e) {
+                 console.warn("Could not remove controls programmatically:", e);
+                 console.warn("CSS rules should still hide them.");
+             }
+         });
 
-      map.on('load', () => {
-        console.log('Map fully loaded.');
-      });
-
-      // --- Event Listener for Right-Click (contextmenu) ---
-      map.on('contextmenu', (e) => {
-        // Prevent the default browser context menu
-        e.preventDefault();
-
-        // Get the geographical coordinates of the clicked point
-        const clickedLngLat = e.lngLat;
-        console.log('Right-clicked at:', clickedLngLat);
-
-        // Remove the previous user marker if it exists
-        if (userMarker) {
-          userMarker.remove();
-        }
-
-        // Add a new marker at the clicked location
-        userMarker = new maptilersdk.Marker()
-          .setLngLat(clickedLngLat)
-          .addTo(map);
-
-        // Display the coordinates in the guessedCoords span
-        document.getElementById('guessedCoords').textContent = `Lng: ${clickedLngLat.lng.toFixed(6)}, Lat: ${clickedLngLat.lat.toFixed(6)}`;
-      });
+         map.on('load', () => {
+             console.log('Map fully loaded.');
+         });
     }
 
     // --- Function to find a random city and spot with retry logic ---
     async function findRandomCityAndSpot(attempt = 1) {
-      const locationText = document.getElementById('locationText');
+         const locationText = document.getElementById('locationText');
 
-      if (attempt > MAX_RETRIES) {
-        locationText.textContent = `Failed to find a valid city location after ${MAX_RETRIES} attempts.`;
-        console.error(`Failed to find a valid city location after ${MAX_RETRIES} attempts.`);
-        return; // Stop retrying
-      }
+         if (attempt > MAX_RETRIES) {
+             locationText.textContent = `Failed to find a valid city location after ${MAX_RETRIES} attempts.`;
+             console.error(`Failed to find a valid city location after ${MAX_RETRIES} attempts.`);
+             return; // Stop retrying
+         }
 
-      locationText.textContent = `Fetching a random city (Attempt ${attempt}/${MAX_RETRIES})...`;
+         locationText.textContent = `Fetching a random city (Attempt ${attempt}/${MAX_RETRIES})...`;
 
-      try {
-        // 1. Fetch a random city name from the provided API
-        const cityResponse = await fetch(randomCityApiUrl);
-        if (!cityResponse.ok) {
-          throw new Error(`HTTP error fetching random city: ${cityResponse.status}`);
-        }
-        const cityData = await cityResponse.json();
-        const cityName = cityData.city; // Extract city name from the response
+        try {
+            // 1. Fetch a random city name from the provided API
+            const cityResponse = await fetch(randomCityApiUrl);
+            if (!cityResponse.ok) {
+                 throw new Error(`HTTP error fetching random city: ${cityResponse.status}`);
+            }
+            const cityData = await cityResponse.json();
+            const cityName = cityData.city; // Extract city name from the response
 
-        if (!cityName) {
-          console.warn(`Random City API returned no city name (Attempt ${attempt}/${MAX_RETRIES}). Retrying...`);
-          // Retry if no city name is returned
-          findRandomCityAndSpot(attempt + 1);
-          return;
-        }
+            if (!cityName) {
+                 console.warn(`Random City API returned no city name (Attempt ${attempt}/${MAX_RETRIES}). Retrying...`);
+                 // Retry if no city name is returned
+                 findRandomCityAndSpot(attempt + 1);
+                 return;
+            }
 
-        locationText.textContent = `Finding a random spot in ${cityName}...`;
-        document.getElementById('cityName').textContent = cityName;
+            locationText.textContent = `Finding a random spot in ${cityName}...`;
 
-        // 2. Use MapTiler Geocoding API to find the city's location and bounds
-        const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`;
-        const geocodingResponse = await fetch(geocodingUrl);
-        if (!geocodingResponse.ok) {
-          // If geocoding fails with an HTTP error, log and retry
-          console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}/${MAX_RETRIES}): ${geocodingResponse.status}. Retrying...`);
-          findRandomCityAndSpot(attempt + 1);
-          return;
-        }
-        const geocodingData = await geocodingResponse.json();
+            // 2. Use MapTiler Geocoding API to find the city's location and bounds
+            const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`;
+            const geocodingResponse = await fetch(geocodingUrl);
+            if (!geocodingResponse.ok) {
+                 // If geocoding fails with an HTTP error, log and retry
+                 console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}/${MAX_RETRIES}): ${geocodingResponse.status}. Retrying...`);
+                 findRandomCityAndSpot(attempt + 1);
+                 return;
+            }
+            const geocodingData = await geocodingResponse.json();
 
-        if (geocodingData && geocodingData.features && geocodingData.features.length > 0) {
-          // Find the best feature (usually the first one)
-          const feature = geocodingData.features[0];
-          const bounds = feature.bbox; // Bounding box [minLng, minLat, maxLng, maxLat]
-          const center = feature.center; // Center [lng, lat]
+            if (geocodingData && geocodingData.features && geocodingData.features.length > 0) {
+                // Find the best feature (usually the first one)
+                const feature = geocodingData.features[0];
+                const bounds = feature.bbox; // Bounding box [minLng, minLat, maxLng, maxLat]
+                const center = feature.center; // Center [lng, lat]
 
-          if (bounds) {
-            // Generate a random coordinate within the bounding box
-            const randomLngLat = getRandomCoordinateInBounds(bounds);
+                if (bounds) {
+                    // Generate a random coordinate within the bounding box
+                    const randomLngLat = getRandomCoordinateInBounds(bounds);
 
-            // Update the map view to the random spot instantly
-            map.jumpTo({
-              center: randomLngLat,
-              zoom: zoomLevel, // Use the predefined zoom level
-              essential: true
-            });
+                    // Update the map view to the random spot instantly
+                    map.jumpTo({
+                        center: randomLngLat,
+                        zoom: zoomLevel, // Use the predefined zoom level
+                        essential: true
+                    });
 
-            // Update the location text
-            locationText.textContent = `Location: A random spot in ${feature.place_name}`;
+                    // Update the location text
+                    locationText.textContent = `Location: A random spot in ${feature.place_name}`;
 
-            // Add a marker to the new spot
-            addOrUpdateMarker(randomLngLat);
+                    // Add a marker to the new spot
+                    addOrUpdateMarker(randomLngLat);
 
-          } else if (center) {
-            // If no bounding box, just use the center and add a small random offset
-            const randomLng = center[0] + (Math.random() - 0.5) * 0.01; // Add small random offset
-            const randomLat = center[1] + (Math.random() - 0.5) * 0.01; // Add small random offset
-            const randomLngLat = [randomLng, randomLat];
+                } else if (center) {
+                     // If no bounding box, just use the center and add a small random offset
+                     const randomLng = center[0] + (Math.random() - 0.5) * 0.01; // Add small random offset
+                     const randomLat = center[1] + (Math.random() - 0.5) * 0.01; // Add small random offset
+                     const randomLngLat = [randomLng, randomLat];
 
-            map.jumpTo({
-              center: randomLngLat,
-              zoom: zoomLevel,
-              essential: true
-            });
+                     map.jumpTo({
+                        center: randomLngLat,
+                        zoom: zoomLevel,
+                        essential: true
+                    });
 
-            locationText.textContent = `Location: A random spot near the center of ${feature.place_name}`;
-            addOrUpdateMarker(randomLngLat);
+                    locationText.textContent = `Location: A random spot near the center of ${feature.place_name}`;
+                    addOrUpdateMarker(randomLngLat);
 
-          } else {
-            // If no bounds or center, MapTiler couldn't provide useful data for this city
-            console.warn(`MapTiler Geocoding could not find detailed location data for "${cityName}" (Attempt ${attempt}/${MAX_RETRIES}). Retrying...`);
-            // Retry if geocoding data is insufficient
+                } else {
+                    // If no bounds or center, MapTiler couldn't provide useful data for this city
+                    console.warn(`MapTiler Geocoding could not find detailed location data for "${cityName}" (Attempt ${attempt}/${MAX_RETRIES}). Retrying...`);
+                    // Retry if geocoding data is insufficient
+                    findRandomCityAndSpot(attempt + 1);
+                }
+
+            } else {
+                // If MapTiler Geocoding returned no features for this city
+                console.warn(`MapTiler Geocoding could not find the location for "${cityName}" (Attempt ${attempt}/${MAX_RETRIES}). Retrying...`);
+                // Retry if geocoding returned no features
+                findRandomCityAndSpot(attempt + 1);
+            }
+
+        } catch (error) {
+            console.error(`Error during API call (Attempt ${attempt}/${MAX_RETRIES}):`, error);
+            locationText.textContent = `An error occurred: ${error.message}. Retrying...`;
+            // Retry on fetch or other errors
             findRandomCityAndSpot(attempt + 1);
-          }
-
-        } else {
-          // If MapTiler Geocoding returned no features for this city
-          console.warn(`MapTiler Geocoding could not find the location for "${cityName}" (Attempt ${attempt}/${MAX_RETRIES}). Retrying...`);
-          // Retry if geocoding returned no features
-          findRandomCityAndSpot(attempt + 1);
         }
-
-      } catch (error) {
-        console.error(`Error during API call (Attempt ${attempt}/${MAX_RETRIES}):`, error);
-        locationText.textContent = `An error occurred: ${error.message}. Retrying...`;
-        // Retry on fetch or other errors
-        findRandomCityAndSpot(attempt + 1);
-      }
     }
+
 
     // --- Event Listener for the "Find Random City & Spot" button ---
     document.getElementById('findSpotButton').addEventListener('click', findRandomCityAndSpot);
 
-    // --- Event Listener for the "Submit" button ---
-    document.getElementById('submit-guess').addEventListener('click', function() {
-      if (!userMarker || !currentLngLat) {
-        document.getElementById('submitStatus').textContent = "Cannot submit: No location or guess made";
-        return;
-      }
-      
-      const userCoords = userMarker.getLngLat();
-      document.getElementById('submitStatus').textContent = "Guess submitted!";
-      
-      // Here you would add scoring logic based on distance between 
-      // userCoords and currentLngLat
-      // This is where you would also update the score and round counter
-      
-      // Example: Simple log of both positions
-      console.log("Actual location:", currentLngLat);
-      console.log("User guess:", userCoords);
-    });
-
-    // The Google Maps initialization would go here
-    // Note: This is a placeholder for the Google Maps integration
-    // which would require a separate API key and setup
-  </script>
+    // --- Initialize Reference Map ---
+    const mapReferenceContainer = document.getElementById('reference-map');
+    
+    if (mapReferenceContainer) {
+        // Using a different style URL for the reference map
+        const referenceStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey;
+        
+        const referenceMap = new maptilersdk.Map({
+            container: 'reference-map',
+            style: referenceStyleUrl,
+            center: [0, 0],
+            zoom: 0.6,
+            interactive: false // Prevent user interaction
+        });
+        
+        referenceMap.on('error', (e) => {
+            console.error('Reference map loading error:', e.error);
+        });
+    }
+    
+    // Event Listener for Right-Click (from second file)
+    if (map) {
+        map.on('contextmenu', (e) => {
+            // Prevent the default browser context menu
+            e.preventDefault();
+            
+            // Get the geographical coordinates of the clicked point
+            const clickedLngLat = e.lngLat;
+            console.log('Right-clicked at:', clickedLngLat);
+            
+            // Display the coordinates
+            const locationText = document.getElementById('locationText');
+            if (locationText) {
+                locationText.textContent = `Last Right-Clicked Location: Lng: ${clickedLngLat.lng.toFixed(6)}, Lat: ${clickedLngLat.lat.toFixed(6)}`;
+            }
+        });
+    }
+</script>
 </body>
 </html>
