@@ -45,6 +45,7 @@
       border-radius: 5px;
       overflow: hidden;
       background-color: #eaeaea;
+      cursor: none;
     }
     #reference-map {
       position: absolute;
@@ -58,12 +59,11 @@
       background-color: #fff;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       z-index: 10;
-      transition: all 0.3s ease;
+      transition: width 0.3s, height 0.3s;
     }
-    
     #reference-map:hover {
-      width: 400px;
-      height: 300px;
+      width: 350px;
+      height: 250px;
     }
     .submit-container {
       text-align: center;
@@ -139,7 +139,7 @@
       <div class="controls">
         <button id="findSpotButton">Find Random City & Spot</button>
       </div>
-      <p id="locationText">Click the button to find a random city and spot.</p>
+      <p id="locationText">Right-click on the map to mark a location and see its coordinates.</p>
       <div class="submit-container">
         <button class="submit-btn" id="submit-guess">Submit</button>
       </div>
@@ -174,8 +174,66 @@
 
     const zoomLevel = 15; // Adjust initial zoom level as desired
 
-    // Using the provided custom vector style URL
+    // Using the provided custom vector style URL for main map
     const customStyleUrl = 'https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=' + apiKey;
+    
+    // Style URL for reference map
+    const referenceStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey;
+
+    // --- Initialize Map ---
+    const mapContainer = document.getElementById('maptiler-map');
+    const locationText = document.getElementById('locationText');
+
+    if (!mapContainer) {
+        console.error("Map container element not found!");
+        locationText.textContent = "Error: Map container element not found.";
+    } else {
+         map = new maptilersdk.Map({
+            container: 'maptiler-map',
+            style: customStyleUrl,
+            center: [0, 0], // Initial center can be anywhere, it will be updated
+            zoom: 1, // Initial low zoom
+            interactive: true // Keep user interaction enabled (pan, zoom)
+        });
+
+        // Add an error listener to the map
+        map.on('error', (e) => {
+            console.error('Map loading error:', e.error);
+            locationText.textContent = "Error loading map. Check console.";
+        });
+
+         map.on('style.load', () => {
+             console.log('Map style loaded.');
+             // You could add an initial marker here if desired, but the request was for right-click
+         });
+
+         map.on('load', () => {
+             console.log('Map fully loaded.');
+         });
+
+        // --- Event Listener for Right-Click (contextmenu) ---
+        map.on('contextmenu', (e) => {
+            // Prevent the default browser context menu
+            e.preventDefault();
+
+            // Get the geographical coordinates of the clicked point
+            const clickedLngLat = e.lngLat;
+            console.log('Right-clicked at:', clickedLngLat);
+
+            // Remove the previous marker if it exists
+            if (currentMarker) {
+                currentMarker.remove();
+            }
+
+            // Add a new marker at the clicked location
+            currentMarker = new maptilersdk.Marker()
+                .setLngLat(clickedLngLat)
+                .addTo(map);
+
+            // Display the coordinates in the locationText paragraph
+            locationText.textContent = `Last Right-Clicked Location: Lng: ${clickedLngLat.lng.toFixed(6)}, Lat: ${clickedLngLat.lat.toFixed(6)}`;
+        });
+    }
 
     // Function to generate a random coordinate within a bounding box
     function getRandomCoordinateInBounds(bounds) {
@@ -195,62 +253,6 @@
         const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
 
         return [randomLng, randomLat];
-    }
-
-    // Function to add or update the marker on the map
-    function addOrUpdateMarker(lngLat) {
-        if (currentMarker) {
-            currentMarker.remove(); // Remove the previous marker if it exists
-        }
-        currentMarker = new maptilersdk.Marker()
-            .setLngLat(lngLat)
-            .addTo(map);
-    }
-
-    // --- Initialize Map ---
-    const mapContainer = document.getElementById('maptiler-map');
-
-    if (!mapContainer) {
-        console.error("Map container element not found!");
-    } else {
-         map = new maptilersdk.Map({
-            container: 'maptiler-map',
-            style: customStyleUrl,
-            center: [0, 0], // Initial center can be anywhere, it will be updated
-            zoom: 1, // Initial low zoom
-            interactive: true
-        });
-
-        // Add an error listener to the map
-        map.on('error', (e) => {
-            console.error('Map loading error:', e.error);
-            document.getElementById('locationText').textContent = "Error loading map. Check console.";
-        });
-
-         // Remove default controls once the style is loaded
-         map.on('style.load', () => {
-             console.log('Map style loaded.');
-             // Call the function to find a random city and spot on map load
-             findRandomCityAndSpot();
-
-             try {
-                 const navControl = map.getContainer().querySelector('.maptiler-ctrl-nav');
-                 if (navControl) navControl.remove();
-                 const fullscreenControl = map.getContainer().querySelector('.maptiler-ctrl-fullscreen');
-                 if (fullscreenControl) fullscreenControl.remove();
-                 const maplibreNavControl = map.getContainer().querySelector('.maplibregl-ctrl-nav');
-                 if (maplibreNavControl) maplibreNavControl.remove();
-                 const maplibreFullscreenControl = map.getContainer().querySelector('.maplibregl-ctrl-fullscreen');
-                 if (maplibreFullscreenControl) maplibreFullscreenControl.remove();
-             } catch (e) {
-                 console.warn("Could not remove controls programmatically:", e);
-                 console.warn("CSS rules should still hide them.");
-             }
-         });
-
-         map.on('load', () => {
-             console.log('Map fully loaded.');
-         });
     }
 
     // --- Function to find a random city and spot with retry logic ---
@@ -315,7 +317,21 @@
                     locationText.textContent = `Location: A random spot in ${feature.place_name}`;
 
                     // Add a marker to the new spot
-                    addOrUpdateMarker(randomLngLat);
+                    if (currentMarker) {
+                        currentMarker.remove(); // Remove the previous marker if it exists
+                    }
+                    currentMarker = new maptilersdk.Marker()
+                        .setLngLat(randomLngLat)
+                        .addTo(map);
+
+                    // Update reference map center
+                    if (referenceMap) {
+                        referenceMap.jumpTo({
+                            center: randomLngLat,
+                            zoom: 3,
+                            essential: true
+                        });
+                    }
 
                 } else if (center) {
                      // If no bounding box, just use the center and add a small random offset
@@ -330,7 +346,22 @@
                     });
 
                     locationText.textContent = `Location: A random spot near the center of ${feature.place_name}`;
-                    addOrUpdateMarker(randomLngLat);
+                    
+                    if (currentMarker) {
+                        currentMarker.remove(); // Remove the previous marker if it exists
+                    }
+                    currentMarker = new maptilersdk.Marker()
+                        .setLngLat(randomLngLat)
+                        .addTo(map);
+                    
+                    // Update reference map center
+                    if (referenceMap) {
+                        referenceMap.jumpTo({
+                            center: randomLngLat,
+                            zoom: 3,
+                            essential: true
+                        });
+                    }
 
                 } else {
                     // If no bounds or center, MapTiler couldn't provide useful data for this city
@@ -357,15 +388,13 @@
 
     // --- Event Listener for the "Find Random City & Spot" button ---
     document.getElementById('findSpotButton').addEventListener('click', findRandomCityAndSpot);
-
+    
     // --- Initialize Reference Map ---
     const mapReferenceContainer = document.getElementById('reference-map');
+    let referenceMap = null;
     
     if (mapReferenceContainer) {
-        // Using a different style URL for the reference map
-        const referenceStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey;
-        
-        const referenceMap = new maptilersdk.Map({
+        referenceMap = new maptilersdk.Map({
             container: 'reference-map',
             style: referenceStyleUrl,
             center: [0, 0],
@@ -375,34 +404,6 @@
         
         referenceMap.on('error', (e) => {
             console.error('Reference map loading error:', e.error);
-        });
-    }
-    
-    // Event Listener for Right-Click (from second file)
-    if (map) {
-        map.on('contextmenu', (e) => {
-            // Prevent the default browser context menu
-            e.preventDefault();
-            
-            // Get the geographical coordinates of the clicked point
-            const clickedLngLat = e.lngLat;
-            console.log('Right-clicked at:', clickedLngLat);
-            
-            // Remove the previous marker if it exists
-            if (currentMarker) {
-                currentMarker.remove();
-            }
-            
-            // Add a new marker at the clicked location
-            currentMarker = new maptilersdk.Marker()
-                .setLngLat(clickedLngLat)
-                .addTo(map);
-            
-            // Display the coordinates
-            const locationText = document.getElementById('locationText');
-            if (locationText) {
-                locationText.textContent = `Last Right-Clicked Location: Lng: ${clickedLngLat.lng.toFixed(6)}, Lat: ${clickedLngLat.lat.toFixed(6)}`;
-            }
         });
     }
 </script>
