@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>2 - Map Guessr</title>
+  <title>Map Guessr</title>
   <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptiler-sdk.umd.min.js"></script>
   <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptilersdk.css" rel="stylesheet" />
   <style>
@@ -58,6 +58,12 @@
       background-color: #fff;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       z-index: 10;
+      transition: all 0.3s ease;
+    }
+    
+    #reference-map:hover {
+      width: 400px;
+      height: 300px;
     }
     .submit-container {
       text-align: center;
@@ -212,7 +218,7 @@
             style: customStyleUrl,
             center: [0, 0], // Initial center can be anywhere, it will be updated
             zoom: 1, // Initial low zoom
-            interactive: false
+            interactive: true
         });
 
         // Add an error listener to the map
@@ -381,6 +387,16 @@
             // Get the geographical coordinates of the clicked point
             const clickedLngLat = e.lngLat;
             console.log('Right-clicked at:', clickedLngLat);
+            
+            // Remove the previous marker if it exists
+            if (currentMarker) {
+                currentMarker.remove();
+            }
+            
+            // Add a new marker at the clicked location
+            currentMarker = new maptilersdk.Marker()
+                .setLngLat(clickedLngLat)
+                .addTo(map);
             
             // Display the coordinates
             const locationText = document.getElementById('locationText');
