@@ -189,11 +189,23 @@
     if (currentMarker) {
         currentMarker.remove(); // Remove the previous marker if it exists
     }
-    currentMarker = new maptilersdk.Marker()
-        .setLngLat(lngLat)
-        .addTo(mainMap);
       
-    currentLocationCoords = lngLat;
+    if (Array.isArray(lngLat)) {
+        currentLocationCoords = {
+            lng: lngLat[0],
+            lat: lngLat[1]
+        };
+    } else {
+        // It's already an object with lng/lat properties
+        currentLocationCoords = lngLat;
+    }
+    
+    currentMarker = new maptilersdk.Marker()
+        .setLngLat(currentLocationCoords)
+        .addTo(mainMap);
+    
+    // Hide the marker initially so player can't see the correct location
+    currentMarker.getElement().style.display = 'none';
     }
 
     function calculateDistanceInMeters(lat1, lon1, lat2, lon2) {
