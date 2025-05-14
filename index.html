@@ -352,6 +352,11 @@
         );
         
         let distanceDisplay;
+        if (result.distance >= 1000) {
+            distanceDisplay = `${(result.distance / 1000).toFixed(2)} km`;
+        } else {
+            distanceDisplay = `${Math.round(result.distance)} meters`;
+        }
 
         document.getElementById('points-score').textContent = 
             `Score: ${result.score} points (Distance: ${distanceDisplay})`;
