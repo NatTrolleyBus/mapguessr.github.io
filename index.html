@@ -192,6 +192,55 @@
             .addTo(mainMap);
     }
 
+    function calculateDistanceInMeters(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+    const a =
+        Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) *
+        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c; // Distance in meters
+    return distance;
+    }
+
+    function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) {
+    // Constants for the GeoGuessr World map scoring
+    const MAX_SCORE = 5000; // Maximum points per round
+    const MAP_SIZE = 14916862; // Effective size of the World map in meters (diagonal distance)
+    const FIVE_K_DISTANCE = 149.18; // Distance threshold in meters for automatic 5000 points
+
+    // Calculate the distance in meters
+    const distance = calculateDistanceInMeters(lat1, lon1, lat2, lon2);
+
+    let score;
+
+    // Apply the scoring logic
+    if (distance <= FIVE_K_DISTANCE) {
+        score = MAX_SCORE;
+    } else {
+        // Exponential scoring formula: score = 5000 * e ^ (-10 * distance / size)
+        score = MAX_SCORE * Math.exp(-10 * distance / MAP_SIZE);
+        // Round the score to the nearest whole number
+        score = Math.round(score);
+    }
+
+    return {
+        distance: distance, // Distance in meters
+        score: score
+    };
+    
+    }
+
+    
+
+    
+
     // --- Initialize Maps ---
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize the main map
