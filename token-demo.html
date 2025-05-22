@@ -165,13 +165,13 @@
 </head>
 <body>
   <header>
-    <h1>Test</h1>
-    <p>May 15th 2025 - V10 (Token Authentication Support - Fixed)</p>
+    <h1>Map Guessr</h1>
+    <p>May 15th 2025 - V11 (Fully Token-Based Authentication)</p>
   </header>
   <main>
     <section>
       <h2>About</h2>
-      <p>Game Rules: Enter your API token and click "Initialize Maps" to begin playing.</p>
+      <p>Game Rules: Enter your API token to load maps and begin playing. All map data and styles are loaded through the authenticated API.</p>
       
       <div class="api-auth-section">
         <h3>API Configuration</h3>
@@ -182,7 +182,7 @@
           <span id="token-status" class="token-status pending">Enter token</span>
         </div>
         <p style="font-size: 12px; color: #666; margin-top: 10px;">
-          <strong>Required:</strong> You need a valid API token from the MapGuessr service to play.
+          <strong>Token Required:</strong> All APIs including map styles are accessed through your authenticated token.
         </p>
       </div>
     </section>
@@ -222,7 +222,7 @@
 
   <script>
     // --- Configuration ---
-    const MAPTILER_API_KEY = 'ZS9RHHRim7f1OZRKuI6n'; // Your original MapTiler API key for map loading
+    // No hard-coded API keys - everything goes through your authenticated API!
     
     // API configuration
     let API_BASE_URL = 'https://mapguessr-worker.games-6cb.workers.dev';
@@ -242,12 +242,9 @@
     const initialCenter = [0, 0];
     const initialZoom = -1.0;
 
-    // Fixed style URLs (removed spaces)
-    const customStyleUrl = `https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=${MAPTILER_API_KEY}`;
-    const overlayStyleUrl = `https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=${MAPTILER_API_KEY}`;
-
-    // Configure MapTiler SDK
-    maptilersdk.config.apiKey = MAPTILER_API_KEY;
+    // Style IDs for your custom MapTiler styles
+    const MAIN_STYLE_ID = '0196cb69-f55f-71f8-9a8f-90fa083f0f67';
+    const OVERLAY_STYLE_ID = '0196cb7f-9914-7a9b-aed1-8bfa7b9a0705';
 
     // --- Token Authentication Functions ---
     function updateTokenStatus(status, message) {
@@ -267,7 +264,7 @@
             return false;
         }
         
-        updateTokenStatus('valid', 'Token valid');
+        updateTokenStatus('valid', 'Token format valid');
         return true;
     }
 
@@ -278,6 +275,7 @@
         }
 
         try {
+            // Test the token with a simple API call
             const response = await fetch(`${API_BASE_URL}/api/cities?token=${API_TOKEN}`);
             
             if (response.ok) {
@@ -293,6 +291,33 @@
         } catch (error) {
             updateTokenStatus('invalid', 'Connection error');
             return false;
+        }
+    }
+
+    async function loadMapStyles() {
+        if (!API_TOKEN) {
+            throw new Error('No API token available');
+        }
+
+        // Build style URLs using your API endpoints
+        const customStyleUrl = `${API_BASE_URL}/api/mapstyle?style=${MAIN_STYLE_ID}&token=${API_TOKEN}`;
+        const overlayStyleUrl = `${API_BASE_URL}/api/mapstyle?style=${OVERLAY_STYLE_ID}&token=${API_TOKEN}`;
+
+        // Test that the style endpoints are accessible
+        try {
+            const mainStyleTest = await fetch(customStyleUrl);
+            const overlayStyleTest = await fetch(overlayStyleUrl);
+            
+            if (!mainStyleTest.ok || !overlayStyleTest.ok) {
+                throw new Error('Cannot access map style APIs');
+            }
+            
+            console.log('Map styles accessible via API');
+            return { customStyleUrl, overlayStyleUrl };
+            
+        } catch (error) {
+            console.error('Error testing map style APIs:', error);
+            throw new Error('Map style APIs not accessible');
         }
     }
 
@@ -313,24 +338,39 @@
             return false;
         }
 
+        // Load map styles through API
+        let styleUrls;
+        try {
+            updateTokenStatus('pending', 'Loading styles...');
+            styleUrls = await loadMapStyles();
+        } catch (error) {
+            updateTokenStatus('invalid', 'Style load failed');
+            console.error('Failed to load map styles:', error);
+            return false;
+        }
+
         try {
             // Clear the placeholder content
             document.getElementById('maptiler-map').innerHTML = '';
             document.getElementById('overlay-map').innerHTML = '';
 
-            // Initialize the main map
+            // Configure MapTiler SDK to use your API as a source transform
+            // This tells the SDK how to handle requests
+            maptilersdk.config.apiKey = 'dummy'; // Required but not used since we're using custom URLs
+
+            // Initialize the main map with your API style URL
             mainMap = new maptilersdk.Map({
                 container: 'maptiler-map',
-                style: customStyleUrl,
+                style: styleUrls.customStyleUrl,
                 center: [0, 0],
                 zoom: 1,
                 interactive: false
             });
 
-            // Initialize the overlay map
+            // Initialize the overlay map with your API style URL
             overlayMap = new maptilersdk.Map({
                 container: 'overlay-map',
-                style: overlayStyleUrl,
+                style: styleUrls.overlayStyleUrl,
                 center: initialCenter,
                 zoom: initialZoom,
                 interactive: true
@@ -340,6 +380,7 @@
             setupMapEventListeners();
             
             mapsInitialized = true;
+            updateTokenStatus('valid', 'Maps loaded');
             
             // Enable game buttons
             document.getElementById('new-location').disabled = false;
@@ -371,7 +412,7 @@
 
         // Style load handlers
         mainMap.on('style.load', () => {
-            console.log('Main map style loaded.');
+            console.log('Main map style loaded from API.');
             try {
                 mainMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
             } catch (e) {
@@ -380,7 +421,7 @@
         });
 
         overlayMap.on('style.load', () => {
-            console.log('Overlay map style loaded.');
+            console.log('Overlay map style loaded from API.');
             try {
                 overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
             } catch (e) {
@@ -590,14 +631,14 @@
         locationText.textContent = `Working on a random city (Attempt ${attempt})...`;
 
         try {
-            // Fetch random city
+            // Fetch random city via your API
             const cityApiUrl = `${API_BASE_URL}/api/cities?token=${API_TOKEN}`;
             const cityResponse = await fetch(cityApiUrl);
             
             if (!cityResponse.ok) {
                 if (cityResponse.status === 401 || cityResponse.status === 403) {
-                    updateTokenStatus('invalid', 'Invalid token');
-                    locationText.textContent = 'Authentication failed. Please check your token.';
+                    updateTokenStatus('invalid', 'Token expired');
+                    locationText.textContent = 'Authentication failed. Please refresh your token.';
                     return;
                 }
                 throw new Error(`HTTP error fetching random city: ${cityResponse.status}`);
@@ -615,14 +656,14 @@
             console.log(`Successfully fetched city: ${cityName}. Finding geocoding data...`);
             locationText.textContent = `Finding a random spot in ${cityName}...`;
 
-            // Get geocoding data
+            // Get geocoding data via your API
             const geocodingUrl = `${API_BASE_URL}/api/geocode?city=${encodeURIComponent(cityName)}&token=${API_TOKEN}`;
             const geocodingResponse = await fetch(geocodingUrl);
             
             if (!geocodingResponse.ok) {
                 if (geocodingResponse.status === 401 || geocodingResponse.status === 403) {
-                    updateTokenStatus('invalid', 'Invalid token');
-                    locationText.textContent = 'Authentication failed. Please check your token.';
+                    updateTokenStatus('invalid', 'Token expired');
+                    locationText.textContent = 'Authentication failed. Please refresh your token.';
                     return;
                 }
                 console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}): ${geocodingResponse.status}. Retrying...`);
@@ -692,7 +733,7 @@
             const success = await initializeMaps();
             
             if (success) {
-                this.textContent = 'Maps Initialized';
+                this.textContent = 'Maps Loaded';
                 document.getElementById('api-token').disabled = true;
             } else {
                 this.disabled = false;
