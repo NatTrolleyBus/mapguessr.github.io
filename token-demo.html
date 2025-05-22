@@ -173,9 +173,7 @@
       <p>Game Rules.</p>
       
       <div class="api-auth-section">
-        <h3>MapGuessr API</h3>
-        <p>You need to login first to use this API</p>
-        <p><strong>Login with transitspotter</strong></p>
+        <h3>Login to use API</h3>
         <div class="token-input-group">
           <label for="api-token">API Token:</label>
           <input type="text" id="api-token" class="token-input" placeholder="Enter your API token here" />
@@ -217,9 +215,8 @@
 
   <script>
     // --- Configuration ---
-    const apiKey = 'ZS9RHHRim7f1OZRKuI6n'; // Ensure your MapTiler API key is correct and active
-    maptilersdk.config.apiKey = apiKey;
-
+    // No MapTiler API key needed - using your API service for everything!
+    
     // API configuration - Updated to use the new service
     let API_BASE_URL = ''; // Will be set based on token input
     let API_TOKEN = '';
@@ -232,13 +229,10 @@
     let mainMap = null; // Variable to hold the main map instance
     let overlayMap = null; // Variable to hold the overlay map instance
     let roundCount = 1; // Track the current round
+    let customStyleUrl = ''; // Will be loaded from API
+    let overlayStyleUrl = ''; // Will be loaded from API
 
     const zoomLevel = 15; // Adjust initial zoom level as desired
-
-    // Using the provided custom vector style URL for main map
-    const customStyleUrl = 'https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=' + apiKey;
-    // Style for the overlay map
-    const overlayStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey;
 
     // Initial coordinates and zoom for the overlay map
     const initialCenter = [0, 0];
@@ -267,7 +261,7 @@
         return true;
     }
 
-    function setupAPIEndpoints() {
+    async function setupAPIEndpoints() {
         const tokenInput = document.getElementById('api-token');
         const token = tokenInput.value.trim();
         
@@ -279,6 +273,28 @@
         // You can modify this logic based on how the API service works
         API_BASE_URL = 'https://your-api-service.com'; // Update this to your actual API base URL
         API_TOKEN = token;
+        
+        // Load map styles from your API service
+        try {
+            const mainStyleResponse = await fetch(`${API_BASE_URL}/api/mapstyle?style=main&token=${API_TOKEN}`);
+            const overlayStyleResponse = await fetch(`${API_BASE_URL}/api/mapstyle?style=overlay&token=${API_TOKEN}`);
+            
+            if (mainStyleResponse.ok && overlayStyleResponse.ok) {
+                customStyleUrl = `${API_BASE_URL}/api/mapstyle?style=main&token=${API_TOKEN}`;
+                overlayStyleUrl = `${API_BASE_URL}/api/mapstyle?style=overlay&token=${API_TOKEN}`;
+                console.log('Map styles loaded from API service');
+            } else {
+                // Fallback to default styles if API doesn't provide them
+                console.warn('Could not load custom map styles, using defaults');
+                customStyleUrl = 'https://api.maptiler.com/maps/streets/style.json'; // Basic fallback
+                overlayStyleUrl = 'https://api.maptiler.com/maps/streets/style.json'; // Basic fallback
+            }
+        } catch (error) {
+            console.warn('Error loading map styles from API:', error);
+            // Use basic fallback styles
+            customStyleUrl = 'https://api.maptiler.com/maps/streets/style.json';
+            overlayStyleUrl = 'https://api.maptiler.com/maps/streets/style.json';
+        }
         
         return true;
     }
@@ -699,8 +715,9 @@
         });
 
         // Event listener for the "New Location" button
-        document.getElementById('new-location').addEventListener('click', function() {
-            if (!setupAPIEndpoints()) {
+        document.getElementById('new-location').addEventListener('click', async function() {
+            const setupSuccess = await setupAPIEndpoints();
+            if (!setupSuccess) {
                 document.getElementById('location-text').textContent = 'Please enter a valid API token first.';
                 return;
             }
