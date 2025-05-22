@@ -275,12 +275,12 @@
         
         // Load map styles from your API service
         try {
-            const mainStyleResponse = await fetch(`${API_BASE_URL}/api/mapstyle?style=main&token=${API_TOKEN}`);
-            const overlayStyleResponse = await fetch(`${API_BASE_URL}/api/mapstyle?style=overlay&token=${API_TOKEN}`);
+            const mainStyleResponse = await fetch(`${API_BASE_URL}/api/mapstyle?style= 0196cb69-f55f-71f8-9a8f-90fa083f0f67&token=${API_TOKEN}`);
+            const overlayStyleResponse = await fetch(`${API_BASE_URL}/api/mapstyle?style=0196cb7f-9914-7a9b-aed1-8bfa7b9a0705&token=${API_TOKEN}`);
             
             if (mainStyleResponse.ok && overlayStyleResponse.ok) {
-                customStyleUrl = `${API_BASE_URL}/api/mapstyle?style=main&token=${API_TOKEN}`;
-                overlayStyleUrl = `${API_BASE_URL}/api/mapstyle?style=overlay&token=${API_TOKEN}`;
+                customStyleUrl = `${API_BASE_URL}/api/mapstyle?style= 0196cb69-f55f-71f8-9a8f-90fa083f0f67&token=${API_TOKEN}`;
+                overlayStyleUrl = `${API_BASE_URL}/api/mapstyle?style=0196cb7f-9914-7a9b-aed1-8bfa7b9a0705&token=${API_TOKEN}`;
                 console.log('Map styles loaded from API service');
             } else {
                 // Fallback to default styles if API doesn't provide them
