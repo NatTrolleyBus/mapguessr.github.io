@@ -270,8 +270,7 @@
         }
         
         // Extract base URL from token input or use a default
-        // You can modify this logic based on how the API service works
-        API_BASE_URL = 'https://your-api-service.com'; // Update this to your actual API base URL
+        API_BASE_URL = 'https://mapguessr-worker.games-6cb.workers.dev/'; 
         API_TOKEN = token;
         
         // Load map styles from your API service
@@ -620,7 +619,6 @@
             if (token) {
                 if (validateToken(token)) {
                     API_TOKEN = token;
-                    API_BASE_URL = 'https://mapguessr-worker.games-6cb.workers.dev';
                 }
             } else {
                 API_TOKEN = '';
