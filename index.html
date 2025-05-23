@@ -1,672 +1,1018 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Map Guessr</title>
-  <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptiler-sdk.umd.min.js"></script>
-  <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptilersdk.css" rel="stylesheet" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
-    
-    header {
-      background-color: #0cc0df;
-      padding: 20px;
-      border-radius: 0 0 5px 5px;
-    }
-    h1 {
-      color: #444;
-      margin-top: 0;
-    }
-    main {
-      padding: 20px;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    section {
-      margin-bottom: 30px;
-    }
-    .maps-container {
-      position: relative;
-      height: 600px;
-      width: 100%;
-      margin-bottom: 20px;
-    }
-    #maptiler-map {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      overflow: hidden;
-      background-color: #eaeaea;
-    }
-    #overlay-map {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 250px;
-      height: 150px;
-      border: 2px solid #555;
-      border-radius: 5px;
-      overflow: hidden;
-      background-color: #fff;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      z-index: 10;
-      transition: all 0.3s ease-in-out;
-    }
-    #overlay-map:hover {
-      width: 400px;
-      height: 300px;
-    }
-    .submit-container {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    .submit-btn, .new-location-btn {
-      background-color: #0cc0df;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      font-size: 1.1em;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      margin: 0 10px;
-    }
-    .submit-btn:hover, .new-location-btn:hover {
-      background-color: #0aa8c4;
-    }
-    footer {
-      background-color: #0cc0df;
-      padding: 10px;
-      text-align: center;
-      border-radius: 5px;
-      font-size: 0.9em;
-      margin-top: 40px;
-    }
-    /* CSS to hide default MapTiler controls */
-    .maptiler-ctrl-group,
-    .maptiler-ctrl,
-    .maplibregl-ctrl-group,
-    .maplibregl-ctrl {
-      display: none !important;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Map Guessr</title>
+    <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptiler-sdk.umd.min.js"></script>
+    <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptilersdk.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
 
-    /* Style for the custom guess pin (Teardrop shape using SVG data URL) */
-    .guess-pin {
-        position: absolute;
-        width: 24px; /* Width of the pin */
-        height: 36px; /* Height of the pin */
-        /* SVG data URL for a simple red teardrop with a white circle */
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%23e53e3e" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
-        background-size: contain;
-        background-repeat: no-repeat;
-        /* Position the bottom-center (the tip) of the element at the pixel coordinates */
-        transform: translate3d(-50%, -100%, 0); /* Use translate3d for potentially better performance */
-        z-index: 11;
-        cursor: pointer;
-         /* Optional: prevent the pin from blocking map click events */
-        /* pointer-events: none; */
-    }
+        header {
+            background-color: #0cc0df;
+            padding: 20px;
+            border-radius: 0 0 5px 5px;
+        }
+        h1 {
+            color: #444;
+            margin-top: 0;
+        }
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        section {
+            margin-bottom: 30px;
+        }
+        /* Make maps-container relative to position its children absolutely */
+        .maps-container {
+            position: relative;
+            height: 600px; /* Fixed height for the container */
+            width: 100%;
+            margin-bottom: 20px;
+            /* Add overflow hidden to prevent elements from spilling outside */
+            overflow: hidden;
+        }
+        #maptiler-map {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #eaeaea;
+        }
+        #overlay-map {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 250px;
+            height: 150px;
+            border: 2px solid #555;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            transition: all 0.4s ease-in-out; /* Adjusted transition duration */
+            /* Increase transition time for smoother effect */
+        }
+        #overlay-map:hover:not(.overlay-map-fullscreen) { /* Prevent hover effect when fullscreen */
+            width: 400px;
+            height: 300px;
+        }
+        /* Updated fullscreen class */
+        .overlay-map-fullscreen {
+            position: absolute !important;
+            /* Keep it within the parent .maps-container */
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important; /* Fill the entire maps-container */
+            z-index: 100 !important;
+            /* Ensure it's above the main map */
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important; /* Remove shadow when fullscreen */
+        }
+        .submit-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .submit-btn, .new-location-btn {
+            background-color: #0cc0df;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 0 10px;
+        }
+        .submit-btn:hover, .new-location-btn:hover {
+            background-color: #0aa8c4;
+        }
+        footer {
+            background-color: #0cc0df;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-top: 40px;
+        }
+        /* CSS to hide default MapTiler controls */
+        .maptiler-ctrl-group,
+        .maptiler-ctrl,
+        .maplibregl-ctrl-group,
+        .maplibregl-ctrl {
+            display: none !important;
+        }
 
-  </style>
+        /* Style for the custom guess pin (Teardrop shape using SVG data URL) */
+        .guess-pin {
+            position: absolute;
+            width: 24px; /* Width of the pin */
+            height: 36px;
+            /* Height of the pin */
+            /* SVG data URL for a simple red teardrop with a white circle */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%23e53e3e" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            /* Position the bottom-center (the tip) of the element at the pixel coordinates */
+            transform: translate3d(-50%, -100%, 0);
+            /* Use translate3d for potentially better performance */
+            z-index: 101;
+            /* Higher z-index to be above other map elements and the green pin */
+            pointer-events: none;
+            /* Make it unclickable once placed, so map underneath can be interacted with */
+        }
+
+        /* Style for the real location pin (green teardrop, same as guess-pin but green) */
+        .real-location-pin {
+            position: absolute;
+            width: 24px; /* Width of the pin */
+            height: 36px;
+            /* Height of the pin */
+            /* SVG data URL for a simple green teardrop with a white circle */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%2328a745" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            /* Position the bottom-center (the tip) of the element at the pixel coordinates */
+            transform: translate3d(-50%, -100%, 0);
+            /* Use translate3d for potentially better performance */
+            z-index: 102; /* Higher z-index to be above other map elements and the red pin */
+            pointer-events: none;
+            /* Make it unclickable once placed, so map underneath can be interacted with */
+        }
+
+        /* Style for the dynamically added Next Round button */
+        #next-round-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 30px;
+            font-size: 1.1em;
+            background-color: #0cc0df;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 110; /* Ensure it's above the maps */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+        }
+
+        #next-round-btn:hover {
+            background-color: #0aa8c4;
+        }
+
+        /* Styles for score display */
+        #round-score-display, #total-score-display {
+            position: fixed; /* Fixed position relative to viewport */
+            padding: 10px 15px;
+            background-color: black; /* Changed to solid black */
+            color: white;
+            font-size: 1.2em;
+            border-radius: 5px;
+            z-index: 1000; /* High z-index to be on top */
+            display: none; /* Hidden by default */
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+            border: 1px solid white; /* Added white border */
+        }
+
+        #round-score-display {
+            bottom: 20px;
+            left: 20px;
+        }
+
+        #total-score-display {
+            bottom: 20px;
+            right: 20px;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>Test</h1>
-    <p>May 15th 2025 - V9 (Score Calculation Fix)</p>
-  </header>
-  <main>
-    <section>
-      <h2>About</h2>
-      <p>Game Rules.</p>
-    </section>
-    <section>
-      <h2>Maps</h2>
-      <div class="maps-container">
-        <div id="maptiler-map"></div>
-        <div id="overlay-map"></div>
-      </div>
-      <div class="submit-container">
-        <button class="new-location-btn" id="new-location">New Location</button>
-        <button class="submit-btn" id="submit-guess">Submit</button>
-      </div>
-    </section>
-    <section>
-      <h2>Game Answers</h2>
-      <ul>
-        <li id="location-text">The location label/place goes here/coordinates</li>
-        <li id="guessed-coords">The guessed coordinates</li>
-        <li id="submit-status">Submit button clicked? status goes here</li>
-        <li id="points-score">Future points/scores system goes here</li>
-        <li id="round-count">Round: 1</li>
-      </ul>
-    </section>
-  </main>
-  <footer>
-    <p>Made by Nathan</p>
-  </footer>
+    <header>
+        <h1>Test</h1>
+        <p>May 15th 2025 - V9 (Score Calculation Fix)</p>
+    </header>
+    <main>
+        <section>
+            <h2>About</h2>
+            <p>Game Rules.</p>
+        </section>
+        <section>
 
-  <script>
-    // --- Configuration ---
-    const apiKey = 'ZS9RHHRim7f1OZRKuI6n'; // Ensure your MapTiler API key is correct and active
-    maptilersdk.config.apiKey = apiKey;
+            <h2>Maps</h2>
+            <div class="maps-container">
+                <div id="maptiler-map"></div>
+                <div id="overlay-map"></div>
+            </div>
+            <div class="submit-container">
+                <button class="new-location-btn" id="new-location">New Location</button>
 
-    // API endpoint for the Random City API
-    const randomCityApiUrl = 'https://random-city-return.games-6cb.workers.dev/api/cities';
+                <button class="submit-btn" id="submit-guess">Submit</button>
+            </div>
+        </section>
+        <section>
+            <h2>Game Answers</h2>
+            <ul>
+                <li id="location-text">The location label/place goes here/coordinates</li>
+                <li 
+                id="guessed-coords">The guessed coordinates</li>
+                <li id="submit-status">Submit button clicked?
+                status goes here</li>
+                <li id="points-score">Future points/scores system goes here</li>
+                <li id="round-count">Round: 1</li>
+            </ul>
+        </section>
+    </main>
+    <footer>
+        <p>Made by Nathan and Jason</p>
+    </footer>
 
+    <div id="round-score-display"></div>
+    <div id="total-score-display"></div>
 
-    let currentMarker = null; // Variable to hold the current marker on main map (still uses SDK Marker)
-    let userGuessLngLat = null; // Store the geographical location of the user's guess (LngLat Object)
-    let guessPinElement = null; // Variable to hold the custom HTML element for the guess pin
-    let currentLocationCoords = null; // Store the coordinates of the current location for scoring (LngLat Object)
-    let totalScore = 0; // Track the total score across all rounds
-    let mainMap = null; // Variable to hold the main map instance
-    let overlayMap = null; // Variable to hold the overlay map instance
-    let roundCount = 1; // Track the current round
+    <script>
+        // --- Configuration ---
 
-    const zoomLevel = 15; // Adjust initial zoom level as desired
+        const apiKey = 'ZS9RHHRim7f1OZRKuI6n';
+        // Ensure your MapTiler API key is correct and active
+        maptilersdk.config.apiKey = apiKey;
+        // API endpoint for the Random City API
+        const randomCityApiUrl = 'https://random-city-api.vercel.app/api/random-city';
+        let currentMarker = null; // Variable to hold the current marker on main map (still uses SDK Marker)
+        let userGuessLngLat = null;
+        // Store the geographical location of the user's guess (LngLat Object)
+        let guessPinElement = null;
+        // Variable to hold the custom HTML element for the guess pin
+        let currentLocationCoords = null;
+        // Store the coordinates of the current location for scoring (LngLat Object)
+        let totalScore = 0;
+        // Track the total score across all rounds
+        let mainMap = null;
+        // Variable to hold the main map instance
+        let overlayMap = null;
+        // Variable to hold the overlay map instance
+        let realLocationPinElement = null; // Variable to hold the custom HTML element for the real location pin
+        let roundCount = 1;
+        // Track the current round
 
-    // Using the provided custom vector style URL for main map
-    const customStyleUrl = 'https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=' + apiKey;
-    // Style for the overlay map
-    const overlayStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey;
+        const zoomLevel = 15;
+        // Adjust initial zoom level as desired
 
-    // Initial coordinates and zoom for the overlay map
-    const initialCenter = [0, 0];
-    const initialZoom = -1.0;
+        // Using the provided custom vector style URL for main map
+        const customStyleUrl = 'https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=' + apiKey;
+        // Style for the overlay map
+        const overlayStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey;
+        // Initial coordinates and zoom for the overlay map
+        const initialCenter = [0, 0];
+        const initialZoom = -1.0;
 
-     // --- Function to generate a random coordinate within a bounding box ---
-    function getRandomCoordinateInBounds(bounds) {
-        const minLng = bounds[0];
-        const minLat = bounds[1];
-        const maxLng = bounds[2];
-        const maxLat = bounds[3];
+        // Global variable for the line layer and source visibility (managed by MapLibre GL JS layers)
+        let lineLayerVisible = false;
 
-        // Add a small buffer to avoid being exactly on the edge
-        const buffer = 0.001; // Adjust buffer size as needed
-        const bufferedMinLng = minLng + (maxLng - minLng) * buffer;
-        const bufferedMinLat = minLat + (maxLat - minLat) * buffer;
-        const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer;
-        const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
+        // --- Function to generate a random coordinate within a bounding box ---
+        function getRandomCoordinateInBounds(bounds) {
+            const minLng = bounds[0];
+            const minLat = bounds[1];
+            const maxLng = bounds[2];
+            const maxLat = bounds[3];
+            // Add a small buffer to avoid being exactly on the edge
+            const buffer = 0.001;
+            // Adjust buffer size as needed
+            const bufferedMinLng = minLng + (maxLng - minLng) * buffer;
+            const bufferedMinLat = minLat + (maxLat - minLat) * buffer;
+            const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer;
+            const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
 
-        const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
-        const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
+            const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
+            const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
 
-        return [randomLng, randomLat]; // Return as an array [lng, lat]
-    }
-
-
-    // Function to add or update the marker on the main map (still uses SDK Marker)
-    function addOrUpdateMarker(lngLatInput) { // Renamed input to avoid conflict
-        // Ensure lngLatInput is a MapTiler SDK LngLat object
-        // If it's an array [lng, lat], convert it to a LngLat object
-        const lngLatObject = Array.isArray(lngLatInput) ?
-                           new maptilersdk.LngLat(lngLatInput[0], lngLatInput[1]) :
-                           lngLatInput;
-
-         // Final check to ensure we have a valid LngLat object before proceeding
-         if (!(lngLatObject instanceof maptilersdk.LngLat) || typeof lngLatObject.lng !== 'number' || typeof lngLatObject.lat !== 'number') {
-              console.error("addOrUpdateMarker received invalid LngLat data:", lngLatInput);
-              return; // Prevent adding marker or setting location with bad data
-         }
-
-
-        if (currentMarker) {
-            currentMarker.remove(); // Remove the previous marker if it exists
-        }
-        currentMarker = new maptilersdk.Marker()
-            .setLngLat(lngLatObject) // Use the LngLat object
-            .addTo(mainMap);
-
-        currentLocationCoords = lngLatObject; // Store the LngLat object for scoring
-
-         // Initially hide the marker until the user submits their guess
-        if (currentMarker && currentMarker.getElement()) {
-            currentMarker.getElement().style.display = 'none';
-        }
-         console.log("currentLocationCoords set to LngLat object:", currentLocationCoords);
-    }
-
-    // Haversine formula to calculate distance between two LatLng points on a sphere
-    function calculateDistanceInMeters(lat1, lon1, lat2, lon2) {
-         // Ensure inputs are numbers
-        if (typeof lat1 !== 'number' || typeof lon1 !== 'number' || typeof lat2 !== 'number' || typeof lon2 !== 'number') {
-            console.error("Invalid input types for calculateDistanceInMeters:", lat1, lon1, lat2, lon2);
-            return NaN; // Return NaN for invalid input
+            return [randomLng, randomLat];
+            // Return as an array [lng, lat]
         }
 
-        const R = 6371e3; // Earth's radius in meters
-        const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
-        const φ2 = lat2 * Math.PI / 180;
-        const Δφ = (lat2 - lat1) * Math.PI / 180;
-        const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-        const a =
-            Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-
-         // Ensure 'a' is within a valid range for Math.sqrt and Math.atan2 due to floating point inaccuracies
-        const c = 2 * Math.atan2(Math.sqrt(Math.max(0, a)), Math.sqrt(Math.max(0, 1 - a)));
-
-        const distance = R * c; // Distance in meters
-        return distance;
-    }
-
-    // Basic GeoGuessr-like scoring function
-    function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) {
-        // Constants for a GeoGuessr World map-like scoring (simplified)
-        const MAX_SCORE = 5000; // Maximum points per round
-        const FIVE_K_THRESHOLD_METERS = 100; // A small distance for a guaranteed 5000
-
-        const distance = calculateDistanceInMeters(lat1, lon1, lat2, lon2);
-
-         if (isNaN(distance)) {
-            console.error("Distance calculation returned NaN.");
-            return { distance: NaN, score: NaN }; // Propagate NaN if distance is invalid
-        }
-
-        let score;
-
-        if (distance <= FIVE_K_THRESHOLD_METERS) {
-            score = MAX_SCORE;
-        } else {
-            const decayFactor = 2000000; // Adjust based on desired scoring curve
-            score = MAX_SCORE * Math.exp(-distance / decayFactor);
-            score = Math.max(0, Math.round(score));
-        }
-
-        return {
-            distance: distance,
-            score: score
-        };
-    }
-
-    // --- Function to update the pixel position of the custom guess pin ---
-    function updateGuessPinPosition() {
-        // Check if overlayMap, userGuessLngLat, and guessPinElement exist
-        if (!overlayMap || !userGuessLngLat || !guessPinElement) {
-            return; // Do nothing if map, location, or element not ready
-        }
-
-         // Ensure userGuessLngLat is a valid LngLat object with number properties
-        if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number') {
-             console.error("Invalid userGuessLngLat object for positioning:", userGuessLngLat);
-             return;
-        }
-
-
-        // Convert geographical coordinates to pixel coordinates on the overlay map
-        const pixelCoords = overlayMap.project(userGuessLngLat);
-
-        // Set the position of the custom pin element using pixel coordinates
-        // The CSS transform: translate3d(-50%, -100%, 0) positions the element's tip
-        guessPinElement.style.left = `${pixelCoords.x}px`;
-        guessPinElement.style.top = `${pixelCoords.y}px`;
-    }
-
-
-    // --- Function to place the custom guess pin on the overlay map ---
-    function placeCustomGuessPinOnOverlay(lngLat) {
-        console.log('Attempting to place custom guess pin at LngLat:', lngLat);
-
-        // Store the user's guessed location (should be a LngLat object from map event)
-        userGuessLngLat = lngLat;
-
-        // Remove the previous custom pin element if it exists
-        if (guessPinElement) {
-            console.log('Removing existing custom guess pin element.');
-            guessPinElement.remove();
-        }
-
-        // Create a new custom HTML element for the pin
-        guessPinElement = document.createElement('div');
-        guessPinElement.className = 'guess-pin'; // Apply our custom CSS class
-
-        // Append the custom pin element to the overlay map's canvas container
-        // This container handles the map's transformations and is the correct parent for pixel-positioned elements.
-        overlayMap.getCanvasContainer().appendChild(guessPinElement);
-
-        console.log('New custom guess pin element created:', guessPinElement);
-
-        // Immediately update the pin's position to the clicked location
-        updateGuessPinPosition();
-
-        // Display the coordinates in the guessed coordinates list item
-        document.getElementById('guessed-coords').textContent = `Guessed Location: Lng: ${lngLat.lng.toFixed(6)}, Lat: ${lngLat.lat.toFixed(6)}`;
-        document.getElementById('submit-status').textContent = 'Guess placed. Click Submit!'; // Update status
-
-        // Add event listeners to the overlay map to update the pin's position
-        // whenever the map view changes (pan, zoom, resize, etc.)
-        // Remove previous listeners first to avoid duplicates
-        overlayMap.off('move', updateGuessPinPosition);
-        overlayMap.on('move', updateGuessPinPosition);
-
-         console.log("Guess pin placed and move listener added. userGuessLngLat:", userGuessLngLat);
-    }
-
-
-    // --- Function to find a random city and spot with retry logic ---
-    async function findRandomCityAndSpot(attempt = 1) {
-        const locationText = document.getElementById('location-text');
-
-        // Reset display elements for the new round
-        locationText.textContent = 'Finding a new location...';
-        document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map...';
-        document.getElementById('submit-status').textContent = 'Place your guess on the overlay map...';
-        document.getElementById('points-score').textContent = 'Points: - | Total: ' + totalScore + ' points'; // Reset round score display
-
-
-        // Remove previous markers/pins if they exist before setting up new location
-        if (currentMarker) {
-            currentMarker.remove();
-            currentMarker = null;
-        }
-         if (guessPinElement) {
-            guessPinElement.remove();
-            guessPinElement = null;
-             // Also remove the stored LngLat and map move listener for the old pin
-            userGuessLngLat = null;
-            if(overlayMap) overlayMap.off('move', updateGuessPinPosition); // Check if overlayMap exists
-             console.log("Custom guess pin element and move listener removed.");
-        }
-         currentLocationCoords = null; // Clear previous location
-
-
-        const MAX_LOCATION_RETRIES = 10; // Limit retries for finding a suitable location via API
-        if (attempt > MAX_LOCATION_RETRIES) {
-            locationText.textContent = `Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts. Please check the console for errors.`;
-            console.error(`Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts.`);
-            return; // Stop retrying
-        }
-
-        console.log(`Attempting to find random city (Attempt ${attempt}/${MAX_LOCATION_RETRIES})...`);
-        locationText.textContent = `Workspaceing a random city (Attempt ${attempt})...`;
-
-        try {
-            // 1. Fetch a random city name from the provided API
-            const cityResponse = await fetch(randomCityApiUrl);
-            if (!cityResponse.ok) {
-                throw new Error(`HTTP error fetching random city: ${cityResponse.status}`);
+        // Function to add or update the marker on the main map (still uses SDK Marker)
+        function addOrUpdateMarker(lngLatInput) { // Renamed input to avoid conflict
+            // Ensure lngLatInput is a MapTiler SDK LngLat object
+            // If it's an array [lng, lat], convert it to a LngLat object
+            const lngLatObject = Array.isArray(lngLatInput) ?
+                new maptilersdk.LngLat(lngLatInput[0], lngLatInput[1]) :
+                lngLatInput;
+            // Final check to ensure we have a valid LngLat object before proceeding
+            if (!(lngLatObject instanceof maptilersdk.LngLat) || typeof lngLatObject.lng !== 'number' || typeof lngLatObject.lat !== 'number') {
+                console.error("addOrUpdateMarker received invalid LngLat data:", lngLatInput);
+                return; // Prevent adding marker or setting location with bad data
             }
-            const cityData = await cityResponse.json();
-            const cityName = cityData.city; // Extract city name from the response
 
-            if (!cityName) {
-                console.warn(`Random City API returned no city name (Attempt ${attempt}). Retrying...`);
-                // Retry if no city name is returned
-                findRandomCityAndSpot(attempt + 1);
+            if (currentMarker) {
+                currentMarker.remove();
+            }
+            currentMarker = new maptilersdk.Marker()
+                .setLngLat(lngLatObject) // Use the LngLat object
+                .addTo(mainMap);
+            currentLocationCoords = lngLatObject; // Store the LngLat object for scoring
+
+            // Initially hide the marker until the user submits their guess
+            if (currentMarker && currentMarker.getElement()) {
+                currentMarker.getElement().style.display = 'none';
+            }
+            console.log("currentLocationCoords set to LngLat object:", currentLocationCoords);
+        }
+
+        // Haversine formula to calculate distance between two LatLng points on a sphere
+        function calculateDistanceInMeters(lat1, lon1, lat2, lon2) {
+            // Ensure inputs are numbers
+            if (typeof lat1 !== 'number' || typeof lon1 !== 'number' || typeof lat2 !== 'number' || typeof lon2 !== 'number') {
+                console.error("Invalid input types for calculateDistanceInMeters:", lat1, lon1, lat2, lon2);
+                return NaN; // Return NaN for invalid input
+            }
+
+            const R = 6371e3;
+            // Earth's radius in meters
+            const φ1 = lat1 * Math.PI / 180;
+            // φ, λ in radians
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+            const a =
+                Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            // Ensure 'a' is within a valid range for Math.sqrt and Math.atan2 due to floating point inaccuracies
+            const c = 2 * Math.atan2(Math.sqrt(Math.max(0, a)), Math.sqrt(Math.max(0, 1 - a)));
+            const distance = R * c; // Distance in meters
+            return distance;
+        }
+
+        // Basic GeoGuessr-like scoring function
+        function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) {
+            // Constants for a GeoGuessr World map-like scoring (simplified)
+            const MAX_SCORE = 5000;
+            // Maximum points per round
+            const FIVE_K_THRESHOLD_METERS = 100;
+            // A small distance for a guaranteed 5000
+
+            const distance = calculateDistanceInMeters(lat1, lon1, lat2, lon2);
+            if (isNaN(distance)) {
+                console.error("Distance calculation returned NaN.");
+                return { distance: NaN, score: NaN }; // Propagate NaN if distance is invalid
+            }
+
+            let score;
+            if (distance <= FIVE_K_THRESHOLD_METERS) {
+                score = MAX_SCORE;
+            } else {
+                const decayFactor = 2000000;
+                // Adjust based on desired scoring curve
+                score = MAX_SCORE * Math.exp(-distance / decayFactor);
+                score = Math.max(0, Math.round(score));
+            }
+
+            return {
+                distance: distance,
+                score: score
+            };
+        }
+
+        // --- Function to update the pixel position of the custom guess pin ---
+        function updateGuessPinPosition() {
+            // Check if overlayMap, userGuessLngLat, and guessPinElement exist
+            if (!overlayMap || !userGuessLngLat || !guessPinElement) {
+                return;
+                // Do nothing if map, location, or element not ready
+            }
+
+            // Ensure userGuessLngLat is a valid LngLat object with number properties
+            if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number') {
+                console.error("Invalid userGuessLngLat object for positioning:", userGuessLngLat);
                 return;
             }
 
-            console.log(`Successfully fetched city: ${cityName}. Finding geocoding data...`);
-            locationText.textContent = `Finding a random spot in ${cityName}...`;
+            // Convert geographical coordinates to pixel coordinates on the overlay map
+            const pixelCoords = overlayMap.project(userGuessLngLat);
+            // Set the position of the custom pin element using pixel coordinates
+            // The CSS transform: translate3d(-50%, -100%, 0) positions the element's tip
+            guessPinElement.style.left = `${pixelCoords.x}px`;
+            guessPinElement.style.top = `${pixelCoords.y}px`;
+            // Ensure the element is visible
+            guessPinElement.style.display = 'block';
+        }
 
-            // 2. Use MapTiler Geocoding API to find the city's location and bounds
-            const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`;
-            const geocodingResponse = await fetch(geocodingUrl);
-            if (!geocodingResponse.ok) {
-                // If geocoding fails with an HTTP error, log and retry
-                console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}): ${geocodingResponse.status}. Retrying...`);
-                findRandomCityAndSpot(attempt + 1);
+        // --- Function to update the pixel position of the custom real location pin ---
+        function updateRealLocationPinPosition() {
+            // Check if overlayMap, currentLocationCoords, and realLocationPinElement exist
+            if (!overlayMap || !currentLocationCoords || !realLocationPinElement) {
+                return;
+                // Do nothing if map, location, or element not ready
+            }
+
+            // Ensure currentLocationCoords is a valid LngLat object with number properties
+            if (!(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') {
+                console.error("Invalid currentLocationCoords object for positioning:", currentLocationCoords);
                 return;
             }
-            const geocodingData = await geocodingResponse.json();
 
-            if (geocodingData && geocodingData.features && geocodingData.features.length > 0) {
-                // Find the best feature (usually the first one, which represents the city)
-                const feature = geocodingData.features[0];
-                const bounds = feature.bbox; // Bounding box [minLng, minLat, maxLng, maxLat]
-                const center = feature.center; // Center [lng, lat]
+            // Convert geographical coordinates to pixel coordinates on the overlay map
+            const pixelCoords = overlayMap.project(currentLocationCoords);
+            // Set the position of the custom pin element using pixel coordinates
+            realLocationPinElement.style.left = `${pixelCoords.x}px`;
+            realLocationPinElement.style.top = `${pixelCoords.y}px`;
+            // Ensure the element is visible
+            realLocationPinElement.style.display = 'block';
+        }
 
-                let randomLngLatArray; // Will store as an array initially
 
-                if (bounds) {
-                    // Generate a random coordinate within the bounding box
-                    randomLngLatArray = getRandomCoordinateInBounds(bounds);
-                     console.log("Using bounds to find random coordinate array:", randomLngLatArray);
+        // --- Function to place the custom guess pin on the overlay map ---
+        function placeCustomGuessPinOnOverlay(lngLat) {
+            console.log('Attempting to place custom guess pin at LngLat:', lngLat);
+            // Store the user's guessed location (should be a LngLat object from map event)
+            userGuessLngLat = lngLat;
+            // Remove the previous custom pin element if it exists
+            if (guessPinElement) {
+                console.log('Removing existing custom guess pin element.');
+                guessPinElement.remove();
+            }
 
-                } else if (center) {
-                    // If no bounding box, just use the center and add a small random offset
-                    const randomLng = center[0] + (Math.random() - 0.5) * 0.02; // Add small random offset
-                    const randomLat = center[1] + (Math.random() - 0.5) * 0.02; // Add small random offset
-                    randomLngLatArray = [randomLng, randomLat];
-                     console.log("Using center with offset to find random coordinate array:", randomLngLatArray);
-                } else {
-                    // If no bounds or center, MapTiler couldn't provide useful data for this city
-                    console.warn(`MapTiler Geocoding could not find detailed location data for "${cityName}" (Attempt ${attempt}). Retrying...`);
-                    findRandomCityAndSpot(attempt + 1); // Retry if geocoding data is insufficient
+            // Create a new custom HTML element for the pin
+            guessPinElement = document.createElement('div');
+            guessPinElement.className = 'guess-pin'; // Apply our custom CSS class
+
+            // Append the custom pin element to the overlay map's canvas container
+            // This container handles the map's transformations and is the correct parent for pixel-positioned elements.
+            overlayMap.getCanvasContainer().appendChild(guessPinElement);
+
+            console.log('New custom guess pin element created:', guessPinElement);
+
+            // Immediately update the pin's position to the clicked location
+            updateGuessPinPosition();
+            // Display the coordinates in the guessed coordinates list item
+            document.getElementById('guessed-coords').textContent = `Guessed Location: Lng: ${lngLat.lng.toFixed(6)}, Lat: ${lngLat.lat.toFixed(6)}`;
+            document.getElementById('submit-status').textContent = 'Guess placed. Click Submit!'; // Update status
+
+            // Add event listeners to the overlay map to update the pin's position
+            // whenever the map view changes (pan, zoom, resize, etc.)
+            // Remove previous listeners first to avoid duplicates
+            overlayMap.off('move', updateGuessPinPosition);
+            overlayMap.on('move', updateGuessPinPosition);
+
+            console.log("Guess pin placed and move listener added. userGuessLngLat:", userGuessLngLat);
+        }
+
+        // --- Function to place the custom real location pin on the overlay map ---
+        function placeCustomRealLocationPinOnOverlay(lngLat) {
+            console.log('Attempting to place custom real location pin at LngLat:', lngLat);
+            // The location for this pin is currentLocationCoords, passed as lngLat
+
+            // Remove the previous custom pin element if it exists
+            if (realLocationPinElement) {
+                console.log('Removing existing custom real location pin element.');
+                realLocationPinElement.remove();
+            }
+
+            // Create a new custom HTML element for the pin
+            realLocationPinElement = document.createElement('div');
+            realLocationPinElement.className = 'real-location-pin'; // Apply our custom CSS class
+
+            // Append the custom pin element to the overlay map's canvas container
+            overlayMap.getCanvasContainer().appendChild(realLocationPinElement);
+
+            console.log('New custom real location pin element created:', realLocationPinElement);
+
+            // Immediately update the pin's position to the actual location
+            updateRealLocationPinPosition();
+
+            // Add event listeners to the overlay map to update the pin's position
+            // whenever the map view changes (pan, zoom, resize, etc.)
+            // Remove previous listeners first to avoid duplicates
+            overlayMap.off('move', updateRealLocationPinPosition);
+            overlayMap.on('move', updateRealLocationPinPosition);
+
+            console.log("Real location pin placed and move listener added. currentLocationCoords:", currentLocationCoords);
+        }
+
+        // Function to update the line between pins on the overlay map
+        function updateLineBetweenPins() {
+            // Only update if the line is supposed to be visible (i.e., after submission)
+            if (!lineLayerVisible || !overlayMap || !userGuessLngLat || !currentLocationCoords) {
+                return;
+            }
+
+            // Ensure both are valid LngLat objects
+            if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number' ||
+                !(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') {
+                console.error("Invalid LngLat objects for drawing line:", userGuessLngLat, currentLocationCoords);
+                return;
+            }
+
+            const lineGeoJSON = {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'LineString',
+                    'coordinates': [
+                        [userGuessLngLat.lng, userGuessLngLat.lat],
+                        [currentLocationCoords.lng, currentLocationCoords.lat]
+                    ]
+                }
+            };
+
+            // Check if source exists before trying to set data
+            if (overlayMap.getSource('line-source')) {
+                overlayMap.getSource('line-source').setData(lineGeoJSON);
+            }
+        }
+
+
+        // --- Function to find a random city and spot with retry logic ---
+        async function findRandomCityAndSpot(attempt = 1) {
+            const locationText = document.getElementById('location-text');
+            const newLocationBtn = document.getElementById('new-location');
+            const submitGuessBtn = document.getElementById('submit-guess');
+
+            // Reset display elements for the new round
+            locationText.textContent = 'Finding a new location...';
+            document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map...';
+            document.getElementById('submit-status').textContent = 'Place your guess on the overlay map...';
+            document.getElementById('points-score').textContent = 'Points: - | Total: ' + totalScore + ' points';
+            // Reset round score display
+
+            // Hide score displays
+            document.getElementById('round-score-display').style.display = 'none';
+            document.getElementById('total-score-display').style.display = 'none';
+
+            // Remove previous markers/pins if they exist before setting up new location
+            if (currentMarker) {
+                currentMarker.remove();
+                currentMarker = null;
+            }
+            if (guessPinElement) {
+                guessPinElement.remove();
+                guessPinElement = null;
+                userGuessLngLat = null; // Clear user guess for new round
+                if(overlayMap) overlayMap.off('move', updateGuessPinPosition);
+                console.log("Custom guess pin element and move listener removed.");
+            }
+            if (realLocationPinElement) { // Remove the real location pin
+                realLocationPinElement.remove();
+                realLocationPinElement = null;
+                if(overlayMap) overlayMap.off('move', updateRealLocationPinPosition);
+            }
+            currentLocationCoords = null;
+            // Clear previous actual location
+
+            // Hide the line layer
+            if (overlayMap && overlayMap.getLayer('line-layer')) {
+                overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
+                lineLayerVisible = false;
+            }
+
+
+            // Remove "Next Round" button if it exists from previous round
+            const existingNextButton = document.getElementById('next-round-btn');
+            if (existingNextButton) {
+                existingNextButton.remove();
+            }
+
+            submitGuessBtn.disabled = false; // Re-enable the submit button
+            newLocationBtn.disabled = false; // Re-enable the new location button
+
+
+            const MAX_LOCATION_RETRIES = 10;
+            // Limit retries for finding a suitable location via API
+            if (attempt > MAX_LOCATION_RETRIES) {
+                locationText.textContent = `Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts.
+                Please check the console for errors.`;
+                console.error(`Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts.`);
+                return;
+                // Stop retrying
+            }
+
+            console.log(`Attempting to find random city (Attempt ${attempt}/${MAX_LOCATION_RETRIES})...`);
+            locationText.textContent = `Finding a random city (Attempt ${attempt})...`;
+
+            try {
+                // 1. Fetch a random city name from the provided API
+                const cityResponse = await fetch(randomCityApiUrl);
+                if (!cityResponse.ok) {
+                    throw new Error(`HTTP error fetching random city: ${cityResponse.status}`);
+                }
+                const cityData = await cityResponse.json();
+                const cityName = cityData.city; // Extract city name from the response
+
+                if (!cityName) {
+                    console.warn(`Random City API returned no city name (Attempt ${attempt}). Retrying...`);
+                    // Retry if no city name is returned
+                    findRandomCityAndSpot(attempt + 1);
                     return;
                 }
 
-                 console.log("Setting main map view to:", randomLngLatArray, "at zoom", zoomLevel);
-                // Update the main map view to the random spot instantly
-                if (mainMap) { // Check if mainMap is initialized
-                     mainMap.jumpTo({
-                         center: randomLngLatArray, // jumpTo can accept an array or LngLat object
-                         zoom: zoomLevel, // Use the predefined zoom level
-                         essential: true
-                     });
+                console.log(`Successfully fetched city: ${cityName}. Finding geocoding data...`);
+                locationText.textContent = `Finding a random spot in ${cityName}...`;
+
+                // 2. Use MapTiler Geocoding API to find the city's location and bounds
+                const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`;
+                const geocodingResponse = await fetch(geocodingUrl);
+                if (!geocodingResponse.ok) {
+                    // If geocoding fails with an HTTP error, log and retry
+                    console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}): ${geocodingResponse.status}. Retrying...`);
+                    findRandomCityAndSpot(attempt + 1);
+                    return;
+                }
+                const geocodingData = await geocodingResponse.json();
+                if (geocodingData && geocodingData.features && geocodingData.features.length > 0) {
+                    // Find the best feature (usually the first one, which represents the city)
+                    const feature = geocodingData.features[0];
+                    const bounds = feature.bbox; // Bounding box [minLng, minLat, maxLng, maxLat]
+                    const center = feature.center;
+                    // Center [lng, lat]
+
+                    let randomLngLatArray;
+                    // Will store as an array initially
+
+                    if (bounds) {
+                        // Generate a random coordinate within the bounding box
+                        randomLngLatArray = getRandomCoordinateInBounds(bounds);
+                        console.log("Using bounds to find random coordinate array:", randomLngLatArray);
+
+                    } else if (center) {
+                        // If no bounding box, just use the center and add a small random offset
+                        const randomLng = center[0] + (Math.random() - 0.5) * 0.02;
+                        // Add small random offset
+                        const randomLat = center[1] + (Math.random() - 0.5) * 0.02;
+                        // Add small random offset
+                        randomLngLatArray = [randomLng, randomLat];
+                        console.log("Using center with offset to find random coordinate array:", randomLngLatArray);
+                    } else {
+                        // If no bounds or center, MapTiler couldn't provide useful data for this city
+                        console.warn(`MapTiler Geocoding could not find detailed location data for "${cityName}" (Attempt ${attempt}). Retrying...`);
+                        findRandomCityAndSpot(attempt + 1); // Retry if geocoding data is insufficient
+                        return;
+                    }
+
+                    console.log("Setting main map view to:", randomLngLatArray, "at zoom", zoomLevel);
+                    // Update the main map view to the random spot instantly
+                    if (mainMap) { // Check if mainMap is initialized
+                        mainMap.jumpTo({
+                            center: randomLngLatArray, // jumpTo can accept an array or LngLat
+                            // object
+                            zoom: zoomLevel, // Use the predefined zoom level
+                            essential: true
+                        });
+                    } else {
+                        console.error("mainMap not initialized when trying to jumpTo.");
+                    }
+
+                    // Update the location text to show the found place name
+                    document.getElementById('location-text').textContent = `Location: A random spot in ${feature.place_name ||
+                    cityName}`;
+
+                    // Add the SDK marker to the main map (initially hidden)
+                    // Pass the array, addOrUpdateMarker will convert it to LngLat Object
+                    addOrUpdateMarker(randomLngLatArray);
+                    console.log("New location setup complete via API. currentLocationCoords:", currentLocationCoords);
+
                 } else {
-                     console.error("mainMap not initialized when trying to jumpTo.");
+                    // If MapTiler Geocoding returned no features for this city
+                    console.warn(`MapTiler Geocoding could not find the location for "${cityName}" (Attempt ${attempt}). Retrying...`);
+                    findRandomCityAndSpot(attempt + 1); // Retry if geocoding returned no features
+                }
+
+            } catch (error) {
+                console.error(`Error during API call (Attempt ${attempt}):`, error);
+                locationText.textContent = `An error occurred fetching location: ${error.message}. Retrying...`;
+                findRandomCityAndSpot(attempt + 1);
+                // Retry on fetch or other errors
+            }
+        }
+
+        // --- Initialize Maps ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const newLocationBtn = document.getElementById('new-location');
+            const submitGuessBtn = document.getElementById('submit-guess');
+            const roundScoreDisplay = document.getElementById('round-score-display');
+            const totalScoreDisplay = document.getElementById('total-score-display');
+
+
+            // Initialize the main map
+            mainMap = new maptilersdk.Map({
+                container: 'maptiler-map',
+
+                style: customStyleUrl,
+                center: [0, 0], // Initial center will be updated by findRandomCityAndSpot
+                zoom: 1, // Initial low zoom
+                interactive: false // The main map should not be interactive for the game
+
+            });
+
+            // Initialize the overlay map for guessing
+            overlayMap = new maptilersdk.Map({
+                container: 'overlay-map',
+                style: overlayStyleUrl,
+                center: initialCenter, // Stays centered on the world map initially
+
+                zoom: initialZoom,
+                interactive: true // The overlay map should be interactive for guessing
+            });
+
+            // Add error listeners to both maps
+            mainMap.on('error', (e) => {
+                console.error('Main map loading error:', 
+                e.error);
+                document.getElementById('location-text').textContent = "Error loading main map. Check console.";
+            });
+            overlayMap.on('error', (e) => {
+                console.error('Overlay map loading error:', e.error);
+                document.getElementById('guessed-coords').textContent = "Error loading overlay map. Check console.";
+            });
+            // Start the first round once the main map style is loaded
+            mainMap.on('style.load', () => {
+                console.log('Main map style loaded.');
+                findRandomCityAndSpot(); // Start the first round by finding a location
+
+                // Attempt to remove default controls (using both MapTiler and MapLibre class names)
+
+                try {
+                    mainMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
+                } catch (e) {
+                    console.warn("Could not remove controls programmatically for main map:", e);
+
+                }
+            });
+            // Add source and layer for the line on overlay map style load
+            overlayMap.on('style.load', () => {
+                console.log('Overlay map style loaded.');
+                // Attempt to remove default controls
+                try {
+                    overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
+                } catch (e) {
+                    console.warn("Could not remove controls programmatically for overlay map:", e);
+                }
+
+                // Add source for the line
+                overlayMap.addSource('line-source', {
+                    'type': 'geojson',
+                    'data': {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [] // Empty initially
+                        }
+                    }
+                });
+
+                // Add layer for the line
+                overlayMap.addLayer({
+                    'id': 'line-layer',
+                    'type': 'line',
+                    'source': 'line-source',
+                    'layout': {
+                        'line-join': 'round',
+                        'line-cap': 'round',
+                        'visibility': 'none' // Hidden by default
+                    },
+                    'paint': {
+                        'line-color': '#000', // Black line
+                        'line-width': 2, // Thin line
+                        'line-dasharray': [0.5, 2] // Dotted effect
+                    }
+                });
+
+                // Listen for map movement to update the line position
+                overlayMap.on('move', updateLineBetweenPins);
+            });
+
+
+            // *** Add Left-click functionality to the overlay map for placing custom guess pin ***
+            overlayMap.on('click', (e) => {
+                // Only allow clicking if the map is not in fullscreen mode (i.e., before submission)
+                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
+                    const clickedLngLat = 
+                    e.lngLat; // e.lngLat is already a LngLat object
+                    console.log('Overlay map left-clicked at:', clickedLngLat);
+                    placeCustomGuessPinOnOverlay(clickedLngLat);
+                }
+            });
+            // Keep Right-click functionality as an alternative for placing custom guess pin
+            overlayMap.on('contextmenu', (e) => {
+                e.preventDefault(); // Prevent the default browser context menu
+                // Only allow clicking if the map is not in fullscreen mode (i.e., before submission)
+                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
+
+                    const clickedLngLat = e.lngLat; // e.lngLat is already a LngLat object
+                    console.log('Overlay map right-clicked at:', clickedLngLat);
+                    placeCustomGuessPinOnOverlay(clickedLngLat);
+                }
+            });
+            // *** Event listener to handle overlay map resize and update custom guess pin position ***
+            const overlayMapElement = document.getElementById('overlay-map');
+            overlayMapElement.addEventListener('transitionend', () => {
+                console.log('Overlay map container transition ended. Resizing map.');
+                if (overlayMap) {
+                    overlayMap.resize();
+
+                    // Update both pins if they exist and are supposed to be visible
+
+                    if (guessPinElement && userGuessLngLat) {
+                        updateGuessPinPosition(); // Re-position the red guess pin
+                    }
+                    if (realLocationPinElement && currentLocationCoords) { // Update the green pin
+                        updateRealLocationPinPosition();
+                    }
+                    // Update the line as well
+                    updateLineBetweenPins();
+                }
+            });
+            // ******************************************************************************
+
+            // Event listener for the "New Location" button (primarily for development/debug)
+            newLocationBtn.addEventListener('click', findRandomCityAndSpot);
+            // Event listener for the "Submit" button
+            submitGuessBtn.addEventListener('click', function() {
+                console.log("Submit button clicked.");
+                // Check if a guess has been made (userGuessLngLat is set and is a LngLat object)
+                if (!userGuessLngLat || !(userGuessLngLat instanceof maptilersdk.LngLat)) {
+
+                    document.getElementById('submit-status').textContent = 'Please make a guess by clicking or right-clicking on the map.';
+                    console.warn("Submit clicked without a valid guess location.");
+                    return;
                 }
 
 
-                // Update the location text to show the found place name
-                document.getElementById('location-text').textContent = `Location: A random spot in ${feature.place_name || cityName}`;
+                // Check if we have a current location to compare against (should be set by findRandomCityAndSpot)
+                if (!currentLocationCoords || !(currentLocationCoords instanceof maptilersdk.LngLat)) {
+                    document.getElementById('submit-status').textContent = 'Error: No location set for scoring.';
+                    console.error('Error: Submit clicked but currentLocationCoords is null or not a LngLat object.');
+                    return;
+                }
 
-                // Add the SDK marker to the main map (initially hidden)
-                // Pass the array, addOrUpdateMarker will convert it to LngLat Object
-                addOrUpdateMarker(randomLngLatArray);
+                // Get guessed coordinates (from our stored LngLat Object)
+                const guessedLngLat = userGuessLngLat;
+                // Get actual coordinates (from our stored LngLat Object)
+                const actualLngLat = currentLocationCoords;
+                console.log("Actual LngLat for scoring:", actualLngLat);
+                console.log("Guessed LngLat for scoring:", guessedLngLat);
+                // ** Debugging: Enhanced logging and checks before calculation **
+                console.log("Checking actualLngLat.lat:", actualLngLat.lat, "Type:", typeof actualLngLat.lat);
+                console.log("Checking actualLngLat.lng:", actualLngLat.lng, "Type:", typeof actualLngLat.lng);
+                console.log("Checking guessedLngLat.lat:", guessedLngLat.lat, "Type:", typeof guessedLngLat.lat);
+                console.log("Checking guessedLngLat.lng:", guessedLngLat.lng, "Type:", typeof guessedLngLat.lng);
+                // Check if the lat/lng properties are numbers before calling calculation
+                if (typeof actualLngLat.lat !== 'number' || typeof actualLngLat.lng !== 'number' || typeof guessedLngLat.lat !== 'number' || typeof guessedLngLat.lng !== 'number') {
+                    console.error("Score Calculation Error: One or more coordinate values are not numbers.", {actual: actualLngLat, guessed: guessedLngLat});
+                    document.getElementById('submit-status').textContent = 'Error: Cannot calculate score due to invalid coordinate data.';
+                    return;
+                }
 
-                 console.log("New location setup complete via API. currentLocationCoords:", currentLocationCoords);
+                // Calculate the score
+                const scoreResult = calculateGeoGuessrScore(
+                    actualLngLat.lat,
+                    actualLngLat.lng,
+                    guessedLngLat.lat,
 
-            } else {
-                // If MapTiler Geocoding returned no features for this city
-                console.warn(`MapTiler Geocoding could not find the location for "${cityName}" (Attempt ${attempt}). Retrying...`);
-                findRandomCityAndSpot(attempt + 1); // Retry if geocoding returned no features
-            }
+                    guessedLngLat.lng
+                );
+                // ** Debugging: Check score result **
+                console.log("Score Calculation Result:", scoreResult);
+                if (isNaN(scoreResult.score) || isNaN(scoreResult.distance)) {
+                    console.error("Score calculation returned NaN.", scoreResult);
+                    document.getElementById('submit-status').textContent = 'Error: Score calculation failed.';
+                    return; // Prevent updating score display with NaN
+                }
 
-        } catch (error) {
-            console.error(`Error during API call (Attempt ${attempt}):`, error);
-            locationText.textContent = `An error occurred fetching location: ${error.message}. Retrying...`;
-            findRandomCityAndSpot(attempt + 1); // Retry on fetch or other errors
-        }
-    }
+                totalScore += scoreResult.score;
+                document.getElementById('points-score').textContent =
+                    `Round Score: ${scoreResult.score} points (${(scoreResult.distance/1000).toFixed(2)} km) |
+                    Total Score: ${totalScore} points`;
 
+                document.getElementById('submit-status').textContent = `Guess submitted! You were ${(scoreResult.distance/1000).toFixed(2)} km away.`;
+                // Show the correct location by making the main map SDK marker visible
+                if (currentMarker && currentMarker.getElement()) {
+                    currentMarker.getElement().style.display = 'block';
+                    console.log("Showing actual location marker on main map.");
+                } else {
+                    console.warn("Could not find currentMarker element to show.");
+                }
 
-    // --- Initialize Maps ---
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize the main map
-        mainMap = new maptilersdk.Map({
-            container: 'maptiler-map',
-            style: customStyleUrl,
-            center: [0, 0], // Initial center will be updated by findRandomCityAndSpot
-            zoom: 1, // Initial low zoom
-            interactive: false // The main map should not be interactive for the game
-        });
-
-        // Initialize the overlay map for guessing
-        overlayMap = new maptilersdk.Map({
-            container: 'overlay-map',
-            style: overlayStyleUrl,
-            center: initialCenter, // Stays centered on the world map initially
-            zoom: initialZoom,
-            interactive: true // The overlay map should be interactive for guessing
-        });
-
-        // Add error listeners to both maps
-        mainMap.on('error', (e) => {
-            console.error('Main map loading error:', e.error);
-            document.getElementById('location-text').textContent = "Error loading main map. Check console.";
-        });
-
-        overlayMap.on('error', (e) => {
-            console.error('Overlay map loading error:', e.error);
-            document.getElementById('guessed-coords').textContent = "Error loading overlay map. Check console.";
-        });
-
-        // Start the first round once the main map style is loaded
-        mainMap.on('style.load', () => {
-            console.log('Main map style loaded.');
-            findRandomCityAndSpot(); // Start the first round by finding a location
-
-            // Attempt to remove default controls (using both MapTiler and MapLibre class names)
-            try {
-                mainMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
-            } catch (e) {
-                console.warn("Could not remove controls programmatically for main map:", e);
-            }
-        });
-
-        // Remove default controls once the overlay map style is loaded
-        overlayMap.on('style.load', () => {
-            console.log('Overlay map style loaded.');
-             // Attempt to remove default controls
-            try {
-                overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
-            } catch (e) {
-                console.warn("Could not remove controls programmatically for overlay map:", e);
-            }
-        });
-
-
-        // *** Add Left-click functionality to the overlay map for placing custom guess pin ***
-        overlayMap.on('click', (e) => {
-            const clickedLngLat = e.lngLat; // e.lngLat is already a LngLat object
-            console.log('Overlay map left-clicked at:', clickedLngLat);
-            placeCustomGuessPinOnOverlay(clickedLngLat);
-        });
-
-        // Keep Right-click functionality as an alternative for placing custom guess pin
-        overlayMap.on('contextmenu', (e) => {
-            e.preventDefault(); // Prevent the default browser context menu
-            const clickedLngLat = e.lngLat; // e.lngLat is already a LngLat object
-            console.log('Overlay map right-clicked at:', clickedLngLat);
-            placeCustomGuessPinOnOverlay(clickedLngLat);
-        });
-
-
-        // *** Event listener to handle overlay map resize and update custom guess pin position ***
-        const overlayMapElement = document.getElementById('overlay-map');
-        overlayMapElement.addEventListener('transitionend', () => {
-            console.log('Overlay map container transition ended. Resizing map.');
-            if (overlayMap) {
+                // --- Full Screen Effect (within the maps-container) ---
+                const overlayMapElement = document.getElementById('overlay-map');
+                overlayMapElement.classList.add('overlay-map-fullscreen');
+                // Ensure the overlay map is resized to fit the new dimensions
                 overlayMap.resize();
-
-                // Add a small timeout before attempting to update custom pin position
-                // This gives the map renderer a moment to finish recalculating its layout
+                // Adjust the overlay map's view to encompass both points.
+                // Create a bounding box that includes both the guessed and actual locations.
+                const bounds = new maptilersdk.LngLatBounds();
+                bounds.extend(guessedLngLat);
+                bounds.extend(actualLngLat);
+                // Use a short delay for flyTo to allow fullscreen transition to complete
                 setTimeout(() => {
-                    console.log('Attempting to update custom guess pin position after timeout.');
-                    updateGuessPinPosition(); // Call our manual update function
-                    console.log('Custom guess pin position update attempted.');
-                }, 50); // Adjust delay (milliseconds) if needed
-            }
+                    overlayMap.fitBounds(bounds, {
+                        padding: 50, // Add some padding around the bounds
+
+                        duration: 1000, // Smooth animation
+                        essential: true // Ensures the animation runs
+                    });
+                }, 300); /* Adjusted setTimeout duration */
+                // Small delay to let CSS transition happen
+
+
+                // --- Show Real Location on Overlay Map (Green Pin) ---
+                placeCustomRealLocationPinOnOverlay(actualLngLat);
+
+                // --- Draw and show the line between pins ---
+                updateLineBetweenPins(); // Initial draw/update
+                if (overlayMap.getLayer('line-layer')) {
+                    overlayMap.setLayoutProperty('line-layer', 'visibility', 'visible');
+                    lineLayerVisible = true;
+                }
+
+                // --- Display Scores at bottom corners ---
+                roundScoreDisplay.textContent = `Round Score: ${scoreResult.score} points`;
+                totalScoreDisplay.textContent = `Total Score: ${totalScore} points`;
+                roundScoreDisplay.style.display = 'block';
+                totalScoreDisplay.style.display = 'block';
+
+                // --- Create and Add "Next" Button ---
+                // Check if the button already exists before creating a new one
+                let nextButton = document.getElementById('next-round-btn');
+                if (!nextButton) {
+                    nextButton = document.createElement('button');
+                    nextButton.textContent = 'Next Round';
+                    nextButton.id = 'next-round-btn'; // Assign an ID for easy removal
+                    const mapsContainer = document.querySelector('.maps-container');
+                    mapsContainer.appendChild(nextButton);
+
+                    nextButton.addEventListener('click', () => {
+                        overlayMapElement.classList.remove('overlay-map-fullscreen');
+                        // Reset overlay map to its initial state (small, bottom right)
+                        overlayMap.flyTo({
+
+                            center: initialCenter,
+                            zoom: initialZoom,
+                            essential: true,
+
+                            duration: 500 // Smooth transition back
+                        });
+
+                        if (realLocationPinElement) { // Use the new realLocationPinElement
+                            realLocationPinElement.remove();
+                            realLocationPinElement = null;
+                        }
+                        // Remove the guess pin as well for the next round
+                        if (guessPinElement) {
+
+                            guessPinElement.remove();
+                            guessPinElement = null;
+                        }
+
+                        userGuessLngLat = null; // Clear the stored guess
+                        // No need to remove updateRealLocationPinPosition listener here, it's tied to element existence
+                        // and will be re-added when a new pin is placed.
+
+                        // Hide the line layer
+                        if (overlayMap.getLayer('line-layer')) {
+                            overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
+                            lineLayerVisible = false;
+                        }
+
+                        // Hide score displays
+                        roundScoreDisplay.style.display = 'none';
+                        totalScoreDisplay.style.display = 'none';
+
+                        nextButton.remove(); // Remove the next button itself
+
+                        // Resize the overlay map back to its original small size after the transition ends
+                        // A small delay might be necessary if the map doesn't immediately resize
+
+                        setTimeout(() => {
+                            overlayMap.resize();
+                        }, 500);
+                        // Match the transition duration
+
+                        roundCount++;
+                        document.getElementById('round-count').textContent = `Round: ${roundCount}`;
+                        findRandomCityAndSpot(); // Start the next round
+                    });
+                }
+
+
+                // Disable the submit button and new location button until "Next" is clicked
+                submitGuessBtn.disabled = true;
+                newLocationBtn.disabled = true;
+            });
         });
-        // ******************************************************************************
-
-
-        // Event listener for the "New Location" button
-        document.getElementById('new-location').addEventListener('click', findRandomCityAndSpot);
-
-
-        // Event listener for the "Submit" button
-        document.getElementById('submit-guess').addEventListener('click', function() {
-            console.log("Submit button clicked.");
-            // Check if a guess has been made (userGuessLngLat is set and is a LngLat object)
-            if (!userGuessLngLat || !(userGuessLngLat instanceof maptilersdk.LngLat)) {
-                document.getElementById('submit-status').textContent = 'Please make a guess by clicking or right-clicking on the map.';
-                console.warn("Submit clicked without a valid guess location.");
-                return;
-            }
-
-            // Check if we have a current location to compare against (should be set by findRandomCityAndSpot)
-            if (!currentLocationCoords || !(currentLocationCoords instanceof maptilersdk.LngLat)) {
-                document.getElementById('submit-status').textContent = 'Error: No location set for scoring.';
-                 console.error('Error: Submit clicked but currentLocationCoords is null or not a LngLat object.');
-                return;
-            }
-
-            // Get guessed coordinates (from our stored LngLat Object)
-            const guessedLngLat = userGuessLngLat;
-
-            // Get actual coordinates (from our stored LngLat Object)
-            const actualLngLat = currentLocationCoords;
-
-            console.log("Actual LngLat for scoring:", actualLngLat);
-            console.log("Guessed LngLat for scoring:", guessedLngLat);
-
-            // ** Debugging: Enhanced logging and checks before calculation **
-            console.log("Checking actualLngLat.lat:", actualLngLat.lat, "Type:", typeof actualLngLat.lat);
-            console.log("Checking actualLngLat.lng:", actualLngLat.lng, "Type:", typeof actualLngLat.lng);
-            console.log("Checking guessedLngLat.lat:", guessedLngLat.lat, "Type:", typeof guessedLngLat.lat);
-            console.log("Checking guessedLngLat.lng:", guessedLngLat.lng, "Type:", typeof guessedLngLat.lng);
-
-
-             // Check if the lat/lng properties are numbers before calling calculation
-             if (typeof actualLngLat.lat !== 'number' || typeof actualLngLat.lng !== 'number' || typeof guessedLngLat.lat !== 'number' || typeof guessedLngLat.lng !== 'number') {
-                console.error("Score Calculation Error: One or more coordinate values are not numbers.", {actual: actualLngLat, guessed: guessedLngLat});
-                document.getElementById('submit-status').textContent = 'Error: Cannot calculate score due to invalid coordinate data.';
-                return;
-            }
-
-
-            // Calculate the score
-            const scoreResult = calculateGeoGuessrScore(
-                actualLngLat.lat,
-                actualLngLat.lng,
-                guessedLngLat.lat,
-                guessedLngLat.lng
-            );
-
-             // ** Debugging: Check score result **
-             console.log("Score Calculation Result:", scoreResult);
-             if (isNaN(scoreResult.score) || isNaN(scoreResult.distance)) {
-                  console.error("Score calculation returned NaN.", scoreResult);
-                  document.getElementById('submit-status').textContent = 'Error: Score calculation failed.';
-                  return; // Prevent updating score display with NaN
-             }
-
-
-            // Add to total score
-            totalScore += scoreResult.score;
-
-            // Update the points display
-            document.getElementById('points-score').textContent =
-                `Round Score: ${scoreResult.score} points (${(scoreResult.distance/1000).toFixed(2)} km) | Total Score: ${totalScore} points`;
-
-            // Update submit status
-            document.getElementById('submit-status').textContent = `Guess submitted! You were ${(scoreResult.distance/1000).toFixed(2)} km away.`;
-
-            // Show the correct location by making the main map SDK marker visible
-            if (currentMarker && currentMarker.getElement()) {
-                 currentMarker.getElement().style.display = 'block';
-                 console.log("Showing actual location marker on main map.");
-            } else {
-                 console.warn("Could not find currentMarker element to show.");
-            }
-
-            // Increment round count
-            roundCount++;
-            document.getElementById('round-count').textContent = `Round: ${roundCount}`;
-
-            // Set a timeout to move to the next location
-            setTimeout(() => {
-                console.log("Starting next round...");
-                findRandomCityAndSpot(); // Start the next round by finding a location
-                // findRandomCityAndSpot handles removing the custom guess pin element,
-                // clearing stored location, and resetting status text.
-            }, 5000); // Wait 5 seconds before starting the next round
-        });
-    });
-  </script>
+    </script>
 </body>
 </html>
