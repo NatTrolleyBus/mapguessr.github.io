@@ -8,168 +8,168 @@
     <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptilersdk.css" rel="stylesheet" />
     <style>
         body {
-            font-family: Arial, sans-serif; /* [cite: 1] */
-            line-height: 1.6; /* [cite: 2] */
-            margin: 0; /* [cite: 2] */
-            padding: 0; /* [cite: 2] */
-            color: #333; /* [cite: 2] */
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
         }
 
         header {
-            background-color: #0cc0df; /* [cite: 2] */
-            padding: 20px; /* [cite: 3] */
-            border-radius: 0 0 5px 5px; /* [cite: 3] */
+            background-color: #0cc0df;
+            padding: 20px;
+            border-radius: 0 0 5px 5px;
         }
         h1 {
-            color: #444; /* [cite: 3] */
-            margin-top: 0; /* [cite: 4] */
+            color: #444;
+            margin-top: 0;
         }
         main {
-            padding: 20px; /* [cite: 4] */
-            max-width: 800px; /* [cite: 5] */
-            margin: 0 auto; /* [cite: 5] */
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
         section {
-            margin-bottom: 30px; /* [cite: 5] */
+            margin-bottom: 30px;
         }
         .maps-container {
-            position: relative; /* [cite: 6] */
-            height: 600px; /* Fixed height for the container */ /* [cite: 7] */
-            width: 100%; /* [cite: 7] */
-            margin-bottom: 20px; /* [cite: 8] */
-            overflow: hidden; /* [cite: 8] */
+            position: relative;
+            height: 600px; /* Fixed height for the container */
+            width: 100%;
+            margin-bottom: 20px;
+            overflow: hidden;
         }
         #maptiler-map {
-            position: relative; /* [cite: 9] */
-            width: 100%; /* [cite: 10] */
-            height: 100%; /* [cite: 10] */
-            border: 1px solid #ddd; /* [cite: 10] */
-            border-radius: 5px; /* [cite: 10] */
-            overflow: hidden; /* [cite: 10] */
-            background-color: #eaeaea; /* [cite: 10] */
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #eaeaea;
         }
         #overlay-map {
-            position: absolute; /* [cite: 11] */
-            bottom: 20px; /* [cite: 12] */
-            right: 20px; /* [cite: 12] */
-            width: 250px; /* [cite: 12] */
-            height: 150px; /* [cite: 12] */
-            border: 2px solid #555; /* [cite: 12] */
-            border-radius: 5px; /* [cite: 12] */
-            overflow: hidden; /* [cite: 12] */
-            background-color: #fff; /* [cite: 12] */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* [cite: 13] */
-            z-index: 10; /* [cite: 13] */
-            transition: all 0.4s ease-in-out; /* [cite: 13] */
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 250px;
+            height: 150px;
+            border: 2px solid #555;
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            transition: all 0.4s ease-in-out;
         }
         #overlay-map:hover:not(.overlay-map-fullscreen) {
-            width: 400px; /* [cite: 14] */
-            height: 300px; /* [cite: 15] */
+            width: 400px;
+            height: 300px;
         }
         .overlay-map-fullscreen {
-            position: absolute !important; /* [cite: 15] */
-            top: 0 !important; /* [cite: 16] */
-            left: 0 !important; /* [cite: 17] */
-            width: 100% !important; /* [cite: 17] */
-            height: 100% !important; /* Fill the entire maps-container */ /* [cite: 17] */
-            z-index: 100 !important; /* [cite: 17] */
-            border: none !important; /* [cite: 18] */
-            border-radius: 0 !important; /* [cite: 19] */
-            box-shadow: none !important; /* Remove shadow when fullscreen */ /* [cite: 19] */
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important; /* Fill the entire maps-container */
+            z-index: 100 !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important; /* Remove shadow when fullscreen */
         }
         .submit-container {
-            text-align: center; /* [cite: 19] */
-            margin-bottom: 30px; /* [cite: 20] */
+            text-align: center;
+            margin-bottom: 30px;
         }
         .submit-btn, .new-location-btn {
-            background-color: #0cc0df; /* [cite: 20] */
-            color: white; /* [cite: 21] */
-            border: none; /* [cite: 21] */
-            padding: 12px 30px; /* [cite: 21] */
-            font-size: 1.1em; /* [cite: 21] */
-            border-radius: 5px; /* [cite: 21] */
-            cursor: pointer; /* [cite: 21] */
-            transition: background-color 0.3s; /* [cite: 21] */
-            margin: 0 10px; /* [cite: 21] */
+            background-color: #0cc0df;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 0 10px;
         }
         .submit-btn:hover, .new-location-btn:hover {
-            background-color: #0aa8c4; /* [cite: 22] */
+            background-color: #0aa8c4;
         }
         footer {
-            background-color: #0cc0df; /* [cite: 23] */
-            padding: 10px; /* [cite: 24] */
-            text-align: center; /* [cite: 24] */
-            border-radius: 5px; /* [cite: 24] */
-            font-size: 0.9em; /* [cite: 24] */
-            margin-top: 40px; /* [cite: 24] */
+            background-color: #0cc0df;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-top: 40px;
         }
         .maptiler-ctrl-group,
         .maptiler-ctrl,
         .maplibregl-ctrl-group,
         .maplibregl-ctrl {
-            display: none !important; /* [cite: 25] */
+            display: none !important;
         }
         .guess-pin {
-            position: absolute; /* [cite: 26] */
-            width: 24px; /* Width of the pin */ /* [cite: 27] */
-            height: 36px; /* Height of the pin */ /* [cite: 27] */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%23e53e3e" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>'); /* [cite: 28] */
-            background-size: contain; /* [cite: 29] */
-            background-repeat: no-repeat; /* [cite: 29] */
-            transform: translate3d(-50%, -100%, 0); /* [cite: 29] */
-            z-index: 101; /* [cite: 30] */
-            pointer-events: none; /* [cite: 31] */
+            position: absolute;
+            width: 24px; /* Width of the pin */
+            height: 36px; /* Height of the pin */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%23e53e3e" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            transform: translate3d(-50%, -100%, 0);
+            z-index: 101;
+            pointer-events: none;
         }
         .real-location-pin {
-            position: absolute; /* [cite: 32] */
-            width: 24px; /* Width of the pin */ /* [cite: 33] */
-            height: 36px; /* Height of the pin */ /* [cite: 33] */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%2328a745" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>'); /* [cite: 34] */
-            background-size: contain; /* [cite: 35] */
-            background-repeat: no-repeat; /* [cite: 35] */
-            transform: translate3d(-50%, -100%, 0); /* [cite: 35] */
-            z-index: 102; /* [cite: 36] */
-            pointer-events: none; /* [cite: 37] */
+            position: absolute;
+            width: 24px; /* Width of the pin */
+            height: 36px; /* Height of the pin */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%2328a745" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            transform: translate3d(-50%, -100%, 0);
+            z-index: 102;
+            pointer-events: none;
         }
         #next-round-btn {
-            position: absolute; /* [cite: 38] */
-            bottom: 20px; /* [cite: 39] */
-            left: 50%; /* [cite: 39] */
-            transform: translateX(-50%); /* [cite: 39] */
-            padding: 12px 30px; /* [cite: 39] */
-            font-size: 1.1em; /* [cite: 39] */
-            background-color: #0cc0df; /* [cite: 39] */
-            color: white; /* [cite: 39] */
-            border: none; /* [cite: 39] */
-            border-radius: 5px; /* [cite: 39] */
-            cursor: pointer; /* [cite: 40] */
-            z-index: 110; /* Ensure it's above the maps */ /* [cite: 40] */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* [cite: 40] */
-            transition: background-color 0.3s; /* [cite: 41] */
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 30px;
+            font-size: 1.1em;
+            background-color: #0cc0df;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 110; /* Ensure it's above the maps */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
         }
         #next-round-btn:hover {
-            background-color: #0aa8c4; /* [cite: 41] */
+            background-color: #0aa8c4;
         }
         #round-score-display, #total-score-display {
-            position: fixed; /* Fixed position relative to viewport */ /* [cite: 42] */
-            padding: 10px 15px; /* [cite: 43] */
-            background-color: black; /* Changed to solid black */ /* [cite: 44] */
-            color: white; /* [cite: 44] */
-            font-size: 1.2em; /* [cite: 45] */
-            border-radius: 5px; /* [cite: 45] */
-            z-index: 1000; /* High z-index to be on top */ /* [cite: 45] */
-            display: none; /* Hidden by default */ /* [cite: 45] */
-            transition: opacity 0.3s ease-in-out; /* [cite: 46] */
-            pointer-events: none; /* [cite: 47] */
-            border: 1px solid white; /* Added white border */ /* [cite: 47] */
+            position: fixed; /* Fixed position relative to viewport */
+            padding: 10px 15px;
+            background-color: black; /* Changed to solid black */
+            color: white;
+            font-size: 1.2em;
+            border-radius: 5px;
+            z-index: 1000; /* High z-index to be on top */
+            display: none; /* Hidden by default */
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+            border: 1px solid white; /* Added white border */
         }
         #round-score-display {
-            bottom: 20px; /* [cite: 47] */
-            left: 20px; /* [cite: 48] */
+            bottom: 20px;
+            left: 20px;
         }
         #total-score-display {
-            bottom: 20px; /* [cite: 48] */
-            right: 20px; /* [cite: 49] */
+            bottom: 20px;
+            right: 20px;
         }
     </style>
 </head>
@@ -184,30 +184,30 @@
             <span id="user-info" style="margin-left: 20px; color: #fff;"></span>
         </div>
     </header>
-    <main style="display:none;"> {/* Initially hide main game content */}
+    <main style="display:none;">
         <section>
             <h2>About</h2>
             <p>Game Rules.</p>
         </section>
         <section>
             <h2>Maps</h2>
-            <div class="maps-container"> {/* [cite: 50] */}
+            <div class="maps-container">
                 <div id="maptiler-map"></div>
                 <div id="overlay-map"></div>
             </div>
             <div class="submit-container">
-                <button class="new-location-btn" id="new-location">New Location</button> {/* [cite: 51] */}
+                <button class="new-location-btn" id="new-location">New Location</button>
                 <button class="submit-btn" id="submit-guess">Submit</button>
             </div>
         </section>
         <section>
             <h2>Game Answers</h2>
             <ul>
-                <li id="location-text">The location label/place goes here/coordinates</li> {/* [cite: 52] */}
-                <li id="guessed-coords">The guessed coordinates</li> {/* [cite: 52] */}
-                <li id="submit-status">Submit button clicked? status goes here</li> {/* [cite: 52] */}
-                <li id="points-score">Future points/scores system goes here</li> {/* [cite: 53] */}
-                <li id="round-count">Round: 1</li> {/* [cite: 53] */}
+                <li id="location-text">The location label/place goes here/coordinates</li>
+                <li id="guessed-coords">The guessed coordinates</li>
+                <li id="submit-status">Submit button clicked? status goes here</li>
+                <li id="points-score">Future points/scores system goes here</li>
+                <li id="round-count">Round: 1</li>
             </ul>
         </section>
     </main>
@@ -215,8 +215,8 @@
         <p>Made by Nathan and Jason</p>
     </footer>
 
-    <div id="round-score-display"></div> {/* [cite: 53] */}
-    <div id="total-score-display"></div> {/* [cite: 53] */}
+    <div id="round-score-display"></div>
+    <div id="total-score-display"></div>
 
     <script>
         // --- OAuth Configuration ---
@@ -224,32 +224,31 @@
         const OAUTH_REDIRECT_URI = window.location.href.split('?')[0]; // Assumes the current page handles the callback and is registered
         const AUTH_SERVER_BASE_URL = 'https://auth.transitspotter.com';
 
-        // --- Map Guessr Configuration (existing) ---
-        const apiKey = 'ZS9RHHRim7f1OZRKuI6n'; /* [cite: 54] */
-        maptilersdk.config.apiKey = apiKey; /* [cite: 55] */
-        const randomCityApiUrl = 'https://random-city-api.vercel.app/api/random-city'; /* [cite: 56] */
-        let currentMarker = null; /* [cite: 57] */
-        let userGuessLngLat = null; /* [cite: 57] */
-        let guessPinElement = null; /* [cite: 58] */
-        let currentLocationCoords = null; /* [cite: 59] */
-        let totalScore = 0; /* [cite: 60] */
-        let mainMap = null; /* [cite: 61] */
-        let overlayMap = null; /* [cite: 62] */
-        let realLocationPinElement = null; /* [cite: 63] */
-        let roundCount = 1; /* [cite: 64] */
-        const zoomLevel = 15; /* [cite: 65] */
-        const customStyleUrl = 'https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=' + apiKey; /* [cite: 66] */
-        const overlayStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey; /* [cite: 67] */
-        const initialCenter = [0, 0]; /* [cite: 68] */
-        const initialZoom = -1.0; /* [cite: 69] */
-        let lineLayerVisible = false; /* [cite: 69] */
+        // --- Map Guessr Configuration ---
+        const apiKey = 'ZS9RHHRim7f1OZRKuI6n';
+        maptilersdk.config.apiKey = apiKey;
+        const randomCityApiUrl = 'https://random-city-api.vercel.app/api/random-city';
+        let currentMarker = null;
+        let userGuessLngLat = null;
+        let guessPinElement = null;
+        let currentLocationCoords = null;
+        let totalScore = 0;
+        let mainMap = null;
+        let overlayMap = null;
+        let realLocationPinElement = null;
+        let roundCount = 1;
+        const zoomLevel = 15;
+        const customStyleUrl = 'https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=' + apiKey;
+        const overlayStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey;
+        const initialCenter = [0, 0];
+        const initialZoom = -1.0;
+        let lineLayerVisible = false;
 
 
         // --- Application State ---
         let isAuthenticated = false;
 
-        // --- OAuth Helper Functions (from provided TransitSpotter documentation) ---
-        // 1. Generate code verifier and challenge
+        // --- OAuth Helper Functions ---
         async function generateCodeVerifierAndChallenge() {
             const codeVerifier = generateRandomString(64);
             const encoder = new TextEncoder();
@@ -273,7 +272,6 @@
             return result;
         }
 
-        // 2. Start OAuth flow
         async function startOAuthFlow() {
             const { codeVerifier, codeChallenge } = await generateCodeVerifierAndChallenge();
             const state = generateRandomString(32);
@@ -290,7 +288,6 @@
             window.location.href = authUrl.toString();
         }
 
-        // 3. Handle the callback
         async function handleOAuthCallback() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
@@ -354,7 +351,6 @@
             }
         }
 
-        // 5. Refresh the token
         async function refreshToken() {
             const refreshTokenVal = localStorage.getItem('refresh_token');
             if (!refreshTokenVal) return false;
@@ -391,7 +387,6 @@
             }
         }
 
-        // 6. Check if token needs refreshing
         async function ensureValidToken() {
             const accessToken = localStorage.getItem('access_token');
             if (!accessToken) return false;
@@ -401,14 +396,13 @@
                 localStorage.clear();
                 return false;
             }
-            if (Date.now() > expiryTime - 60000) {
+            if (Date.now() > expiryTime - 60000) { // Refresh if expiring in the next minute
                 console.log("Token expired or expiring soon, attempting refresh...");
                 return await refreshToken();
             }
             return true;
         }
 
-        // 7. Logout
         async function appLogout() {
             const refreshTokenVal = localStorage.getItem('refresh_token');
             if (refreshTokenVal) {
@@ -437,29 +431,36 @@
         }
         
         function resetGameAndUI() {
+            // Remove map instances if they exist
             if (mainMap) { mainMap.remove(); mainMap = null; }
             if (overlayMap) { overlayMap.remove(); overlayMap = null; }
+
+            // Clear markers and pins
             if (currentMarker) { currentMarker.remove(); currentMarker = null; }
             if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; }
             if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; }
             
+            // Reset game state variables
             userGuessLngLat = null;
             currentLocationCoords = null;
             totalScore = 0;
             roundCount = 1;
+            lineLayerVisible = false; // Assuming this should be reset
 
-            document.getElementById('location-text').textContent = 'The location label/place goes here/coordinates'; /* [cite: 52] */
-            document.getElementById('guessed-coords').textContent = 'The guessed coordinates'; /* [cite: 52] */
-            document.getElementById('submit-status').textContent = 'Submit button clicked? status goes here'; /* [cite: 52] */
-            document.getElementById('points-score').textContent = 'Future points/scores system goes here'; /* [cite: 53] */
-            document.getElementById('round-count').textContent = 'Round: 1'; /* [cite: 53] */
+            // Reset UI text elements
+            document.getElementById('location-text').textContent = 'The location label/place goes here/coordinates';
+            document.getElementById('guessed-coords').textContent = 'The guessed coordinates';
+            document.getElementById('submit-status').textContent = 'Submit button clicked? status goes here';
+            document.getElementById('points-score').textContent = 'Future points/scores system goes here';
+            document.getElementById('round-count').textContent = 'Round: 1';
             
             const existingNextButton = document.getElementById('next-round-btn');
             if (existingNextButton) existingNextButton.remove();
 
-            document.getElementById('round-score-display').style.display = 'none'; /* [cite: 137] */
-            document.getElementById('total-score-display').style.display = 'none'; /* [cite: 138] */
+            document.getElementById('round-score-display').style.display = 'none';
+            document.getElementById('total-score-display').style.display = 'none';
 
+            // Disable game buttons
             const submitGuessBtnElem = document.getElementById('submit-guess');
             if(submitGuessBtnElem) submitGuessBtnElem.disabled = true;
             const newLocationBtnElem = document.getElementById('new-location');
@@ -478,266 +479,266 @@
                 loginBtn.style.display = 'none';
                 registerBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
-                userInfoDisplay.textContent = `Logged In`;
-                gameContent.style.display = 'block';
-                if (!mainMap) {
+                userInfoDisplay.textContent = `Logged In`; // You could fetch actual user info here
+                gameContent.style.display = 'block'; // Show game content
+                if (!mainMap) { // Initialize game only if not already done
                   initializeGame();
                 }
             } else {
                 loginBtn.style.display = 'inline-block';
                 registerBtn.style.display = 'inline-block';
                 logoutBtn.style.display = 'none';
-                userInfoDisplay.textContent = '';
-                gameContent.style.display = 'none';
-                if (mainMap) {
+                userInfoDisplay.textContent = ''; // Or "Please log in"
+                gameContent.style.display = 'none'; // Hide game content
+                if (mainMap) { // If maps were initialized, remove them and reset state
                     resetGameAndUI();
                 }
             }
         }
         
         // --- Original Game Functions ---
-        function getRandomCoordinateInBounds(bounds) { /* [cite: 70] */
-            const minLng = bounds[0]; /* [cite: 70] */
-            const minLat = bounds[1]; /* [cite: 71] */
-            const maxLng = bounds[2]; /* [cite: 71] */
-            const maxLat = bounds[3]; /* [cite: 71] */
-            const buffer = 0.001; /* [cite: 72] */
-            const bufferedMinLng = minLng + (maxLng - minLng) * buffer; /* [cite: 73] */
-            const bufferedMinLat = minLat + (maxLat - minLat) * buffer; /* [cite: 74] */
-            const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer; /* [cite: 74] */
-            const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer; /* [cite: 75] */
-            const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random(); /* [cite: 75] */
-            const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random(); /* [cite: 76] */
-            return [randomLng, randomLat]; /* [cite: 76] */
+        function getRandomCoordinateInBounds(bounds) {
+            const minLng = bounds[0];
+            const minLat = bounds[1];
+            const maxLng = bounds[2];
+            const maxLat = bounds[3];
+            const buffer = 0.001;
+            const bufferedMinLng = minLng + (maxLng - minLng) * buffer;
+            const bufferedMinLat = minLat + (maxLat - minLat) * buffer;
+            const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer;
+            const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
+            const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
+            const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
+            return [randomLng, randomLat];
         }
 
-        function addOrUpdateMarker(lngLatInput) { /* [cite: 77] */
-            const lngLatObject = Array.isArray(lngLatInput) ? new maptilersdk.LngLat(lngLatInput[0], lngLatInput[1]) : lngLatInput; /* [cite: 78, 79] */
-            if (!(lngLatObject instanceof maptilersdk.LngLat) || typeof lngLatObject.lng !== 'number' || typeof lngLatObject.lat !== 'number') { /* [cite: 80] */
-                console.error("addOrUpdateMarker received invalid LngLat data:", lngLatInput); /* [cite: 80] */
-                return; /* [cite: 81] */
+        function addOrUpdateMarker(lngLatInput) {
+            const lngLatObject = Array.isArray(lngLatInput) ? new maptilersdk.LngLat(lngLatInput[0], lngLatInput[1]) : lngLatInput;
+            if (!(lngLatObject instanceof maptilersdk.LngLat) || typeof lngLatObject.lng !== 'number' || typeof lngLatObject.lat !== 'number') {
+                console.error("addOrUpdateMarker received invalid LngLat data:", lngLatInput);
+                return;
             }
-            if (currentMarker) { /* [cite: 81] */
-                currentMarker.remove(); /* [cite: 81] */
+            if (currentMarker) {
+                currentMarker.remove();
             }
             currentMarker = new maptilersdk.Marker()
-                .setLngLat(lngLatObject) /* [cite: 82] */
-                .addTo(mainMap); /* [cite: 82] */
-            currentLocationCoords = lngLatObject; /* [cite: 83] */
-            if (currentMarker && currentMarker.getElement()) { /* [cite: 83] */
-                currentMarker.getElement().style.display = 'none'; /* [cite: 83] */
+                .setLngLat(lngLatObject)
+                .addTo(mainMap);
+            currentLocationCoords = lngLatObject;
+            if (currentMarker && currentMarker.getElement()) {
+                currentMarker.getElement().style.display = 'none';
             }
-            console.log("currentLocationCoords set to LngLat object:", currentLocationCoords); /* [cite: 84] */
+            console.log("currentLocationCoords set to LngLat object:", currentLocationCoords);
         }
 
-        function calculateDistanceInMeters(lat1, lon1, lat2, lon2) { /* [cite: 85] */
-            if (typeof lat1 !== 'number' || typeof lon1 !== 'number' || typeof lat2 !== 'number' || typeof lon2 !== 'number') { /* [cite: 85] */
-                console.error("Invalid input types for calculateDistanceInMeters:", lat1, lon1, lat2, lon2); /* [cite: 85] */
-                return NaN; /* [cite: 86] */
+        function calculateDistanceInMeters(lat1, lon1, lat2, lon2) {
+            if (typeof lat1 !== 'number' || typeof lon1 !== 'number' || typeof lat2 !== 'number' || typeof lon2 !== 'number') {
+                console.error("Invalid input types for calculateDistanceInMeters:", lat1, lon1, lat2, lon2);
+                return NaN;
             }
-            const R = 6371e3; /* Earth's radius in meters */ /* [cite: 86] */
-            const φ1 = lat1 * Math.PI / 180; /* φ, λ in radians */ /* [cite: 87] */
-            const φ2 = lat2 * Math.PI / 180; /* [cite: 88] */
-            const Δφ = (lat2 - lat1) * Math.PI / 180; /* [cite: 89] */
-            const Δλ = (lon2 - lon1) * Math.PI / 180; /* [cite: 89] */
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2); /* [cite: 89, 90] */
-            const c = 2 * Math.atan2(Math.sqrt(Math.max(0, a)), Math.sqrt(Math.max(0, 1 - a))); /* [cite: 91] */
-            const distance = R * c; /* Distance in meters */ /* [cite: 92] */
-            return distance; /* [cite: 92] */
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(Math.max(0, a)), Math.sqrt(Math.max(0, 1 - a)));
+            const distance = R * c; // Distance in meters
+            return distance;
         }
 
-        function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) { /* [cite: 93] */
-            const MAX_SCORE = 5000; /* Maximum points per round */ /* [cite: 93] */
-            const FIVE_K_THRESHOLD_METERS = 100; /* A small distance for a guaranteed 5000 */ /* [cite: 94] */
-            const distance = calculateDistanceInMeters(lat1, lon1, lat2, lon2); /* [cite: 95] */
-            if (isNaN(distance)) { /* [cite: 96] */
-                console.error("Distance calculation returned NaN."); /* [cite: 96] */
-                return { distance: NaN, score: NaN }; /* Propagate NaN if distance is invalid */ /* [cite: 97] */
+        function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) {
+            const MAX_SCORE = 5000; // Maximum points per round
+            const FIVE_K_THRESHOLD_METERS = 100; // A small distance for a guaranteed 5000
+            const distance = calculateDistanceInMeters(lat1, lon1, lat2, lon2);
+            if (isNaN(distance)) {
+                console.error("Distance calculation returned NaN.");
+                return { distance: NaN, score: NaN }; // Propagate NaN if distance is invalid
             }
-            let score; /* [cite: 97] */
-            if (distance <= FIVE_K_THRESHOLD_METERS) { /* [cite: 98] */
-                score = MAX_SCORE; /* [cite: 98] */
+            let score;
+            if (distance <= FIVE_K_THRESHOLD_METERS) {
+                score = MAX_SCORE;
             } else {
-                const decayFactor = 2000000; /* Adjust based on desired scoring curve */ /* [cite: 99] */
-                score = MAX_SCORE * Math.exp(-distance / decayFactor); /* [cite: 100] */
-                score = Math.max(0, Math.round(score)); /* [cite: 101] */
+                const decayFactor = 2000000; // Adjust based on desired scoring curve
+                score = MAX_SCORE * Math.exp(-distance / decayFactor);
+                score = Math.max(0, Math.round(score));
             }
-            return { distance: distance, score: score }; /* [cite: 101] */
+            return { distance: distance, score: score };
         }
 
-        function updateGuessPinPosition() { /* [cite: 102] */
-            if (!overlayMap || !userGuessLngLat || !guessPinElement) return; /* [cite: 102] */
-            if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number') { /* [cite: 103] */
-                console.error("Invalid userGuessLngLat object for positioning:", userGuessLngLat); /* [cite: 103] */
-                return; /* [cite: 104] */
+        function updateGuessPinPosition() {
+            if (!overlayMap || !userGuessLngLat || !guessPinElement) return;
+            if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number') {
+                console.error("Invalid userGuessLngLat object for positioning:", userGuessLngLat);
+                return;
             }
-            const pixelCoords = overlayMap.project(userGuessLngLat); /* [cite: 104] */
-            guessPinElement.style.left = `${pixelCoords.x}px`; /* [cite: 105] */
-            guessPinElement.style.top = `${pixelCoords.y}px`; /* [cite: 106] */
-            guessPinElement.style.display = 'block'; /* [cite: 106] */
+            const pixelCoords = overlayMap.project(userGuessLngLat);
+            guessPinElement.style.left = `${pixelCoords.x}px`;
+            guessPinElement.style.top = `${pixelCoords.y}px`;
+            guessPinElement.style.display = 'block';
         }
 
-        function updateRealLocationPinPosition() { /* [cite: 107] */
-            if (!overlayMap || !currentLocationCoords || !realLocationPinElement) return; /* [cite: 107] */
-            if (!(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') { /* [cite: 108] */
-                console.error("Invalid currentLocationCoords object for positioning:", currentLocationCoords); /* [cite: 108] */
-                return; /* [cite: 109] */
+        function updateRealLocationPinPosition() {
+            if (!overlayMap || !currentLocationCoords || !realLocationPinElement) return;
+            if (!(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') {
+                console.error("Invalid currentLocationCoords object for positioning:", currentLocationCoords);
+                return;
             }
-            const pixelCoords = overlayMap.project(currentLocationCoords); /* [cite: 109] */
-            realLocationPinElement.style.left = `${pixelCoords.x}px`; /* [cite: 110] */
-            realLocationPinElement.style.top = `${pixelCoords.y}px`; /* [cite: 111] */
-            realLocationPinElement.style.display = 'block'; /* [cite: 111] */
+            const pixelCoords = overlayMap.project(currentLocationCoords);
+            realLocationPinElement.style.left = `${pixelCoords.x}px`;
+            realLocationPinElement.style.top = `${pixelCoords.y}px`;
+            realLocationPinElement.style.display = 'block';
         }
         
-        function placeCustomGuessPinOnOverlay(lngLat) { /* [cite: 112] */
-            console.log('Attempting to place custom guess pin at LngLat:', lngLat); /* [cite: 112] */
-            userGuessLngLat = lngLat; /* [cite: 113] */
-            if (guessPinElement) { /* [cite: 114] */
-                console.log('Removing existing custom guess pin element.'); /* [cite: 114] */
-                guessPinElement.remove(); /* [cite: 115] */
+        function placeCustomGuessPinOnOverlay(lngLat) {
+            console.log('Attempting to place custom guess pin at LngLat:', lngLat);
+            userGuessLngLat = lngLat;
+            if (guessPinElement) {
+                console.log('Removing existing custom guess pin element.');
+                guessPinElement.remove();
             }
-            guessPinElement = document.createElement('div'); /* [cite: 115] */
-            guessPinElement.className = 'guess-pin'; /* [cite: 116] */
-            overlayMap.getCanvasContainer().appendChild(guessPinElement); /* [cite: 117] */
-            console.log('New custom guess pin element created:', guessPinElement); /* [cite: 117] */
-            updateGuessPinPosition(); /* [cite: 118] */
-            document.getElementById('guessed-coords').textContent = `Guessed Location: Lng: ${lngLat.lng.toFixed(6)}, Lat: ${lngLat.lat.toFixed(6)}`; /* [cite: 118] */
-            document.getElementById('submit-status').textContent = 'Guess placed. Click Submit!'; /* [cite: 119] */
-            overlayMap.off('move', updateGuessPinPosition); /* [cite: 119] */
-            overlayMap.on('move', updateGuessPinPosition); /* [cite: 120] */
-            console.log("Guess pin placed and move listener added. userGuessLngLat:", userGuessLngLat); /* [cite: 120] */
+            guessPinElement = document.createElement('div');
+            guessPinElement.className = 'guess-pin';
+            overlayMap.getCanvasContainer().appendChild(guessPinElement);
+            console.log('New custom guess pin element created:', guessPinElement);
+            updateGuessPinPosition();
+            document.getElementById('guessed-coords').textContent = `Guessed Location: Lng: ${lngLat.lng.toFixed(6)}, Lat: ${lngLat.lat.toFixed(6)}`;
+            document.getElementById('submit-status').textContent = 'Guess placed. Click Submit!';
+            overlayMap.off('move', updateGuessPinPosition); // Remove previous to avoid duplicates
+            overlayMap.on('move', updateGuessPinPosition);
+            console.log("Guess pin placed and move listener added. userGuessLngLat:", userGuessLngLat);
         }
 
-        function placeCustomRealLocationPinOnOverlay(lngLat) { /* [cite: 121] */
-            console.log('Attempting to place custom real location pin at LngLat:', lngLat); /* [cite: 121] */
-            if (realLocationPinElement) { /* [cite: 122] */
-                console.log('Removing existing custom real location pin element.'); /* [cite: 122] */
-                realLocationPinElement.remove(); /* [cite: 123] */
+        function placeCustomRealLocationPinOnOverlay(lngLat) {
+            console.log('Attempting to place custom real location pin at LngLat:', lngLat);
+            if (realLocationPinElement) {
+                console.log('Removing existing custom real location pin element.');
+                realLocationPinElement.remove();
             }
-            realLocationPinElement = document.createElement('div'); /* [cite: 123] */
-            realLocationPinElement.className = 'real-location-pin'; /* [cite: 124] */
-            overlayMap.getCanvasContainer().appendChild(realLocationPinElement); /* [cite: 124] */
-            console.log('New custom real location pin element created:', realLocationPinElement); /* [cite: 125] */
-            updateRealLocationPinPosition(); /* [cite: 125] */
-            overlayMap.off('move', updateRealLocationPinPosition); /* [cite: 126] */
-            overlayMap.on('move', updateRealLocationPinPosition); /* [cite: 127] */
-            console.log("Real location pin placed and move listener added. currentLocationCoords:", currentLocationCoords); /* [cite: 127] */
+            realLocationPinElement = document.createElement('div');
+            realLocationPinElement.className = 'real-location-pin';
+            overlayMap.getCanvasContainer().appendChild(realLocationPinElement);
+            console.log('New custom real location pin element created:', realLocationPinElement);
+            updateRealLocationPinPosition();
+            overlayMap.off('move', updateRealLocationPinPosition); // Remove previous to avoid duplicates
+            overlayMap.on('move', updateRealLocationPinPosition);
+            console.log("Real location pin placed and move listener added. currentLocationCoords:", currentLocationCoords);
         }
         
-        function updateLineBetweenPins() { /* [cite: 128] */
-            if (!lineLayerVisible || !overlayMap || !userGuessLngLat || !currentLocationCoords) return; /* [cite: 128] */
+        function updateLineBetweenPins() {
+            if (!lineLayerVisible || !overlayMap || !userGuessLngLat || !currentLocationCoords) return;
             if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number' ||
-                !(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') { /* [cite: 129] */
-                console.error("Invalid LngLat objects for drawing line:", userGuessLngLat, currentLocationCoords); /* [cite: 129] */
-                return; /* [cite: 130] */
+                !(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') {
+                console.error("Invalid LngLat objects for drawing line:", userGuessLngLat, currentLocationCoords);
+                return;
             }
-            const lineGeoJSON = { /* [cite: 130] */
+            const lineGeoJSON = {
                 'type': 'Feature',
-                'geometry': { 'type': 'LineString', 'coordinates': [ [userGuessLngLat.lng, userGuessLngLat.lat], [currentLocationCoords.lng, currentLocationCoords.lat] ] } /* [cite: 131] */
+                'geometry': { 'type': 'LineString', 'coordinates': [ [userGuessLngLat.lng, userGuessLngLat.lat], [currentLocationCoords.lng, currentLocationCoords.lat] ] }
             };
-            if (overlayMap.getSource('line-source')) { /* [cite: 132] */
-                overlayMap.getSource('line-source').setData(lineGeoJSON); /* [cite: 132] */
+            if (overlayMap.getSource('line-source')) {
+                overlayMap.getSource('line-source').setData(lineGeoJSON);
             }
         }
 
-        async function findRandomCityAndSpot(attempt = 1) { /* [cite: 133] */
-            const locationText = document.getElementById('location-text'); /* [cite: 133] */
-            const newLocationBtn = document.getElementById('new-location'); /* [cite: 134] */
-            const submitGuessBtn = document.getElementById('submit-guess'); /* [cite: 134] */
+        async function findRandomCityAndSpot(attempt = 1) {
+            const locationText = document.getElementById('location-text');
+            const newLocationBtn = document.getElementById('new-location');
+            const submitGuessBtn = document.getElementById('submit-guess');
 
-            locationText.textContent = 'Finding a new location...'; /* [cite: 134] */
-            document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map...'; /* [cite: 135] */
-            document.getElementById('submit-status').textContent = 'Place your guess on the overlay map...'; /* [cite: 135] */
-            document.getElementById('points-score').textContent = 'Points: - | Total: ' + totalScore + ' points'; /* [cite: 136] */
-            document.getElementById('round-score-display').style.display = 'none'; /* [cite: 137] */
-            document.getElementById('total-score-display').style.display = 'none'; /* [cite: 138] */
+            locationText.textContent = 'Finding a new location...';
+            document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map...';
+            document.getElementById('submit-status').textContent = 'Place your guess on the overlay map...';
+            document.getElementById('points-score').textContent = 'Points: - | Total: ' + totalScore + ' points';
+            document.getElementById('round-score-display').style.display = 'none';
+            document.getElementById('total-score-display').style.display = 'none';
 
-            if (currentMarker) { currentMarker.remove(); currentMarker = null; } /* [cite: 138] */
-            if (guessPinElement) { /* [cite: 139] */
-                guessPinElement.remove(); guessPinElement = null; /* [cite: 139] */
-                userGuessLngLat = null; /* [cite: 140] */
-                if(overlayMap) overlayMap.off('move', updateGuessPinPosition); /* [cite: 140] */
-                console.log("Custom guess pin element and move listener removed."); /* [cite: 141] */
+            if (currentMarker) { currentMarker.remove(); currentMarker = null; }
+            if (guessPinElement) {
+                guessPinElement.remove(); guessPinElement = null;
+                userGuessLngLat = null;
+                if(overlayMap) overlayMap.off('move', updateGuessPinPosition);
+                console.log("Custom guess pin element and move listener removed.");
             }
-            if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; if(overlayMap) overlayMap.off('move', updateRealLocationPinPosition); } /* [cite: 141] */
-            currentLocationCoords = null; /* [cite: 142] */
+            if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; if(overlayMap) overlayMap.off('move', updateRealLocationPinPosition); }
+            currentLocationCoords = null;
 
-            if (overlayMap && overlayMap.getLayer('line-layer')) { /* [cite: 143] */
-                overlayMap.setLayoutProperty('line-layer', 'visibility', 'none'); /* [cite: 143] */
-                lineLayerVisible = false; /* [cite: 144] */
+            if (overlayMap && overlayMap.getLayer('line-layer')) {
+                overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
+                lineLayerVisible = false;
             }
 
-            const existingNextButton = document.getElementById('next-round-btn'); /* [cite: 144] */
-            if (existingNextButton) existingNextButton.remove(); /* [cite: 145] */
+            const existingNextButton = document.getElementById('next-round-btn');
+            if (existingNextButton) existingNextButton.remove();
 
-            submitGuessBtn.disabled = false; /* [cite: 146] */
-            newLocationBtn.disabled = false; /* [cite: 147] */
+            submitGuessBtn.disabled = false;
+            newLocationBtn.disabled = false;
 
-            const MAX_LOCATION_RETRIES = 10; /* [cite: 148] */
-            if (attempt > MAX_LOCATION_RETRIES) { /* [cite: 149] */
-                locationText.textContent = `Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts. Please check the console for errors.`; /* [cite: 149] */
-                console.error(`Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts.`); /* [cite: 150] */
-                return; /* [cite: 150] */
+            const MAX_LOCATION_RETRIES = 10;
+            if (attempt > MAX_LOCATION_RETRIES) {
+                locationText.textContent = `Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts. Please check the console for errors.`;
+                console.error(`Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts.`);
+                return;
             }
-            console.log(`Attempting to find random city (Attempt ${attempt}/${MAX_LOCATION_RETRIES})...`); /* [cite: 151] */
-            locationText.textContent = `Finding a random city (Attempt ${attempt})...`; /* [cite: 152] */
+            console.log(`Attempting to find random city (Attempt ${attempt}/${MAX_LOCATION_RETRIES})...`);
+            locationText.textContent = `Finding a random city (Attempt ${attempt})...`;
 
             try {
-                const cityResponse = await fetch(randomCityApiUrl); /* [cite: 152] */
-                if (!cityResponse.ok) throw new Error(`HTTP error fetching random city: ${cityResponse.status}`); /* [cite: 153] */
-                const cityData = await cityResponse.json(); /* [cite: 154] */
-                const cityName = cityData.city; /* [cite: 155] */
-                if (!cityName) { /* [cite: 155] */
-                    console.warn(`Random City API returned no city name (Attempt ${attempt}). Retrying...`); /* [cite: 155] */
-                    findRandomCityAndSpot(attempt + 1); /* [cite: 156] */
-                    return; /* [cite: 157] */
+                const cityResponse = await fetch(randomCityApiUrl);
+                if (!cityResponse.ok) throw new Error(`HTTP error fetching random city: ${cityResponse.status}`);
+                const cityData = await cityResponse.json();
+                const cityName = cityData.city;
+                if (!cityName) {
+                    console.warn(`Random City API returned no city name (Attempt ${attempt}). Retrying...`);
+                    findRandomCityAndSpot(attempt + 1);
+                    return;
                 }
-                console.log(`Successfully fetched city: ${cityName}. Finding geocoding data...`); /* [cite: 157] */
-                locationText.textContent = `Finding a random spot in ${cityName}...`; /* [cite: 158] */
+                console.log(`Successfully fetched city: ${cityName}. Finding geocoding data...`);
+                locationText.textContent = `Finding a random spot in ${cityName}...`;
 
-                const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`; /* [cite: 158] */
-                const geocodingResponse = await fetch(geocodingUrl); /* [cite: 159] */
-                if (!geocodingResponse.ok) { /* [cite: 159] */
-                    console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}): ${geocodingResponse.status}. Retrying...`); /* [cite: 159] */
-                    findRandomCityAndSpot(attempt + 1); /* [cite: 160] */
-                    return; /* [cite: 160] */
+                const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`;
+                const geocodingResponse = await fetch(geocodingUrl);
+                if (!geocodingResponse.ok) {
+                    console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}): ${geocodingResponse.status}. Retrying...`);
+                    findRandomCityAndSpot(attempt + 1);
+                    return;
                 }
-                const geocodingData = await geocodingResponse.json(); /* [cite: 160] */
-                if (geocodingData && geocodingData.features && geocodingData.features.length > 0) { /* [cite: 161] */
-                    const feature = geocodingData.features[0]; /* [cite: 161] */
-                    const bounds = feature.bbox; /* [cite: 162] */
-                    const center = feature.center; /* [cite: 162] */
-                    let randomLngLatArray; /* [cite: 163] */
-                    if (bounds) { /* [cite: 164] */
-                        randomLngLatArray = getRandomCoordinateInBounds(bounds); /* [cite: 164] */
-                        console.log("Using bounds to find random coordinate array:", randomLngLatArray); /* [cite: 165] */
-                    } else if (center) { /* [cite: 165] */
-                        const randomLng = center[0] + (Math.random() - 0.5) * 0.02; /* [cite: 166] */
-                        const randomLat = center[1] + (Math.random() - 0.5) * 0.02; /* [cite: 166] */
-                        randomLngLatArray = [randomLng, randomLat]; /* [cite: 167] */
-                        console.log("Using center with offset to find random coordinate array:", randomLngLatArray); /* [cite: 168] */
+                const geocodingData = await geocodingResponse.json();
+                if (geocodingData && geocodingData.features && geocodingData.features.length > 0) {
+                    const feature = geocodingData.features[0];
+                    const bounds = feature.bbox;
+                    const center = feature.center;
+                    let randomLngLatArray;
+                    if (bounds) {
+                        randomLngLatArray = getRandomCoordinateInBounds(bounds);
+                        console.log("Using bounds to find random coordinate array:", randomLngLatArray);
+                    } else if (center) {
+                        const randomLng = center[0] + (Math.random() - 0.5) * 0.02;
+                        const randomLat = center[1] + (Math.random() - 0.5) * 0.02;
+                        randomLngLatArray = [randomLng, randomLat];
+                        console.log("Using center with offset to find random coordinate array:", randomLngLatArray);
                     } else {
-                        console.warn(`MapTiler Geocoding could not find detailed location data for "${cityName}" (Attempt ${attempt}). Retrying...`); /* [cite: 169] */
-                        findRandomCityAndSpot(attempt + 1); /* [cite: 170] */
-                        return; /* [cite: 170] */
+                        console.warn(`MapTiler Geocoding could not find detailed location data for "${cityName}" (Attempt ${attempt}). Retrying...`);
+                        findRandomCityAndSpot(attempt + 1);
+                        return;
                     }
-                    console.log("Setting main map view to:", randomLngLatArray, "at zoom", zoomLevel); /* [cite: 171] */
-                    if (mainMap) { /* [cite: 172] */
-                        mainMap.jumpTo({ center: randomLngLatArray, zoom: zoomLevel, essential: true }); /* [cite: 172, 173, 174] */
+                    console.log("Setting main map view to:", randomLngLatArray, "at zoom", zoomLevel);
+                    if (mainMap) {
+                        mainMap.jumpTo({ center: randomLngLatArray, zoom: zoomLevel, essential: true });
                     } else {
-                        console.error("mainMap not initialized when trying to jumpTo."); /* [cite: 175] */
+                        console.error("mainMap not initialized when trying to jumpTo.");
                     }
-                    document.getElementById('location-text').textContent = `Location: A random spot in ${feature.place_name || cityName}`; /* [cite: 176] */
-                    addOrUpdateMarker(randomLngLatArray); /* [cite: 177] */
-                    console.log("New location setup complete via API. currentLocationCoords:", currentLocationCoords); /* [cite: 178] */
+                    document.getElementById('location-text').textContent = `Location: A random spot in ${feature.place_name || cityName}`;
+                    addOrUpdateMarker(randomLngLatArray);
+                    console.log("New location setup complete via API. currentLocationCoords:", currentLocationCoords);
                 } else {
-                    console.warn(`MapTiler Geocoding could not find the location for "${cityName}" (Attempt ${attempt}). Retrying...`); /* [cite: 178] */
-                    findRandomCityAndSpot(attempt + 1); /* [cite: 179] */
+                    console.warn(`MapTiler Geocoding could not find the location for "${cityName}" (Attempt ${attempt}). Retrying...`);
+                    findRandomCityAndSpot(attempt + 1);
                 }
             } catch (error) {
-                console.error(`Error during API call (Attempt ${attempt}):`, error); /* [cite: 179] */
-                locationText.textContent = `An error occurred fetching location: ${error.message}. Retrying...`; /* [cite: 180] */
-                findRandomCityAndSpot(attempt + 1); /* [cite: 180] */
+                console.error(`Error during API call (Attempt ${attempt}):`, error);
+                locationText.textContent = `An error occurred fetching location: ${error.message}. Retrying...`;
+                findRandomCityAndSpot(attempt + 1);
             }
         }
         
@@ -745,203 +746,203 @@
         function initializeGame() {
             if (mainMap) return; // Ensure this runs only once
 
-            const newLocationBtn = document.getElementById('new-location'); /* [cite: 181] */
-            const submitGuessBtn = document.getElementById('submit-guess'); /* [cite: 181] */
-            const roundScoreDisplay = document.getElementById('round-score-display'); /* [cite: 181] */
-            const totalScoreDisplay = document.getElementById('total-score-display'); /* [cite: 182] */
+            const newLocationBtn = document.getElementById('new-location');
+            const submitGuessBtn = document.getElementById('submit-guess');
+            const roundScoreDisplay = document.getElementById('round-score-display');
+            const totalScoreDisplay = document.getElementById('total-score-display');
 
-            mainMap = new maptilersdk.Map({ /* [cite: 182] */
-                container: 'maptiler-map', /* [cite: 182] */
-                style: customStyleUrl, /* [cite: 182] */
-                center: [0, 0], /* [cite: 182] */
-                zoom: 1, /* [cite: 183] */
-                interactive: false /* [cite: 183] */
+            mainMap = new maptilersdk.Map({
+                container: 'maptiler-map',
+                style: customStyleUrl,
+                center: [0, 0],
+                zoom: 1,
+                interactive: false
             });
 
-            overlayMap = new maptilersdk.Map({ /* [cite: 183] */
-                container: 'overlay-map', /* [cite: 184] */
-                style: overlayStyleUrl, /* [cite: 184] */
-                center: initialCenter, /* [cite: 184] */
-                zoom: initialZoom, /* [cite: 184] */
-                interactive: true /* [cite: 185] */
+            overlayMap = new maptilersdk.Map({
+                container: 'overlay-map',
+                style: overlayStyleUrl,
+                center: initialCenter,
+                zoom: initialZoom,
+                interactive: true
             });
             
-            mainMap.on('error', (e) => { /* [cite: 185] */
-                console.error('Main map loading error:', e.error); /* [cite: 186] */
-                document.getElementById('location-text').textContent = "Error loading main map. Check console."; /* [cite: 186] */
+            mainMap.on('error', (e) => {
+                console.error('Main map loading error:', e.error);
+                document.getElementById('location-text').textContent = "Error loading main map. Check console.";
             });
-            overlayMap.on('error', (e) => { /* [cite: 186] */
-                console.error('Overlay map loading error:', e.error); /* [cite: 187] */
-                document.getElementById('guessed-coords').textContent = "Error loading overlay map. Check console."; /* [cite: 187] */
-            });
-
-            mainMap.on('style.load', () => { /* [cite: 188] */
-                console.log('Main map style loaded.'); /* [cite: 188] */
-                findRandomCityAndSpot(); /* [cite: 188] */
-                try { /* [cite: 188] */
-                    mainMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove()); /* [cite: 189] */
-                } catch (e) { console.warn("Could not remove controls programmatically for main map:", e); } /* [cite: 189] */
+            overlayMap.on('error', (e) => {
+                console.error('Overlay map loading error:', e.error);
+                document.getElementById('guessed-coords').textContent = "Error loading overlay map. Check console.";
             });
 
-            overlayMap.on('style.load', () => { /* [cite: 190] */
-                console.log('Overlay map style loaded.'); /* [cite: 191] */
-                try { /* [cite: 191] */
-                    overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove()); /* [cite: 192] */
-                } catch (e) { console.warn("Could not remove controls programmatically for overlay map:", e); } /* [cite: 192] */
+            mainMap.on('style.load', () => {
+                console.log('Main map style loaded.');
+                findRandomCityAndSpot();
+                try {
+                    mainMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
+                } catch (e) { console.warn("Could not remove controls programmatically for main map:", e); }
+            });
 
-                overlayMap.addSource('line-source', { /* [cite: 192] */
-                    'type': 'geojson', /* [cite: 193] */
-                    'data': { 'type': 'Feature', 'geometry': { 'type': 'LineString', 'coordinates': [] } } /* [cite: 193, 194] */
-                }); /* [cite: 195] */
-                overlayMap.addLayer({ /* [cite: 195] */
-                    'id': 'line-layer', 'type': 'line', 'source': 'line-source', /* [cite: 195, 196] */
-                    'layout': { 'line-join': 'round', 'line-cap': 'round', 'visibility': 'none' }, /* [cite: 196, 197] */
-                    'paint': { 'line-color': '#000', 'line-width': 2, 'line-dasharray': [0.5, 2] } /* [cite: 197, 198] */
-                }); /* [cite: 198] */
-                overlayMap.on('move', updateLineBetweenPins); /* [cite: 199] */
-            }); /* [cite: 200] */
+            overlayMap.on('style.load', () => {
+                console.log('Overlay map style loaded.');
+                try {
+                    overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
+                } catch (e) { console.warn("Could not remove controls programmatically for overlay map:", e); }
 
-            overlayMap.on('click', (e) => { /* [cite: 200] */
-                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) { /* [cite: 200] */
-                    const clickedLngLat = e.lngLat; /* [cite: 200] */
-                    console.log('Overlay map left-clicked at:', clickedLngLat); /* [cite: 201] */
-                    placeCustomGuessPinOnOverlay(clickedLngLat); /* [cite: 201] */
+                overlayMap.addSource('line-source', {
+                    'type': 'geojson',
+                    'data': { 'type': 'Feature', 'geometry': { 'type': 'LineString', 'coordinates': [] } }
+                });
+                overlayMap.addLayer({
+                    'id': 'line-layer', 'type': 'line', 'source': 'line-source',
+                    'layout': { 'line-join': 'round', 'line-cap': 'round', 'visibility': 'none' },
+                    'paint': { 'line-color': '#000', 'line-width': 2, 'line-dasharray': [0.5, 2] }
+                });
+                overlayMap.on('move', updateLineBetweenPins);
+            });
+
+            overlayMap.on('click', (e) => {
+                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
+                    const clickedLngLat = e.lngLat;
+                    console.log('Overlay map left-clicked at:', clickedLngLat);
+                    placeCustomGuessPinOnOverlay(clickedLngLat);
                 }
-            }); /* [cite: 201] */
-            overlayMap.on('contextmenu', (e) => { /* [cite: 202] */
-                e.preventDefault(); /* [cite: 202] */
-                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) { /* [cite: 202] */
-                    const clickedLngLat = e.lngLat; /* [cite: 203] */
-                    console.log('Overlay map right-clicked at:', clickedLngLat); /* [cite: 203] */
-                    placeCustomGuessPinOnOverlay(clickedLngLat); /* [cite: 203] */
+            });
+            overlayMap.on('contextmenu', (e) => {
+                e.preventDefault();
+                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
+                    const clickedLngLat = e.lngLat;
+                    console.log('Overlay map right-clicked at:', clickedLngLat);
+                    placeCustomGuessPinOnOverlay(clickedLngLat);
                 }
-            }); /* [cite: 204] */
+            });
             
-            const overlayMapElement = document.getElementById('overlay-map'); /* [cite: 204] */
-            overlayMapElement.addEventListener('transitionend', () => { /* [cite: 205] */
-                console.log('Overlay map container transition ended. Resizing map.'); /* [cite: 205] */
-                if (overlayMap) { /* [cite: 205] */
-                    overlayMap.resize(); /* [cite: 205] */
-                    if (guessPinElement && userGuessLngLat) updateGuessPinPosition(); /* [cite: 206] */
-                    if (realLocationPinElement && currentLocationCoords) updateRealLocationPinPosition(); /* [cite: 206] */
-                    updateLineBetweenPins(); /* [cite: 207] */
+            const overlayMapElement = document.getElementById('overlay-map');
+            overlayMapElement.addEventListener('transitionend', () => {
+                console.log('Overlay map container transition ended. Resizing map.');
+                if (overlayMap) {
+                    overlayMap.resize();
+                    if (guessPinElement && userGuessLngLat) updateGuessPinPosition();
+                    if (realLocationPinElement && currentLocationCoords) updateRealLocationPinPosition();
+                    updateLineBetweenPins();
                 }
-            }); /* [cite: 208] */
+            });
 
-            newLocationBtn.addEventListener('click', findRandomCityAndSpot); /* [cite: 209] */
+            newLocationBtn.addEventListener('click', findRandomCityAndSpot);
             
-            submitGuessBtn.addEventListener('click', function handleSubmitGuess() { /* [cite: 210] */
-                console.log("Submit button clicked."); /* [cite: 210] */
-                if (!userGuessLngLat || !(userGuessLngLat instanceof maptilersdk.LngLat)) { /* [cite: 210] */
-                    document.getElementById('submit-status').textContent = 'Please make a guess by clicking or right-clicking on the map.'; /* [cite: 211] */
-                    console.warn("Submit clicked without a valid guess location."); /* [cite: 211] */
-                    return; /* [cite: 211] */
+            submitGuessBtn.addEventListener('click', function handleSubmitGuess() {
+                console.log("Submit button clicked.");
+                if (!userGuessLngLat || !(userGuessLngLat instanceof maptilersdk.LngLat)) {
+                    document.getElementById('submit-status').textContent = 'Please make a guess by clicking or right-clicking on the map.';
+                    console.warn("Submit clicked without a valid guess location.");
+                    return;
                 }
-                if (!currentLocationCoords || !(currentLocationCoords instanceof maptilersdk.LngLat)) { /* [cite: 212] */
-                    document.getElementById('submit-status').textContent = 'Error: No location set for scoring.'; /* [cite: 212] */
-                    console.error('Error: Submit clicked but currentLocationCoords is null or not a LngLat object.'); /* [cite: 213] */
-                    return; /* [cite: 214] */
+                if (!currentLocationCoords || !(currentLocationCoords instanceof maptilersdk.LngLat)) {
+                    document.getElementById('submit-status').textContent = 'Error: No location set for scoring.';
+                    console.error('Error: Submit clicked but currentLocationCoords is null or not a LngLat object.');
+                    return;
                 }
-                const guessedLngLat = userGuessLngLat; /* [cite: 214] */
-                const actualLngLat = currentLocationCoords; /* [cite: 215] */
-                console.log("Actual LngLat for scoring:", actualLngLat); /* [cite: 216] */
-                console.log("Guessed LngLat for scoring:", guessedLngLat); /* [cite: 216] */
-                console.log("Checking actualLngLat.lat:", actualLngLat.lat, "Type:", typeof actualLngLat.lat); /* [cite: 217] */
-                console.log("Checking actualLngLat.lng:", actualLngLat.lng, "Type:", typeof actualLngLat.lng); /* [cite: 218] */
-                console.log("Checking guessedLngLat.lat:", guessedLngLat.lat, "Type:", typeof guessedLngLat.lat); /* [cite: 218] */
-                console.log("Checking guessedLngLat.lng:", guessedLngLat.lng, "Type:", typeof guessedLngLat.lng); /* [cite: 218] */
-                if (typeof actualLngLat.lat !== 'number' || typeof actualLngLat.lng !== 'number' || typeof guessedLngLat.lat !== 'number' || typeof guessedLngLat.lng !== 'number') { /* [cite: 219] */
-                    console.error("Score Calculation Error: One or more coordinate values are not numbers.", {actual: actualLngLat, guessed: guessedLngLat}); /* [cite: 219] */
-                    document.getElementById('submit-status').textContent = 'Error: Cannot calculate score due to invalid coordinate data.'; /* [cite: 220] */
-                    return; /* [cite: 220] */
+                const guessedLngLat = userGuessLngLat;
+                const actualLngLat = currentLocationCoords;
+                console.log("Actual LngLat for scoring:", actualLngLat);
+                console.log("Guessed LngLat for scoring:", guessedLngLat);
+                if (typeof actualLngLat.lat !== 'number' || typeof actualLngLat.lng !== 'number' || typeof guessedLngLat.lat !== 'number' || typeof guessedLngLat.lng !== 'number') {
+                    console.error("Score Calculation Error: One or more coordinate values are not numbers.", {actual: actualLngLat, guessed: guessedLngLat});
+                    document.getElementById('submit-status').textContent = 'Error: Cannot calculate score due to invalid coordinate data.';
+                    return;
                 }
-                const scoreResult = calculateGeoGuessrScore(actualLngLat.lat, actualLngLat.lng, guessedLngLat.lat, guessedLngLat.lng); /* [cite: 221, 222] */
-                console.log("Score Calculation Result:", scoreResult); /* [cite: 223] */
-                if (isNaN(scoreResult.score) || isNaN(scoreResult.distance)) { /* [cite: 223] */
-                    console.error("Score calculation returned NaN.", scoreResult); /* [cite: 224] */
-                    document.getElementById('submit-status').textContent = 'Error: Score calculation failed.'; /* [cite: 225] */
-                    return; /* [cite: 225] */
+                const scoreResult = calculateGeoGuessrScore(actualLngLat.lat, actualLngLat.lng, guessedLngLat.lat, guessedLngLat.lng);
+                console.log("Score Calculation Result:", scoreResult);
+                if (isNaN(scoreResult.score) || isNaN(scoreResult.distance)) {
+                    console.error("Score calculation returned NaN.", scoreResult);
+                    document.getElementById('submit-status').textContent = 'Error: Score calculation failed.';
+                    return;
                 }
-                totalScore += scoreResult.score; /* [cite: 225] */
-                document.getElementById('points-score').textContent = `Round Score: ${scoreResult.score} points (${(scoreResult.distance/1000).toFixed(2)} km) | Total Score: ${totalScore} points`; /* [cite: 226, 227] */
-                document.getElementById('submit-status').textContent = `Guess submitted! You were ${(scoreResult.distance/1000).toFixed(2)} km away.`; /* [cite: 227] */
-                if (currentMarker && currentMarker.getElement()) { /* [cite: 228] */
-                    currentMarker.getElement().style.display = 'block'; /* [cite: 228] */
-                    console.log("Showing actual location marker on main map."); /* [cite: 229] */
-                } else { console.warn("Could not find currentMarker element to show."); } /* [cite: 229] */
+                totalScore += scoreResult.score;
+                document.getElementById('points-score').textContent = `Round Score: ${scoreResult.score} points (${(scoreResult.distance/1000).toFixed(2)} km) | Total Score: ${totalScore} points`;
+                document.getElementById('submit-status').textContent = `Guess submitted! You were ${(scoreResult.distance/1000).toFixed(2)} km away.`;
+                if (currentMarker && currentMarker.getElement()) {
+                    currentMarker.getElement().style.display = 'block';
+                    console.log("Showing actual location marker on main map.");
+                } else { console.warn("Could not find currentMarker element to show."); }
 
-                const overlayMapElem = document.getElementById('overlay-map'); /* [cite: 230] */
-                overlayMapElem.classList.add('overlay-map-fullscreen'); /* [cite: 231] */
-                overlayMap.resize(); /* [cite: 231] */
-                const bounds = new maptilersdk.LngLatBounds(); /* [cite: 232] */
-                bounds.extend(guessedLngLat); /* [cite: 233] */
-                bounds.extend(actualLngLat); /* [cite: 233] */
-                setTimeout(() => { /* [cite: 234] */
-                    overlayMap.fitBounds(bounds, { padding: 50, duration: 1000, essential: true }); /* [cite: 234, 235] */
-                }, 300); /* [cite: 236] */
+                const overlayMapElem = document.getElementById('overlay-map');
+                overlayMapElem.classList.add('overlay-map-fullscreen');
+                overlayMap.resize();
+                const bounds = new maptilersdk.LngLatBounds();
+                bounds.extend(guessedLngLat);
+                bounds.extend(actualLngLat);
+                setTimeout(() => {
+                    overlayMap.fitBounds(bounds, { padding: 50, duration: 1000, essential: true });
+                }, 300);
 
-                placeCustomRealLocationPinOnOverlay(actualLngLat); /* [cite: 236] */
-                updateLineBetweenPins(); /* [cite: 237] */
-                if (overlayMap.getLayer('line-layer')) { /* [cite: 238] */
-                    overlayMap.setLayoutProperty('line-layer', 'visibility', 'visible'); /* [cite: 238] */
-                    lineLayerVisible = true; /* [cite: 239] */
+                placeCustomRealLocationPinOnOverlay(actualLngLat);
+                updateLineBetweenPins();
+                if (overlayMap.getLayer('line-layer')) {
+                    overlayMap.setLayoutProperty('line-layer', 'visibility', 'visible');
+                    lineLayerVisible = true;
                 }
 
-                roundScoreDisplay.textContent = `Round Score: ${scoreResult.score} points`; /* [cite: 239] */
-                totalScoreDisplay.textContent = `Total Score: ${totalScore} points`; /* [cite: 240] */
-                roundScoreDisplay.style.display = 'block'; /* [cite: 240] */
-                totalScoreDisplay.style.display = 'block'; /* [cite: 240] */
+                roundScoreDisplay.textContent = `Round Score: ${scoreResult.score} points`;
+                totalScoreDisplay.textContent = `Total Score: ${totalScore} points`;
+                roundScoreDisplay.style.display = 'block';
+                totalScoreDisplay.style.display = 'block';
 
-                let nextButton = document.getElementById('next-round-btn'); /* [cite: 241] */
-                if (!nextButton) { /* [cite: 242] */
-                    nextButton = document.createElement('button'); /* [cite: 242] */
-                    nextButton.textContent = 'Next Round'; /* [cite: 243] */
-                    nextButton.id = 'next-round-btn'; /* [cite: 243] */
-                    const mapsContainer = document.querySelector('.maps-container'); /* [cite: 243] */
-                    mapsContainer.appendChild(nextButton); /* [cite: 244] */
-                    nextButton.addEventListener('click', () => { /* [cite: 244] */
-                        overlayMapElem.classList.remove('overlay-map-fullscreen'); /* [cite: 244] */
-                        overlayMap.flyTo({ center: initialCenter, zoom: initialZoom, essential: true, duration: 500 }); /* [cite: 244, 245, 246] */
-                        if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; } /* [cite: 246] */
-                        if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; } /* [cite: 248, 249] */
-                        userGuessLngLat = null; /* [cite: 249] */
-                        if (overlayMap.getLayer('line-layer')) { /* [cite: 251] */
-                            overlayMap.setLayoutProperty('line-layer', 'visibility', 'none'); /* [cite: 251] */
-                            lineLayerVisible = false; /* [cite: 252] */
+                let nextButton = document.getElementById('next-round-btn');
+                if (!nextButton) {
+                    nextButton = document.createElement('button');
+                    nextButton.textContent = 'Next Round';
+                    nextButton.id = 'next-round-btn';
+                    const mapsContainer = document.querySelector('.maps-container');
+                    mapsContainer.appendChild(nextButton);
+                    nextButton.addEventListener('click', () => {
+                        overlayMapElem.classList.remove('overlay-map-fullscreen');
+                        overlayMap.flyTo({ center: initialCenter, zoom: initialZoom, essential: true, duration: 500 });
+                        if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; }
+                        if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; }
+                        userGuessLngLat = null;
+                        if (overlayMap.getLayer('line-layer')) {
+                            overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
+                            lineLayerVisible = false;
                         }
-                        roundScoreDisplay.style.display = 'none'; /* [cite: 252] */
-                        totalScoreDisplay.style.display = 'none'; /* [cite: 253] */
-                        nextButton.remove(); /* [cite: 253] */
-                        setTimeout(() => { overlayMap.resize(); }, 500); /* [cite: 254, 255] */
-                        roundCount++; /* [cite: 255] */
-                        document.getElementById('round-count').textContent = `Round: ${roundCount}`; /* [cite: 256] */
-                        findRandomCityAndSpot(); /* [cite: 256] */
+                        roundScoreDisplay.style.display = 'none';
+                        totalScoreDisplay.style.display = 'none';
+                        nextButton.remove();
+                        setTimeout(() => { if(overlayMap) overlayMap.resize(); }, 500); // Added check for overlayMap
+                        roundCount++;
+                        document.getElementById('round-count').textContent = `Round: ${roundCount}`;
+                        findRandomCityAndSpot();
                     });
-                } /* [cite: 257] */
-                submitGuessBtn.disabled = true; /* [cite: 257] */
-                newLocationBtn.disabled = true; /* [cite: 258] */
+                }
+                submitGuessBtn.disabled = true;
+                newLocationBtn.disabled = true;
             });
         }
 
         // --- DOMContentLoaded ---
         document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('login-btn').addEventListener('click', startOAuthFlow);
-            document.getElementById('register-btn').addEventListener('click', startOAuthFlow);
+            document.getElementById('register-btn').addEventListener('click', startOAuthFlow); // Register can also start the same flow
             document.getElementById('logout-btn').addEventListener('click', appLogout);
 
+            // Handle OAuth callback
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('code') && urlParams.has('state')) {
                 const success = await handleOAuthCallback();
                 if (success) {
                     isAuthenticated = true;
+                    // Clean URL - remove OAuth parameters
                     window.history.replaceState({}, document.title, window.location.pathname);
                 } else {
                     isAuthenticated = false;
+                    // Error already alerted in handleOAuthCallback
                 }
             } else {
+                // Regular page load, check if already logged in via stored token
                 isAuthenticated = await ensureValidToken();
             }
-            updateAuthUI();
+            updateAuthUI(); // This will show/hide game content and init if authenticated
         });
     </script>
 </body>
