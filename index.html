@@ -309,7 +309,7 @@
     </main>
 
     <footer>
-        <p>Styles and HTML made by Nathanss | Map data and tiles by <a href="https://www.maptiler.com/" target="_blank" style="color: #fff; text-decoration: underline;">MapTiler</a></p>
+        <p>Styles and HTML made by Nath | Map data and tiles by <a href="https://www.maptiler.com/" target="_blank" style="color: #fff; text-decoration: underline;">MapTiler</a></p>
     </footer>
 
     <div id="round-score-display"></div>
@@ -382,7 +382,27 @@
         const finalScoreSpan = document.getElementById('final-score');
         const distanceInfoSpan = document.getElementById('distance-info'); // From Login try result screen
 
-        // --- OAuth 2.1 Functions (from Login try) ---
+        // --- PKCE Helper Functions ---
+        function generateRandomString(length) {
+            const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let text = '';
+            for (let i = 0; i < length; i++) {
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+            return text;
+        }
+
+        async function sha256(plain) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(plain);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const base64 = btoa(String.fromCharCode(...hashArray)); // Convert to base64
+            // Return base64url format
+            return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        // --- OAuth 2.1 Functions (from Login try, modified for PKCE) ---
         function getAccessToken() {
             return localStorage.getItem('access_token');
         }
@@ -400,6 +420,7 @@
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('expires_at');
+            localStorage.removeItem('code_verifier'); // Clear code_verifier
         }
 
         function parseJwt(token) {
@@ -417,10 +438,14 @@
         }
 
         async function startOAuthFlow() {
-            const state = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            localStorage.setItem('oauth_state', state);
+            const state = generateRandomString(16);
+            const codeVerifier = generateRandomString(128); // Generate code_verifier
+            const codeChallenge = await sha256(codeVerifier); // Generate code_challenge
 
-            const authUrl = `${OAUTH_AUTH_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=openid profile&state=${state}`;
+            localStorage.setItem('oauth_state', state);
+            localStorage.setItem('code_verifier', codeVerifier); // Store code_verifier
+
+            const authUrl = `${OAUTH_AUTH_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=openid profile&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
             window.location.href = authUrl;
         }
 
@@ -430,6 +455,7 @@
             const state = urlParams.get('state');
             const storedState = localStorage.getItem('oauth_state');
             const error = urlParams.get('error');
+            const codeVerifier = localStorage.getItem('code_verifier'); // Retrieve code_verifier
 
             if (error) {
                 console.error("OAuth error:", error, urlParams.get('error_description'));
@@ -437,12 +463,14 @@
                 return;
             }
 
-            if (!code || !state || state !== storedState) {
-                console.error("OAuth callback invalid: Missing code or state mismatch.");
+            if (!code || !state || state !== storedState || !codeVerifier) {
+                console.error("OAuth callback invalid: Missing code, state mismatch, or missing code_verifier.");
+                clearTokens(); // Clear potential half-states
                 return;
             }
 
             localStorage.removeItem('oauth_state');
+            localStorage.removeItem('code_verifier'); // Clear code_verifier after use
 
             try {
                 const response = await fetch(OAUTH_TOKEN_URL, {
@@ -454,7 +482,8 @@
                         grant_type: 'authorization_code',
                         client_id: CLIENT_ID,
                         redirect_uri: REDIRECT_URI,
-                        code: code
+                        code: code,
+                        code_verifier: codeVerifier // Include code_verifier
                     })
                 });
 
