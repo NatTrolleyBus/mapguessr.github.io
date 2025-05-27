@@ -69,7 +69,7 @@
       text-align: center;
       margin-bottom: 30px;
     }
-    .submit-btn, .new-location-btn, .init-btn {
+    .submit-btn, .new-location-btn, .init-btn, .refresh-leaderboard-btn {
       background-color: #0cc0df;
       color: white;
       border: none;
@@ -80,10 +80,10 @@
       transition: background-color 0.3s;
       margin: 0 10px;
     }
-    .submit-btn:hover, .new-location-btn:hover, .init-btn:hover {
+    .submit-btn:hover, .new-location-btn:hover, .init-btn:hover, .refresh-leaderboard-btn:hover {
       background-color: #0aa8c4;
     }
-    .submit-btn:disabled, .new-location-btn:disabled, .init-btn:disabled {
+    .submit-btn:disabled, .new-location-btn:disabled, .init-btn:disabled, .refresh-leaderboard-btn:disabled {
       background-color: #ccc;
       cursor: not-allowed;
     }
@@ -129,6 +129,56 @@
       background-color: #fff3cd;
       color: #856404;
       border: 1px solid #ffeaa7;
+    }
+
+    /* Leaderboard styles */
+    .leaderboard-section {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .leaderboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .leaderboard-table th,
+    .leaderboard-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .leaderboard-table th {
+      background-color: #0cc0df;
+      color: white;
+      font-weight: bold;
+    }
+    .leaderboard-table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .leaderboard-table tr:hover {
+      background-color: #e9ecef;
+    }
+    .rank-1 { font-weight: bold; color: #ffd700; }
+    .rank-2 { font-weight: bold; color: #c0c0c0; }
+    .rank-3 { font-weight: bold; color: #cd7f32; }
+    .leaderboard-status {
+      font-style: italic;
+      color: #666;
+      margin-top: 10px;
+    }
+    .score-post-status {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
     }
     
     footer {
@@ -186,6 +236,32 @@
         </p>
       </div>
     </section>
+
+    <section>
+      <div class="leaderboard-section">
+        <div class="leaderboard-header">
+          <h3>🏆 Leaderboard</h3>
+          <button class="refresh-leaderboard-btn" id="refresh-leaderboard" disabled>Refresh</button>
+        </div>
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <tr>
+              <td colspan="4" style="text-align: center; color: #666;">Initialize maps to load leaderboard</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="leaderboard-status" id="leaderboard-status">Leaderboard will load after initialization</div>
+      </div>
+    </section>
+
     <section>
       <h2>Maps</h2>
       <div class="maps-container">
@@ -213,6 +289,7 @@
         <li id="submit-status">Game status will appear here</li>
         <li id="points-score">Points will be calculated here</li>
         <li id="round-count">Round: 1</li>
+        <li class="score-post-status" id="score-post-status">Score posting status will appear here</li>
       </ul>
     </section>
   </main>
@@ -237,6 +314,7 @@
     let overlayMap = null;
     let roundCount = 1;
     let mapsInitialized = false;
+    let userScore = null; // Store current user score info
 
     const zoomLevel = 15;
     const initialCenter = [0, 0];
@@ -321,6 +399,145 @@
         }
     }
 
+    // --- Leaderboard Functions ---
+    async function fetchLeaderboard() {
+        const statusElement = document.getElementById('leaderboard-status');
+        
+        try {
+            statusElement.textContent = 'Loading leaderboard...';
+            
+            // Fetch leaderboard (no authentication required)
+            const response = await fetch(`${API_BASE_URL}/api/leaderboard`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            displayLeaderboard(data.leaderboard);
+            statusElement.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+            
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
+            statusElement.textContent = `Error loading leaderboard: ${error.message}`;
+            
+            // Show error in leaderboard table
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #dc3545;">
+                        Failed to load leaderboard
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function displayLeaderboard(leaderboard) {
+        const tbody = document.getElementById('leaderboard-body');
+        
+        if (!leaderboard || leaderboard.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #666;">
+                        No players on leaderboard yet
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = leaderboard.map(player => {
+            const rankClass = `rank-${player.rank}`;
+            const lastUpdated = new Date(player.lastUpdated).toLocaleDateString();
+            
+            return `
+                <tr>
+                    <td class="${rankClass}">#${player.rank}</td>
+                    <td class="${rankClass}">${player.name}</td>
+                    <td class="${rankClass}">${player.score.toLocaleString()}</td>
+                    <td>${lastUpdated}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function fetchUserScore() {
+        if (!API_TOKEN) {
+            return null;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/score?token=${API_TOKEN}`);
+            
+            if (response.ok) {
+                const scoreData = await response.json();
+                userScore = scoreData;
+                console.log('Current user score:', userScore);
+                return scoreData;
+            } else if (response.status === 401 || response.status === 403) {
+                console.warn('Score fetch failed: Authentication error');
+                return null;
+            } else {
+                console.warn('Score fetch failed:', response.status);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching user score:', error);
+            return null;
+        }
+    }
+
+    async function postScore(score) {
+        if (!API_TOKEN || !score || score <= 0) {
+            return false;
+        }
+
+        const statusElement = document.getElementById('score-post-status');
+        
+        try {
+            statusElement.textContent = 'Posting score to leaderboard...';
+            
+            const response = await fetch(`${API_BASE_URL}/api/score?token=${API_TOKEN}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ score: score })
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                statusElement.textContent = `Score posted! New total: ${result.newTotalScore.toLocaleString()} (+${score})`;
+                
+                // Update local user score
+                userScore = {
+                    score: result.newTotalScore,
+                    userId: result.userId,
+                    name: result.name,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                // Refresh leaderboard to show updated scores
+                setTimeout(() => {
+                    fetchLeaderboard();
+                }, 1000);
+                
+                return true;
+            } else if (response.status === 401 || response.status === 403) {
+                statusElement.textContent = 'Score posting failed: Authentication error';
+                return false;
+            } else {
+                statusElement.textContent = `Score posting failed: HTTP ${response.status}`;
+                return false;
+            }
+        } catch (error) {
+            console.error('Error posting score:', error);
+            statusElement.textContent = `Score posting failed: ${error.message}`;
+            return false;
+        }
+    }
+
     // --- Map Initialization ---
     async function initializeMaps() {
         const tokenInput = document.getElementById('api-token');
@@ -385,9 +602,14 @@
             // Enable game buttons
             document.getElementById('new-location').disabled = false;
             document.getElementById('submit-guess').disabled = false;
+            document.getElementById('refresh-leaderboard').disabled = false;
             
             // Update status
             document.getElementById('location-text').textContent = 'Maps initialized! Click "New Location" to start playing.';
+            
+            // Load user score and leaderboard
+            await fetchUserScore();
+            await fetchLeaderboard();
             
             return true;
             
@@ -470,7 +692,7 @@
         const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
 
         const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
-        const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
+        const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * buffer;
 
         return [randomLng, randomLat];
     }
@@ -606,6 +828,7 @@
         document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map...';
         document.getElementById('submit-status').textContent = 'Place your guess on the overlay map...';
         document.getElementById('points-score').textContent = 'Points: - | Total: ' + totalScore + ' points';
+        document.getElementById('score-post-status').textContent = '';
 
         if (currentMarker) {
             currentMarker.remove();
@@ -752,6 +975,13 @@
             }
         });
 
+        // Refresh leaderboard button
+        document.getElementById('refresh-leaderboard').addEventListener('click', function() {
+            if (mapsInitialized) {
+                fetchLeaderboard();
+            }
+        });
+
         // New Location button
         document.getElementById('new-location').addEventListener('click', function() {
             if (mapsInitialized && API_TOKEN) {
@@ -760,7 +990,7 @@
         });
 
         // Submit button
-        document.getElementById('submit-guess').addEventListener('click', function() {
+        document.getElementById('submit-guess').addEventListener('click', async function() {
             console.log("Submit button clicked.");
             
             if (!userGuessLngLat || !(userGuessLngLat instanceof maptilersdk.LngLat)) {
@@ -813,6 +1043,11 @@
                  console.log("Showing actual location marker on main map.");
             } else {
                  console.warn("Could not find currentMarker element to show.");
+            }
+
+            // Post score to leaderboard
+            if (scoreResult.score > 0) {
+                await postScore(scoreResult.score);
             }
 
             roundCount++;
