@@ -15,14 +15,25 @@
             color: #333;
         }
 
+
         header {
             background-color: #0cc0df;
             padding: 20px;
             border-radius: 0 0 5px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        header div {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
         }
         h1 {
             color: #444;
             margin-top: 0;
+            margin-right: 20px; /* Space between title and buttons */
         }
         main {
             padding: 20px;
@@ -81,7 +92,7 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        .submit-btn, .new-location-btn {
+        .submit-btn, .new-location-btn, .auth-btn {
             background-color: #0cc0df;
             color: white;
             border: none;
@@ -92,8 +103,23 @@
             transition: background-color 0.3s;
             margin: 0 10px;
         }
-        .submit-btn:hover, .new-location-btn:hover {
+        .submit-btn:hover, .new-location-btn:hover, .auth-btn:hover {
             background-color: #0aa8c4;
+        }
+        .auth-btn {
+            padding: 8px 15px;
+            font-size: 1em;
+            margin-left: 10px;
+            background-color: #007bff; /* Default for login/account */
+        }
+        #register-btn {
+            background-color: #28a745;
+        }
+        #logout-btn {
+            background-color: #dc3545;
+        }
+        #my-account-btn {
+            background-color: #6c757d; /* Grey for account button */
         }
         footer {
             background-color: #0cc0df;
@@ -171,25 +197,53 @@
             bottom: 20px;
             right: 20px;
         }
+        #account-page {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            display: none; /* Hidden by default */
+        }
+        #account-page h2 {
+            color: #0cc0df;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        #account-page p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        #account-page strong {
+            color: #555;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Test</h1>
-        <p>May 15th 2025 - V9 (Score Calculation Fix)</p>
-        <div id="auth-container" style="padding-top: 10px;">
-            <button id="login-btn" style="padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">Login</button>
-            <button id="register-btn" style="padding: 8px 15px; background-color: #28a745; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 10px;">Register</button>
-            <button id="logout-btn" style="display:none; padding: 8px 15px; background-color: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; margin-left: 10px;">Logout</button>
+        <div>
+            <h1>Map Guessr</h1>
+            <p>May 15th 2025 - V9 (Score Calculation Fix)</p>
+        </div>
+        <div id="auth-container">
+            <button id="login-btn" class="auth-btn">Login</button>
+            <button id="register-btn" class="auth-btn">Register</button>
+            <button id="my-account-btn" class="auth-btn" style="display:none;">My Account</button>
+            <button id="logout-btn" class="auth-btn" style="display:none;">Logout</button>
             <span id="user-info" style="margin-left: 20px; color: #fff;"></span>
         </div>
     </header>
     <main style="display:none;">
-        <section>
+        <section id="game-section">
             <h2>About</h2>
             <p>Game Rules.</p>
         </section>
-        <section>
+        <section id="game-maps-section">
             <h2>Maps</h2>
             <div class="maps-container">
                 <div id="maptiler-map"></div>
@@ -200,7 +254,7 @@
                 <button class="submit-btn" id="submit-guess">Submit</button>
             </div>
         </section>
-        <section>
+        <section id="game-answers-section">
             <h2>Game Answers</h2>
             <ul>
                 <li id="location-text">The location label/place goes here/coordinates</li>
@@ -210,19 +264,33 @@
                 <li id="round-count">Round: 1</li>
             </ul>
         </section>
+
+
+        <section id="account-page" style="display:none;">
+            <h2>Account Information</h2>
+            <p><strong>User ID:</strong> <span id="account-user-id">Not available</span></p>
+            <p><strong>Client ID:</strong> <span id="account-client-id">Not available</span></p>
+            <p><strong>Token Expiry:</strong> <span id="account-token-expiry">Not available</span></p>
+            <p><strong>Token Issued At:</strong> <span id="account-token-iat">Not available</span></p>
+            <p><strong>Token Type:</strong> <span id="account-token-type">Not available</span></p>
+            <p><strong>Token Active:</strong> <span id="account-token-active">Not available</span></p>
+        </section>
     </main>
     <footer>
         <p>Made by Nathann and Jason</p>
     </footer>
 
+
     <div id="round-score-display"></div>
     <div id="total-score-display"></div>
+
 
     <script>
         // --- OAuth Configuration ---
         const OAUTH_CLIENT_ID = 'mapguessr-github-io.pages.dev'; // IMPORTANT: Replace with your actual client_id from transitspotter
         const OAUTH_REDIRECT_URI = window.location.href.split('?')[0]; // Assumes the current page handles the callback and is registered
         const AUTH_SERVER_BASE_URL = 'https://auth.transitspotter.com';
+
 
         // --- Map Guessr Configuration ---
         const apiKey = 'ZS9RHHRim7f1OZRKuI6n';
@@ -245,8 +313,12 @@
         let lineLayerVisible = false;
 
 
+
+
         // --- Application State ---
         let isAuthenticated = false;
+        let currentPage = 'game'; // 'game' or 'account'
+
 
         // --- OAuth Helper Functions ---
         async function generateCodeVerifierAndChallenge() {
@@ -261,6 +333,7 @@
             return { codeVerifier, codeChallenge };
         }
 
+
         function generateRandomString(length) {
             const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
             let result = '';
@@ -272,11 +345,13 @@
             return result;
         }
 
+
         async function startOAuthFlow() {
             const { codeVerifier, codeChallenge } = await generateCodeVerifierAndChallenge();
             const state = generateRandomString(32);
             sessionStorage.setItem('code_verifier', codeVerifier);
             sessionStorage.setItem('oauth_state', state);
+
 
             const authUrl = new URL(`${AUTH_SERVER_BASE_URL}/external/authorize`);
             authUrl.searchParams.append('response_type', 'code');
@@ -288,31 +363,37 @@
             window.location.href = authUrl.toString();
         }
 
+
         async function handleOAuthCallback() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             const state = urlParams.get('state');
             const error = urlParams.get('error');
 
+
             if (error) {
                 console.error('OAuth error:', error, urlParams.get('error_description'));
-                alert(`OAuth Error: ${error} - ${urlParams.get('error_description') || 'Unknown error'}`);
+                // Using a custom message box instead of alert()
+                showMessageBox(`OAuth Error: ${error} - ${urlParams.get('error_description') || 'Unknown error'}`);
                 return false;
             }
+
 
             const storedState = sessionStorage.getItem('oauth_state');
             if (!state || state !== storedState) {
                 console.error('Invalid state parameter');
-                alert('Error: Invalid state. CSRF attack suspected.');
+                showMessageBox('Error: Invalid state. CSRF attack suspected.');
                 return false;
             }
+
 
             const codeVerifier = sessionStorage.getItem('code_verifier');
             if (!codeVerifier) {
                 console.error('Code verifier not found');
-                alert('Error: Code verifier missing. Please try logging in again.');
+                showMessageBox('Error: Code verifier missing. Please try logging in again.');
                 return false;
             }
+
 
             try {
                 const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/token`, {
@@ -331,29 +412,34 @@
                 });
                 const tokenData = await response.json();
 
+
                 if (tokenData.error) {
                     console.error('Token error:', tokenData.error, tokenData.error_description);
-                    alert(`Token Error: ${tokenData.error} - ${tokenData.error_description || 'Failed to get token'}`);
+                    showMessageBox(`Token Error: ${tokenData.error} - ${tokenData.error_description || 'Failed to get token'}`);
                     return false;
                 }
+
 
                 localStorage.setItem('access_token', tokenData.access_token);
                 localStorage.setItem('refresh_token', tokenData.refresh_token);
                 localStorage.setItem('token_expiry', Date.now() + (tokenData.expires_in * 1000));
+
 
                 sessionStorage.removeItem('code_verifier');
                 sessionStorage.removeItem('oauth_state');
                 return true;
             } catch (err) {
                 console.error('Token exchange error:', err);
-                alert('Error exchanging code for token. Please check console.');
+                showMessageBox('Error exchanging code for token. Please check console.');
                 return false;
             }
         }
 
+
         async function refreshToken() {
             const refreshTokenVal = localStorage.getItem('refresh_token');
             if (!refreshTokenVal) return false;
+
 
             try {
                 const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/token`, {
@@ -369,6 +455,7 @@
                     })
                 });
                 const tokenData = await response.json();
+
 
                 if (tokenData.error) {
                     console.error('Refresh error:', tokenData.error, tokenData.error_description);
@@ -387,9 +474,11 @@
             }
         }
 
+
         async function ensureValidToken() {
             const accessToken = localStorage.getItem('access_token');
             if (!accessToken) return false;
+
 
             const expiryTime = parseInt(localStorage.getItem('token_expiry'), 10);
             if (isNaN(expiryTime)) {
@@ -402,6 +491,7 @@
             }
             return true;
         }
+
 
         async function appLogout() {
             const refreshTokenVal = localStorage.getItem('refresh_token');
@@ -428,18 +518,21 @@
             isAuthenticated = false;
             resetGameAndUI();
             updateAuthUI();
+            currentPage = 'game'; // Reset to game page on logout
+            showPage(currentPage);
         }
-        
+       
         function resetGameAndUI() {
             // Remove map instances if they exist
             if (mainMap) { mainMap.remove(); mainMap = null; }
             if (overlayMap) { overlayMap.remove(); overlayMap = null; }
 
+
             // Clear markers and pins
             if (currentMarker) { currentMarker.remove(); currentMarker = null; }
             if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; }
             if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; }
-            
+           
             // Reset game state variables
             userGuessLngLat = null;
             currentLocationCoords = null;
@@ -447,18 +540,21 @@
             roundCount = 1;
             lineLayerVisible = false; // Assuming this should be reset
 
+
             // Reset UI text elements
             document.getElementById('location-text').textContent = 'The location label/place goes here/coordinates';
             document.getElementById('guessed-coords').textContent = 'The guessed coordinates';
             document.getElementById('submit-status').textContent = 'Submit button clicked? status goes here';
             document.getElementById('points-score').textContent = 'Future points/scores system goes here';
             document.getElementById('round-count').textContent = 'Round: 1';
-            
+           
             const existingNextButton = document.getElementById('next-round-btn');
             if (existingNextButton) existingNextButton.remove();
 
+
             document.getElementById('round-score-display').style.display = 'none';
             document.getElementById('total-score-display').style.display = 'none';
+
 
             // Disable game buttons
             const submitGuessBtnElem = document.getElementById('submit-guess');
@@ -467,35 +563,160 @@
             if(newLocationBtnElem) newLocationBtnElem.disabled = true;
         }
 
+
+        // Custom message box function instead of alert()
+        function showMessageBox(message) {
+            const messageBox = document.createElement('div');
+            messageBox.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: #f44336; /* Red background for error */
+                color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                z-index: 2000;
+                font-size: 1.2em;
+                text-align: center;
+                max-width: 80%;
+            `;
+            messageBox.textContent = message;
+            document.body.appendChild(messageBox);
+
+
+            setTimeout(() => {
+                messageBox.remove();
+            }, 5000); // Remove after 5 seconds
+        }
+
+
+        async function fetchAndDisplayUserInfo() {
+            const accessToken = localStorage.getItem('access_token');
+            if (!accessToken) {
+                document.getElementById('account-user-id').textContent = 'Not logged in.';
+                return;
+            }
+
+
+            try {
+                const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/introspect`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': window.location.origin
+                    },
+                    body: JSON.stringify({
+                        token: accessToken,
+                        token_type_hint: 'access_token'
+                    })
+                });
+                const userData = await response.json();
+
+
+                if (userData.active) {
+                    document.getElementById('account-user-id').textContent = userData.sub || 'N/A';
+                    document.getElementById('account-client-id').textContent = userData.client_id || 'N/A';
+                    document.getElementById('account-token-type').textContent = userData.token_type || 'N/A';
+                    document.getElementById('account-token-active').textContent = 'Yes';
+
+
+                    if (userData.exp) {
+                        const expiryDate = new Date(userData.exp * 1000);
+                        document.getElementById('account-token-expiry').textContent = expiryDate.toLocaleString();
+                    } else {
+                        document.getElementById('account-token-expiry').textContent = 'N/A';
+                    }
+
+
+                    if (userData.iat) {
+                        const issuedAtDate = new Date(userData.iat * 1000);
+                        document.getElementById('account-token-iat').textContent = issuedAtDate.toLocaleString();
+                    } else {
+                        document.getElementById('account-token-iat').textContent = 'N/A';
+                    }
+                    document.getElementById('user-info').textContent = `Logged In as: ${userData.sub || 'User'}`;
+                } else {
+                    document.getElementById('account-user-id').textContent = 'Token is inactive.';
+                    document.getElementById('account-client-id').textContent = 'N/A';
+                    document.getElementById('account-token-expiry').textContent = 'N/A';
+                    document.getElementById('account-token-iat').textContent = 'N/A';
+                    document.getElementById('account-token-type').textContent = 'N/A';
+                    document.getElementById('account-token-active').textContent = 'No';
+                    document.getElementById('user-info').textContent = `Logged In (Token Inactive)`;
+                }
+
+
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+                document.getElementById('account-user-id').textContent = 'Error fetching user info.';
+                document.getElementById('user-info').textContent = `Logged In (Error)`;
+            }
+        }
+
+
         // --- UI Update Functions ---
         function updateAuthUI() {
             const loginBtn = document.getElementById('login-btn');
             const registerBtn = document.getElementById('register-btn');
             const logoutBtn = document.getElementById('logout-btn');
+            const myAccountBtn = document.getElementById('my-account-btn');
             const userInfoDisplay = document.getElementById('user-info');
-            const gameContent = document.querySelector('main');
+            const mainContent = document.querySelector('main');
+
 
             if (isAuthenticated) {
                 loginBtn.style.display = 'none';
                 registerBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
-                userInfoDisplay.textContent = `Logged In`; // You could fetch actual user info here
-                gameContent.style.display = 'block'; // Show game content
-                if (!mainMap) { // Initialize game only if not already done
+                myAccountBtn.style.display = 'inline-block';
+                mainContent.style.display = 'block'; // Show main content area
+                fetchAndDisplayUserInfo(); // Fetch and display user info when authenticated
+                if (!mainMap && currentPage === 'game') { // Initialize game only if not already done and on game page
                   initializeGame();
                 }
             } else {
                 loginBtn.style.display = 'inline-block';
                 registerBtn.style.display = 'inline-block';
                 logoutBtn.style.display = 'none';
-                userInfoDisplay.textContent = ''; // Or "Please log in"
-                gameContent.style.display = 'none'; // Hide game content
+                myAccountBtn.style.display = 'none';
+                userInfoDisplay.textContent = ''; // Clear user info
+                mainContent.style.display = 'none'; // Hide main content area
                 if (mainMap) { // If maps were initialized, remove them and reset state
                     resetGameAndUI();
                 }
+                // Clear account info display
+                document.getElementById('account-user-id').textContent = 'Not logged in.';
+                document.getElementById('account-client-id').textContent = 'Not available';
+                document.getElementById('account-token-expiry').textContent = 'Not available';
+                document.getElementById('account-token-iat').textContent = 'Not available';
+                document.getElementById('account-token-type').textContent = 'Not available';
+                document.getElementById('account-token-active').textContent = 'Not available';
             }
+            showPage(currentPage); // Ensure correct page is shown
         }
-        
+
+
+        function showPage(pageName) {
+            const gameSections = document.querySelectorAll('#game-section, #game-maps-section, #game-answers-section');
+            const accountPage = document.getElementById('account-page');
+
+
+            if (pageName === 'game') {
+                gameSections.forEach(section => section.style.display = 'block');
+                accountPage.style.display = 'none';
+                if (isAuthenticated && !mainMap) { // Re-initialize game if on game page and not initialized
+                    initializeGame();
+                }
+            } else if (pageName === 'account') {
+                gameSections.forEach(section => section.style.display = 'none');
+                accountPage.style.display = 'block';
+                // No need to de-initialize maps here, just hide game sections
+            }
+            currentPage = pageName;
+        }
+       
         // --- Original Game Functions ---
         function getRandomCoordinateInBounds(bounds) {
             const minLng = bounds[0];
@@ -511,6 +732,7 @@
             const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
             return [randomLng, randomLat];
         }
+
 
         function addOrUpdateMarker(lngLatInput) {
             const lngLatObject = Array.isArray(lngLatInput) ? new maptilersdk.LngLat(lngLatInput[0], lngLatInput[1]) : lngLatInput;
@@ -531,6 +753,7 @@
             console.log("currentLocationCoords set to LngLat object:", currentLocationCoords);
         }
 
+
         function calculateDistanceInMeters(lat1, lon1, lat2, lon2) {
             if (typeof lat1 !== 'number' || typeof lon1 !== 'number' || typeof lat2 !== 'number' || typeof lon2 !== 'number') {
                 console.error("Invalid input types for calculateDistanceInMeters:", lat1, lon1, lat2, lon2);
@@ -546,6 +769,7 @@
             const distance = R * c; // Distance in meters
             return distance;
         }
+
 
         function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) {
             const MAX_SCORE = 5000; // Maximum points per round
@@ -566,6 +790,7 @@
             return { distance: distance, score: score };
         }
 
+
         function updateGuessPinPosition() {
             if (!overlayMap || !userGuessLngLat || !guessPinElement) return;
             if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number') {
@@ -578,6 +803,7 @@
             guessPinElement.style.display = 'block';
         }
 
+
         function updateRealLocationPinPosition() {
             if (!overlayMap || !currentLocationCoords || !realLocationPinElement) return;
             if (!(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') {
@@ -589,7 +815,7 @@
             realLocationPinElement.style.top = `${pixelCoords.y}px`;
             realLocationPinElement.style.display = 'block';
         }
-        
+       
         function placeCustomGuessPinOnOverlay(lngLat) {
             console.log('Attempting to place custom guess pin at LngLat:', lngLat);
             userGuessLngLat = lngLat;
@@ -609,6 +835,7 @@
             console.log("Guess pin placed and move listener added. userGuessLngLat:", userGuessLngLat);
         }
 
+
         function placeCustomRealLocationPinOnOverlay(lngLat) {
             console.log('Attempting to place custom real location pin at LngLat:', lngLat);
             if (realLocationPinElement) {
@@ -624,7 +851,7 @@
             overlayMap.on('move', updateRealLocationPinPosition);
             console.log("Real location pin placed and move listener added. currentLocationCoords:", currentLocationCoords);
         }
-        
+       
         function updateLineBetweenPins() {
             if (!lineLayerVisible || !overlayMap || !userGuessLngLat || !currentLocationCoords) return;
             if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number' ||
@@ -641,10 +868,12 @@
             }
         }
 
+
         async function findRandomCityAndSpot(attempt = 1) {
             const locationText = document.getElementById('location-text');
             const newLocationBtn = document.getElementById('new-location');
             const submitGuessBtn = document.getElementById('submit-guess');
+
 
             locationText.textContent = 'Finding a new location...';
             document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map...';
@@ -652,6 +881,7 @@
             document.getElementById('points-score').textContent = 'Points: - | Total: ' + totalScore + ' points';
             document.getElementById('round-score-display').style.display = 'none';
             document.getElementById('total-score-display').style.display = 'none';
+
 
             if (currentMarker) { currentMarker.remove(); currentMarker = null; }
             if (guessPinElement) {
@@ -663,16 +893,20 @@
             if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; if(overlayMap) overlayMap.off('move', updateRealLocationPinPosition); }
             currentLocationCoords = null;
 
+
             if (overlayMap && overlayMap.getLayer('line-layer')) {
                 overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
                 lineLayerVisible = false;
             }
 
+
             const existingNextButton = document.getElementById('next-round-btn');
             if (existingNextButton) existingNextButton.remove();
 
+
             submitGuessBtn.disabled = false;
             newLocationBtn.disabled = false;
+
 
             const MAX_LOCATION_RETRIES = 10;
             if (attempt > MAX_LOCATION_RETRIES) {
@@ -682,6 +916,7 @@
             }
             console.log(`Attempting to find random city (Attempt ${attempt}/${MAX_LOCATION_RETRIES})...`);
             locationText.textContent = `Finding a random city (Attempt ${attempt})...`;
+
 
             try {
                 const cityResponse = await fetch(randomCityApiUrl);
@@ -695,6 +930,7 @@
                 }
                 console.log(`Successfully fetched city: ${cityName}. Finding geocoding data...`);
                 locationText.textContent = `Finding a random spot in ${cityName}...`;
+
 
                 const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`;
                 const geocodingResponse = await fetch(geocodingUrl);
@@ -741,15 +977,17 @@
                 findRandomCityAndSpot(attempt + 1);
             }
         }
-        
+       
         // --- Game Initialization (Called after successful authentication) ---
         function initializeGame() {
             if (mainMap) return; // Ensure this runs only once
+
 
             const newLocationBtn = document.getElementById('new-location');
             const submitGuessBtn = document.getElementById('submit-guess');
             const roundScoreDisplay = document.getElementById('round-score-display');
             const totalScoreDisplay = document.getElementById('total-score-display');
+
 
             mainMap = new maptilersdk.Map({
                 container: 'maptiler-map',
@@ -759,6 +997,7 @@
                 interactive: false
             });
 
+
             overlayMap = new maptilersdk.Map({
                 container: 'overlay-map',
                 style: overlayStyleUrl,
@@ -766,7 +1005,7 @@
                 zoom: initialZoom,
                 interactive: true
             });
-            
+           
             mainMap.on('error', (e) => {
                 console.error('Main map loading error:', e.error);
                 document.getElementById('location-text').textContent = "Error loading main map. Check console.";
@@ -776,6 +1015,7 @@
                 document.getElementById('guessed-coords').textContent = "Error loading overlay map. Check console.";
             });
 
+
             mainMap.on('style.load', () => {
                 console.log('Main map style loaded.');
                 findRandomCityAndSpot();
@@ -784,11 +1024,13 @@
                 } catch (e) { console.warn("Could not remove controls programmatically for main map:", e); }
             });
 
+
             overlayMap.on('style.load', () => {
                 console.log('Overlay map style loaded.');
                 try {
                     overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
                 } catch (e) { console.warn("Could not remove controls programmatically for overlay map:", e); }
+
 
                 overlayMap.addSource('line-source', {
                     'type': 'geojson',
@@ -801,6 +1043,7 @@
                 });
                 overlayMap.on('move', updateLineBetweenPins);
             });
+
 
             overlayMap.on('click', (e) => {
                 if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
@@ -817,7 +1060,7 @@
                     placeCustomGuessPinOnOverlay(clickedLngLat);
                 }
             });
-            
+           
             const overlayMapElement = document.getElementById('overlay-map');
             overlayMapElement.addEventListener('transitionend', () => {
                 console.log('Overlay map container transition ended. Resizing map.');
@@ -829,8 +1072,9 @@
                 }
             });
 
+
             newLocationBtn.addEventListener('click', findRandomCityAndSpot);
-            
+           
             submitGuessBtn.addEventListener('click', function handleSubmitGuess() {
                 console.log("Submit button clicked.");
                 if (!userGuessLngLat || !(userGuessLngLat instanceof maptilersdk.LngLat)) {
@@ -867,6 +1111,7 @@
                     console.log("Showing actual location marker on main map.");
                 } else { console.warn("Could not find currentMarker element to show."); }
 
+
                 const overlayMapElem = document.getElementById('overlay-map');
                 overlayMapElem.classList.add('overlay-map-fullscreen');
                 overlayMap.resize();
@@ -877,6 +1122,7 @@
                     overlayMap.fitBounds(bounds, { padding: 50, duration: 1000, essential: true });
                 }, 300);
 
+
                 placeCustomRealLocationPinOnOverlay(actualLngLat);
                 updateLineBetweenPins();
                 if (overlayMap.getLayer('line-layer')) {
@@ -884,10 +1130,12 @@
                     lineLayerVisible = true;
                 }
 
+
                 roundScoreDisplay.textContent = `Round Score: ${scoreResult.score} points`;
                 totalScoreDisplay.textContent = `Total Score: ${totalScore} points`;
                 roundScoreDisplay.style.display = 'block';
                 totalScoreDisplay.style.display = 'block';
+
 
                 let nextButton = document.getElementById('next-round-btn');
                 if (!nextButton) {
@@ -920,11 +1168,16 @@
             });
         }
 
+
         // --- DOMContentLoaded ---
         document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('login-btn').addEventListener('click', startOAuthFlow);
             document.getElementById('register-btn').addEventListener('click', startOAuthFlow); // Register can also start the same flow
             document.getElementById('logout-btn').addEventListener('click', appLogout);
+            document.getElementById('my-account-btn').addEventListener('click', () => {
+                showPage(currentPage === 'account' ? 'game' : 'account');
+            });
+
 
             // Handle OAuth callback
             const urlParams = new URLSearchParams(window.location.search);
@@ -947,3 +1200,4 @@
     </script>
 </body>
 </html>
+
