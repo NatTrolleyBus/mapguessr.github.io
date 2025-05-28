@@ -1035,22 +1035,22 @@
                     throw new Error(`HTTP error: ${response.status}`);
                 }
                 const data = await response.json();
-                displayLeaderboard(data.leaderboard); [cite: 549]
-                statusElement.textContent = `Last updated: ${new Date().toLocaleTimeString()}`; [cite: 550]
+                displayLeaderboard(data.leaderboard); //[cite: 549]
+                statusElement.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;// [cite: 550]
             } catch (error) {
-                console.error('Error fetching leaderboard:', error); [cite: 550]
-                statusElement.textContent = `Error loading leaderboard: ${error.message}`; [cite: 550]
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #dc3545;"> Failed to load leaderboard </td></tr>`; [cite: 551, 552]
+                console.error('Error fetching leaderboard:', error);// [cite: 550]
+                statusElement.textContent = `Error loading leaderboard: ${error.message}`; //[cite: 550]
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #dc3545;"> Failed to load leaderboard </td></tr>`; //[cite: 551, 552]
             } finally {
                 refreshButton.disabled = false; // Re-enable refresh button
             }
         }
 
         function displayLeaderboard(leaderboard) {
-            const tbody = document.getElementById('leaderboard-body'); [cite: 553]
+            const tbody = document.getElementById('leaderboard-body');// [cite: 553]
             tbody.innerHTML = ''; // Clear existing rows
 
-            if (!leaderboard || leaderboard.length === 0) { [cite: 554]
+            if (!leaderboard || leaderboard.length === 0) { //[cite: 554]
                 tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #666;">No players on the leaderboard yet. Be the first!</td></tr>`;
                 return;
             }
