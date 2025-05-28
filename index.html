@@ -880,26 +880,15 @@
             document.getElementById('new-location').disabled = true;
             document.getElementById('submit-guess').disabled = true;
 
-            // Clear previous markers
-            if (currentMarker) {
-                currentMarker.remove();
-                currentMarker = null;
-            }
-            if (guessPinElement) {
-                guessPinElement.remove();
-                guessPinElement = null;
-            }
-            if (realLocationPinElement) {
-                realLocationPinElement.remove();
-                realLocationPinElement = null;
-            }
-            // Clear the line layer if it exists
-            if (mainMap && mainMap.getLayer('line-layer')) { // Added check for mainMap existence
+            // Clear previous markers and lines (existing code is fine for this)
+            if (currentMarker) { currentMarker.remove(); currentMarker = null; }
+            if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; }
+            if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; }
+            if (mainMap && mainMap.getLayer('line-layer')) {
                 mainMap.removeLayer('line-layer');
                 mainMap.removeSource('line-source');
                 lineLayerVisible = false;
             }
-
 
             try {
                 const accessToken = localStorage.getItem('access_token');
@@ -907,13 +896,40 @@
                     showMessageBox("You must be logged in to find a new location.");
                     return;
                 }
-                const response = await fetch(`${API_BASE_URL}/api/cities?token=${accessToken}`); // Use API_BASE_URL
-                if (!response.ok) {
-                    throw new Error(`HTTP error fetching random city: ${response.status}`);
+
+                // STEP 1: Fetch a random city name using /api/cities
+                const cityResponse = await fetch(`${API_BASE_URL}/api/cities?token=${accessToken}`);
+                if (!cityResponse.ok) {
+                    throw new Error(`HTTP error fetching random city name: ${cityResponse.status}`);
                 }
-                const data = await response.json();
-                currentLocationCoords = { lng: data.coordinates[0], lat: data.coordinates[1] };
-                document.getElementById('location-text').textContent = `Location: ${data.city_name}, ${data.country_name} (${currentLocationCoords.lat.toFixed(4)}, ${currentLocationCoords.lng.toFixed(4)})`;
+                const cityData = await cityResponse.json();
+                const cityName = cityData.city; // Extract the city name
+
+                if (!cityName) {
+                    throw new Error("API did not return a valid city name.");
+                }
+
+                // STEP 2: Use the city name to get geocoding information (coordinates) using /api/geocode
+                const geocodeResponse = await fetch(`${API_BASE_URL}/api/geocode?city=${encodeURIComponent(cityName)}&token=${accessToken}`);
+                if (!geocodeResponse.ok) {
+                    throw new Error(`HTTP error fetching geocode for ${cityName}: ${geocodeResponse.status}`);
+                }
+                const geocodeData = await geocodeResponse.json();
+
+                // Ensure geocodeData has the expected structure (adjust based on actual geocode API response)
+                // Assuming geocodeData looks like: { "lat": 12.34, "lng": 56.78, "city": "...", "country": "..." }
+                // OR { "coordinates": [lng, lat], "city_name": "...", "country_name": "..." } if your original code structure was correct for geocode
+                
+                // Based on your original code's expectation for `data.coordinates`, 
+                // let's assume the geocode API returns `{"coordinates": [lng, lat]}`
+                // If it returns `{"lat": ..., "lng": ...}`, you'll need to adjust `currentLocationCoords`
+                
+                if (!geocodeData || !geocodeData.coordinates || geocodeData.coordinates.length < 2) {
+                    throw new Error("Geocoding API did not return valid coordinates.");
+                }
+
+                currentLocationCoords = { lng: geocodeData.coordinates[0], lat: geocodeData.coordinates[1] };
+                document.getElementById('location-text').textContent = `Location: ${cityName}, ${geocodeData.country_name || ''} (${currentLocationCoords.lat.toFixed(4)}, ${currentLocationCoords.lng.toFixed(4)})`;
 
                 // Set initial map view to the new location (but hide it from the user)
                 mainMap.setCenter(currentLocationCoords);
