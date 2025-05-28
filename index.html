@@ -381,7 +381,7 @@
     <div id="total-score-display"></div>
 
 
-    <script>
+     <script>
         // --- OAuth Configuration ---
         const OAUTH_CLIENT_ID = 'mapguessr-github-io.pages.dev';
         const OAUTH_REDIRECT_URI = window.location.href.split('?')[0];
@@ -390,7 +390,7 @@
         // --- Map Guessr Configuration ---
         const apiKey = 'ZS9RHHRim7f1OZRKuI6n'; // This is MapTiler SDK key
         maptilersdk.config.apiKey = apiKey;
-        let API_BASE_URL = 'https://mapguessr-worker.games-6cb.workers.dev'; // Backend API for game data and leaderboard [cite: 534]
+        let API_BASE_URL = 'https://mapguessr-worker.games-6cb.workers.dev'; // Backend API for game data and leaderboard
 
         let currentMarker = null;
         let userGuessLngLat = null;
@@ -407,11 +407,13 @@
         const initialCenter = [0, 0];
         const initialZoom = -1.0;
         let lineLayerVisible = false;
+        let mapsInitialized = false; // <<< ADD THIS LINE
+
 
         // --- Application State ---
         let isAuthenticated = false;
         let currentPage = 'game'; // 'game' or 'account'
-        let userScore = null; // Store current user score info [cite: 534]
+        let userScore = null; // Store current user score info
 
         // --- OAuth Helper Functions ---
         async function generateCodeVerifierAndChallenge() {
@@ -628,6 +630,14 @@
                 realLocationPinElement.remove();
                 realLocationPinElement = null;
             }
+            // Clear the line layer if it exists
+            if (mainMap && mainMap.getLayer('line-layer')) { // Added check for mainMap existence
+                mainMap.removeLayer('line-layer');
+                mainMap.removeSource('line-source');
+                lineLayerVisible = false;
+            }
+
+
             // Reset game state variables
             userGuessLngLat = null;
             currentLocationCoords = null;
@@ -884,7 +894,7 @@
                 realLocationPinElement = null;
             }
             // Clear the line layer if it exists
-            if (mainMap.getLayer('line-layer')) {
+            if (mainMap && mainMap.getLayer('line-layer')) { // Added check for mainMap existence
                 mainMap.removeLayer('line-layer');
                 mainMap.removeSource('line-source');
                 lineLayerVisible = false;
@@ -1030,39 +1040,43 @@
                     return;
                 }
 
-                const response = await fetch(`${API_BASE_URL}/api/leaderboard?token=${accessToken}`); // Pass token [cite: 548]
+                const response = await fetch(`${API_BASE_URL}/api/leaderboard?token=${accessToken}`); // Pass token
                 if (!response.ok) {
                     throw new Error(`HTTP error: ${response.status}`);
                 }
                 const data = await response.json();
-                displayLeaderboard(data.leaderboard); //[cite: 549]
-                statusElement.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;// [cite: 550]
+                displayLeaderboard(data.leaderboard);
+                statusElement.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
             } catch (error) {
-                console.error('Error fetching leaderboard:', error);// [cite: 550]
-                statusElement.textContent = `Error loading leaderboard: ${error.message}`; //[cite: 550]
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #dc3545;"> Failed to load leaderboard </td></tr>`; //[cite: 551, 552]
+                console.error('Error fetching leaderboard:', error);
+                statusElement.textContent = `Error loading leaderboard: ${error.message}`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #dc3545;"> Failed to load leaderboard </td></tr>`;
             } finally {
                 refreshButton.disabled = false; // Re-enable refresh button
             }
         }
 
         function displayLeaderboard(leaderboard) {
-            const tbody = document.getElementById('leaderboard-body');// [cite: 553]
+            const tbody = document.getElementById('leaderboard-body');
             tbody.innerHTML = ''; // Clear existing rows
 
-            if (!leaderboard || leaderboard.length === 0) { //[cite: 554]
+            if (!leaderboard || leaderboard.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #666;">No players on the leaderboard yet. Be the first!</td></tr>`;
                 return;
             }
 
             leaderboard.forEach((entry, index) => {
                 const rankClass = index === 0 ? 'rank-1' : (index === 1 ? 'rank-2' : (index === 2 ? 'rank-3' : ''));
+                // Attempt to parse date string for display, handle invalid dates
+                const lastUpdatedDate = new Date(entry.timestamp);
+                const formattedDate = isNaN(lastUpdatedDate) ? 'Invalid Date' : lastUpdatedDate.toLocaleString();
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="${rankClass}">${index + 1}</td>
                     <td>${entry.player_name || 'Anonymous'}</td>
                     <td>${entry.score} (${(entry.distance_km || 0).toFixed(2)} km)</td>
-                    <td>${new Date(entry.timestamp).toLocaleString()}</td>
+                    <td>${formattedDate}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1116,11 +1130,13 @@
 
                 document.getElementById('submit-status').textContent = `Guess submitted! You were ${(scoreResult.distance / 1000).toFixed(2)} km away.`;
 
-                if (currentMarker && currentMarker.getElement()) {
-                    currentMarker.getElement().style.display = 'block'; // This was `currentMarker` in `New imp`
+                // The 'currentMarker' in your previous snippet was likely intended to be 'realLocationPinElement'
+                // as 'currentMarker' was declared as null and never assigned in the provided 'map Guessr stuff' context
+                if (realLocationPinElement && realLocationPinElement.getElement()) {
+                    realLocationPinElement.getElement().style.display = 'block';
                     console.log("Showing actual location marker on main map.");
                 } else {
-                    console.warn("Could not find currentMarker element to show.");
+                    console.warn("Could not find realLocationPinElement to show.");
                 }
 
                 // Show line between guess and actual location
