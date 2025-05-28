@@ -880,7 +880,7 @@
             document.getElementById('new-location').disabled = true;
             document.getElementById('submit-guess').disabled = true;
 
-            // Clear previous markers and lines (existing code is fine for this)
+            // Clear previous markers and lines (keep this part as it is)
             if (currentMarker) { currentMarker.remove(); currentMarker = null; }
             if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; }
             if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; }
@@ -916,20 +916,29 @@
                 }
                 const geocodeData = await geocodeResponse.json();
 
-                // Ensure geocodeData has the expected structure (adjust based on actual geocode API response)
-                // Assuming geocodeData looks like: { "lat": 12.34, "lng": 56.78, "city": "...", "country": "..." }
-                // OR { "coordinates": [lng, lat], "city_name": "...", "country_name": "..." } if your original code structure was correct for geocode
-                
-                // Based on your original code's expectation for `data.coordinates`, 
-                // let's assume the geocode API returns `{"coordinates": [lng, lat]}`
-                // If it returns `{"lat": ..., "lng": ...}`, you'll need to adjust `currentLocationCoords`
-                
-                if (!geocodeData || !geocodeData.coordinates || geocodeData.coordinates.length < 2) {
+                // --- START OF REQUIRED CHANGES ---
+
+                // Validate the structure of the geocode response
+                if (!geocodeData || !geocodeData.features || geocodeData.features.length === 0 ||
+                    !geocodeData.features[0].geometry || !geocodeData.features[0].geometry.coordinates ||
+                    geocodeData.features[0].geometry.coordinates.length < 2) {
                     throw new Error("Geocoding API did not return valid coordinates.");
                 }
 
-                currentLocationCoords = { lng: geocodeData.coordinates[0], lat: geocodeData.coordinates[1] };
-                document.getElementById('location-text').textContent = `Location: ${cityName}, ${geocodeData.country_name || ''} (${currentLocationCoords.lat.toFixed(4)}, ${currentLocationCoords.lng.toFixed(4)})`;
+                // Extract the first feature as it's the most relevant result
+                const feature = geocodeData.features[0];
+
+                // Coordinates are [longitude, latitude] in GeoJSON format
+                currentLocationCoords = {
+                    lng: feature.geometry.coordinates[0],
+                    lat: feature.geometry.coordinates[1]
+                };
+
+                // Use the place_name for the location text, which includes city, region, country
+                document.getElementById('location-text').textContent =
+                    `Location: ${feature.place_name} (${currentLocationCoords.lat.toFixed(4)}, ${currentLocationCoords.lng.toFixed(4)})`;
+
+                // --- END OF REQUIRED CHANGES ---
 
                 // Set initial map view to the new location (but hide it from the user)
                 mainMap.setCenter(currentLocationCoords);
