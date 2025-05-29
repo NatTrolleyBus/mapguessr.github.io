@@ -179,7 +179,7 @@
     </main>
 
     <script>
-        const CLIENT_ID = 'YOUR_CLIENT_ID'; // Replace with your actual Client ID
+        const CLIENT_ID = 'YOUR_CLIENT_ID'; // Replace with your actual Client ID from Transitspotter
         const REDIRECT_URI = window.location.origin + '/auth-callback';
         const AUTH_SERVER_BASE_URL = 'https://auth.transitspotter.com/external';
 
@@ -217,7 +217,7 @@
             'game-setup': gameSetupSection,
             'game': gameSection,
             'account': accountSection,
-            'leaderboard': leaderboardSection, // Leaderboard is always visible now
+            'leaderboard': leaderboardSection,
         };
         let currentPage = 'game-setup';
 
@@ -226,7 +226,8 @@
                 if (section) section.style.display = 'none';
             });
             if (pages[pageId]) pages[pageId].style.display = 'block';
-            leaderboardSection.style.display = 'block'; // Always show leaderboard
+            // The leaderboard is now always visible on the page, regardless of other sections
+            leaderboardSection.style.display = 'block';
             currentPage = pageId;
         }
 
@@ -275,6 +276,7 @@
                 } else {
                     console.error('No features found for geocoding:', cityName);
                     alert('Could not find location for city. Starting next round.');
+                    // This might cause an infinite loop if many cities fail, consider a counter or skip
                     if (roundCount < selectedRounds) {
                         roundCount++;
                         roundCountDisplay.textContent = `Round: ${roundCount}`;
@@ -511,6 +513,7 @@
                 }
                 if (scoreResponse.ok) {
                     const scoreData = await scoreResponse.json();
+                    // The /api/score endpoint returns total score, not session score
                     document.getElementById('account-user-score').textContent = scoreData.score !== undefined ? scoreData.score : 'N/A';
                 }
                 if (roleResponse.ok) {
@@ -554,7 +557,8 @@
                     console.error('Failed to submit highscore:', data.error);
                     alert('Failed to submit highscore: ' + (data.error || 'Unknown error'));
                 }
-            } catch (error) {
+            }
+            catch (error) {
                 console.error('Error submitting highscore:', error);
                 alert('Error submitting highscore: ' + error.message);
             }
@@ -621,7 +625,7 @@
             logoutBtn.addEventListener('click', appLogout);
             myAccountBtn.addEventListener('click', () => {
                 if (currentPage === 'account') {
-                    showPage('game-setup');
+                    showPage('game-setup'); // Toggle back to game setup if already on account
                 } else {
                     fetchAccountDetails();
                     showPage('account');
