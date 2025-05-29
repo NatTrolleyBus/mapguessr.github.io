@@ -15,7 +15,6 @@
             color: #333;
         }
 
-
         header {
             background-color: #0cc0df;
             padding: 20px;
@@ -23,7 +22,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            flex-wrap: wrap;
         }
         header div {
             display: flex;
@@ -33,1169 +32,667 @@
         h1 {
             color: #444;
             margin-top: 0;
-            margin-right: 20px; /* Space between title and buttons */
+            margin-right: 20px;
         }
         main {
             padding: 20px;
-            max-width: 1900px;
-            margin: 0 auto;
+            max-width: 1200px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         section {
-            margin-bottom: 30px;
-        }
-        .maps-container {
-            position: relative;
-            height: 900px; /* Fixed height for the container */
-            width: 100%;
             margin-bottom: 20px;
-            overflow: hidden;
-        }
-        #maptiler-map {
-            position: relative;
-            width: 100%;
-            height: 100%;
+            padding: 15px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            overflow: hidden;
-            background-color: #eaeaea;
         }
-        #overlay-map {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 250px;
-            height: 150px;
-            border: 2px solid #555;
-            border-radius: 5px;
-            overflow: hidden;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 10;
-            transition: all 0.4s ease-in-out;
+        #map-container {
+            width: 100%;
+            height: 500px;
+            margin-bottom: 20px;
         }
-        #overlay-map:hover:not(.overlay-map-fullscreen) {
-            width: 400px;
-            height: 300px;
+        #game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
         }
-        .overlay-map-fullscreen {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important; /* Fill the entire maps-container */
-            z-index: 100 !important;
-            border: none !important;
-            border-radius: 0 !important;
-            box-shadow: none !important; /* Remove shadow when fullscreen */
+        #game-info div {
+            font-size: 1.2em;
+            font-weight: bold;
         }
-        .submit-container {
+        .buttons-container {
+            margin-top: 20px;
             text-align: center;
-            margin-bottom: 30px;
         }
-        .submit-btn, .new-location-btn, .auth-btn {
+        button {
             background-color: #0cc0df;
             color: white;
+            padding: 10px 15px;
             border: none;
-            padding: 12px 30px;
-            font-size: 1.1em;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s;
-            margin: 0 10px;
-        }
-        .submit-btn:hover, .new-location-btn:hover, .auth-btn:hover {
-            background-color: #0aa8c4;
-        }
-        .auth-btn {
-            padding: 8px 15px;
             font-size: 1em;
-            margin-left: 10px;
-            background-color: #007bff; /* Default for login/account */
+            margin: 5px;
+            transition: background-color 0.3s ease;
         }
-        #register-btn {
+        button:hover {
+            background-color: #0a9cb7;
+        }
+        input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .submit-btn {
             background-color: #28a745;
         }
-        #logout-btn {
-            background-color: #dc3545;
+        .submit-btn:hover {
+            background-color: #218838;
         }
-        #my-account-btn {
-            background-color: #6c757d; /* Grey for account button */
+        #leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
         }
-        footer {
-            background-color: #0cc0df;
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
-            font-size: 0.9em;
-            margin-top: 40px;
-        }
-        .maptiler-ctrl-group,
-        .maptiler-ctrl,
-        .maplibregl-ctrl-group,
-        .maplibregl-ctrl {
-            display: none !important;
-        }
-        .guess-pin {
-            position: absolute;
-            width: 24px; /* Width of the pin */
-            height: 36px; /* Height of the pin */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%23e53e3e" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
-            background-size: contain;
-            background-repeat: no-repeat;
-            transform: translate3d(-50%, -100%, 0);
-            z-index: 101;
-            pointer-events: none;
-        }
-        .real-location-pin {
-            position: absolute;
-            width: 24px; /* Width of the pin */
-            height: 36px; /* Height of the pin */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%2328a745" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
-            background-size: contain;
-            background-repeat: no-repeat;
-            transform: translate3d(-50%, -100%, 0);
-            z-index: 102;
-            pointer-events: none;
-        }
-        #next-round-btn {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 30px;
-            font-size: 1.1em;
-            background-color: #0cc0df;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 110; /* Ensure it's above the maps */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s;
-        }
-        #next-round-btn:hover {
-            background-color: #0aa8c4;
-        }
-        #round-score-display, #total-score-display {
-            position: fixed; /* Fixed position relative to viewport */
-            padding: 10px 15px;
-            background-color: black; /* Changed to solid black */
-            color: white;
-            font-size: 1.2em;
-            border-radius: 5px;
-            z-index: 1000; /* High z-index to be on top */
-            display: none; /* Hidden by default */
-            transition: opacity 0.3s ease-in-out;
-            pointer-events: none;
-            border: 1px solid white; /* Added white border */
-        }
-        #round-score-display {
-            bottom: 20px;
-            left: 20px;
-        }
-        #total-score-display {
-            bottom: 20px;
-            right: 20px;
-        }
-        #account-page {
-            background-color: #f9f9f9;
+        #leaderboard-table th, #leaderboard-table td {
             border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 30px;
-            margin-top: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            display: none; /* Hidden by default */
+            padding: 8px;
+            text-align: left;
         }
-        #account-page h2 {
-            color: #0cc0df;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        #account-page p {
-            font-size: 1.1em;
-            margin-bottom: 10px;
-        }
-        #account-page strong {
-            color: #555;
+        #leaderboard-table th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
     <header>
+        <h1>Map Guessr</h1>
         <div>
-            <h1>Map Guessr</h1>
-            <p>May 15th 2025 - V9 (Score Calculation Fix)</p>
-        </div>
-        <div id="auth-container">
-            <button id="login-btn" class="auth-btn">Login</button>
-            <button id="register-btn" class="auth-btn">Register</button>
-            <button id="my-account-btn" class="auth-btn" style="display:none;">My Account</button>
-            <button id="logout-btn" class="auth-btn" style="display:none;">Logout</button>
-            <span id="user-info" style="margin-left: 20px; color: #fff;"></span>
+            <button id="login-btn">Login</button>
+            <button id="register-btn">Register</button>
+            <button id="my-account-btn" style="display: none;">My Account</button>
+            <button id="logout-btn" style="display: none;">Logout</button>
         </div>
     </header>
-    <main style="display:none;">
-        <section id="game-section">
-            <h2>About</h2>
-            <p>Game Rules.</p>
-        </section>
-        <section id="game-maps-section">
-            <h2>Maps</h2>
-            <div class="maps-container">
-                <div id="maptiler-map"></div>
-                <div id="overlay-map"></div>
-            </div>
-            <div class="submit-container">
-                <button class="new-location-btn" id="new-location">New Location</button>
-                <button class="submit-btn" id="submit-guess">Submit</button>
-            </div>
-        </section>
-        <section id="game-answers-section">
-            <h2>Game Answers</h2>
-            <ul>
-                <li id="location-text">The location label/place goes here/coordinates</li>
-                <li id="guessed-coords">The guessed coordinates</li>
-                <li id="submit-status">Submit button clicked? status goes here</li>
-                <li id="points-score">Future points/scores system goes here</li>
-                <li id="round-count">Round: 1</li>
-            </ul>
+
+    <main>
+        <section id="auth-info" style="display: none;">
+            <h2>Welcome <span id="username-display"></span>!</h2>
+            <p>You are logged in.</p>
         </section>
 
+        <section id="game-setup-section">
+            <h2>Game Setup</h2>
+            <div>
+                <label for="num-rounds-select">Select Number of Rounds:</label>
+                <select id="num-rounds-select">
+                    <option value="5">5 Rounds</option>
+                    <option value="10">10 Rounds</option>
+                    <option value="20">20 Rounds (Ranked)</option>
+                </select>
+                <button id="start-game-btn" class="submit-btn">Start New Game</button>
+            </div>
+        </section>
 
-        <section id="account-page" style="display:none;">
-            <h2>Account Information</h2>
-            <p><strong>User ID:</strong> <span id="account-user-id">Not available</span></p>
-            <p><strong>Client ID:</strong> <span id="account-client-id">Not available</span></p>
-            <p><strong>Token Expiry:</strong> <span id="account-token-expiry">Not available</span></p>
-            <p><strong>Token Issued At:</strong> <span id="account-token-iat">Not available</span></p>
-            <p><strong>Token Type:</strong> <span id="account-token-type">Not available</span></p>
-            <p><strong>Token Active:</strong> <span id="account-token-active">Not available</span></p>
+        <section id="game-section" style="display: none;">
+            <h2>Map Guessr Game</h2>
+            <div id="game-info">
+                <div id="round-count">Round: 1</div>
+                <div id="total-score-display">Total Score: 0</div>
+            </div>
+            <div id="map-container"></div>
+            <div class="buttons-container">
+                <button id="guess-btn">Guess Location</button>
+                <button id="next-round-btn" style="display: none;">Next Round</button>
+            </div>
+            <div id="score-display"></div>
+            <div id="distance-display"></div>
+        </section>
+
+        <section id="leaderboard-section">
+            <h2>Global Leaderboard (20-Round Highscores)</h2>
+            <table id="global-leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+            <h3>Your 20-Round Highscore Rank:</h3>
+            <p id="user-global-rank">Loading...</p>
+        </section>
+
+        <section id="account-section" style="display: none;">
+            <h2>My Account</h2>
+            <p>User ID: <span id="account-user-id"></span></p>
+            <p>Email: <span id="account-user-email"></span></p>
+            <p>Role: <span id="account-user-role"></span></p>
+            <p>Your current score: <span id="account-user-score"></span></p>
         </section>
     </main>
-    <footer>
-        <p>Made by Nathann and Jason</p>
-    </footer>
-
-
-    <div id="round-score-display"></div>
-    <div id="total-score-display"></div>
-
 
     <script>
-        // --- OAuth Configuration ---
-        const OAUTH_CLIENT_ID = 'mapguessr-github-io.pages.dev'; // IMPORTANT: Replace with your actual client_id from transitspotter
-        const OAUTH_REDIRECT_URI = window.location.href.split('?')[0]; // Assumes the current page handles the callback and is registered
-        const AUTH_SERVER_BASE_URL = 'https://auth.transitspotter.com';
+        const CLIENT_ID = 'YOUR_CLIENT_ID'; // Replace with your actual Client ID
+        const REDIRECT_URI = window.location.origin + '/auth-callback';
+        const AUTH_SERVER_BASE_URL = 'https://auth.transitspotter.com/external';
 
-
-        // --- Map Guessr Configuration ---
-        const apiKey = 'ZS9RHHRim7f1OZRKuI6n';
-        maptilersdk.config.apiKey = apiKey;
-        const randomCityApiUrl = 'https://random-city-api.vercel.app/api/random-city';
-        let currentMarker = null;
-        let userGuessLngLat = null;
-        let guessPinElement = null;
-        let currentLocationCoords = null;
+        let map;
+        let marker;
+        let randomLatLng;
         let totalScore = 0;
-        let mainMap = null;
-        let overlayMap = null;
-        let realLocationPinElement = null;
         let roundCount = 1;
-        const zoomLevel = 15;
-        const customStyleUrl = 'https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=' + apiKey;
-        const overlayStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey;
-        const initialCenter = [0, 0];
-        const initialZoom = -1.0;
-        let lineLayerVisible = false;
-
-
-
-
-        // --- Application State ---
         let isAuthenticated = false;
-        let currentPage = 'game'; // 'game' or 'account'
+        let currentUserId = null; // To store the logged-in user's ID
+        let currentUserName = ''; // To store the logged-in user's name
+        let selectedRounds = 5; // Default value
 
+        // Page elements
+        const authInfoSection = document.getElementById('auth-info');
+        const usernameDisplay = document.getElementById('username-display');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const myAccountBtn = document.getElementById('my-account-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const gameSection = document.getElementById('game-section');
+        const accountSection = document.getElementById('account-section');
+        const scoreDisplay = document.getElementById('score-display');
+        const distanceDisplay = document.getElementById('distance-display');
+        const guessBtn = document.getElementById('guess-btn');
+        const nextRoundBtn = document.getElementById('next-round-btn');
+        const roundCountDisplay = document.getElementById('round-count');
+        const totalScoreDisplay = document.getElementById('total-score-display');
+        const numRoundsSelect = document.getElementById('num-rounds-select');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const gameSetupSection = document.getElementById('game-setup-section');
+        const leaderboardSection = document.getElementById('leaderboard-section');
 
-        // --- OAuth Helper Functions ---
-        async function generateCodeVerifierAndChallenge() {
-            const codeVerifier = generateRandomString(64);
-            const encoder = new TextEncoder();
-            const data = encoder.encode(codeVerifier);
-            const digest = await crypto.subtle.digest('SHA-256', data);
-            const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=/g, '');
-            return { codeVerifier, codeChallenge };
+        const pages = {
+            'game-setup': gameSetupSection,
+            'game': gameSection,
+            'account': accountSection,
+            'leaderboard': leaderboardSection, // Leaderboard is always visible now
+        };
+        let currentPage = 'game-setup';
+
+        function showPage(pageId) {
+            Object.values(pages).forEach(section => {
+                if (section) section.style.display = 'none';
+            });
+            if (pages[pageId]) pages[pageId].style.display = 'block';
+            leaderboardSection.style.display = 'block'; // Always show leaderboard
+            currentPage = pageId;
         }
 
+        async function initMap() {
+            if (map) map.remove(); // Remove existing map if any
+            map = new maptilersdk.Map({
+                container: 'map-container',
+                style: maptilersdk.MapStyle.SATELLITE,
+                center: [0, 0],
+                zoom: 1,
+            });
 
-        function generateRandomString(length) {
-            const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-            let result = '';
-            const randomValues = new Uint8Array(length);
-            crypto.getRandomValues(randomValues);
-            for (let i = 0; i < length; i++) {
-                result += charset[randomValues[i] % charset.length];
+            map.on('click', (e) => {
+                if (marker) marker.remove();
+                marker = new maptilersdk.Marker({ color: "#FF0000" })
+                    .setLngLat(e.lngLat)
+                    .addTo(map);
+            });
+        }
+
+        async function startNewRound() {
+            scoreDisplay.textContent = '';
+            distanceDisplay.textContent = '';
+            guessBtn.style.display = 'inline-block';
+            nextRoundBtn.style.display = 'none';
+            if (marker) marker.remove();
+            marker = null;
+
+            // Fetch a new random city
+            try {
+                const token = localStorage.getItem('access_token');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                const response = await fetch('/api/cities', { headers });
+                if (!response.ok) throw new Error('Failed to fetch city');
+                const data = await response.json();
+                const cityName = data.city;
+
+                const geoResponse = await fetch(`/api/geocode?city=${encodeURIComponent(cityName)}`, { headers });
+                if (!geoResponse.ok) throw new Error('Failed to geocode city');
+                const geoData = await geoResponse.json();
+
+                if (geoData.features && geoData.features.length > 0) {
+                    const coords = geoData.features[0].geometry.coordinates;
+                    randomLatLng = [coords[0], coords[1]]; // [lng, lat]
+                    map.flyTo({ center: [0, 0], zoom: 1, speed: 0.8 }); // Reset map view for new guess
+                } else {
+                    console.error('No features found for geocoding:', cityName);
+                    alert('Could not find location for city. Starting next round.');
+                    if (roundCount < selectedRounds) {
+                        roundCount++;
+                        roundCountDisplay.textContent = `Round: ${roundCount}`;
+                        startNewRound();
+                    } else {
+                        endGame();
+                    }
+                }
+            } catch (error) {
+                console.error('Error starting new round:', error);
+                alert('Error starting new round: ' + error.message + '. Please try again.');
+                endGame(); // End game on error
             }
-            return result;
         }
 
-
-        async function startOAuthFlow() {
-            const { codeVerifier, codeChallenge } = await generateCodeVerifierAndChallenge();
-            const state = generateRandomString(32);
-            sessionStorage.setItem('code_verifier', codeVerifier);
-            sessionStorage.setItem('oauth_state', state);
-
-
-            const authUrl = new URL(`${AUTH_SERVER_BASE_URL}/external/authorize`);
-            authUrl.searchParams.append('response_type', 'code');
-            authUrl.searchParams.append('client_id', OAUTH_CLIENT_ID);
-            authUrl.searchParams.append('redirect_uri', OAUTH_REDIRECT_URI);
-            authUrl.searchParams.append('code_challenge', codeChallenge);
-            authUrl.searchParams.append('code_challenge_method', 'S256');
-            authUrl.searchParams.append('state', state);
-            window.location.href = authUrl.toString();
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
         }
 
+        function calculateScore(distance) {
+            const maxScore = 1000;
+            const maxDistanceForScore = 2000; // km
+            if (distance >= maxDistanceForScore) return 0;
+            return Math.round(maxScore * (1 - (distance / maxDistanceForScore)));
+        }
+
+        function resetGame() {
+            totalScore = 0;
+            roundCount = 1;
+            roundCountDisplay.textContent = `Round: ${roundCount}`;
+            totalScoreDisplay.textContent = `Total Score: ${totalScore}`;
+            scoreDisplay.textContent = '';
+            distanceDisplay.textContent = '';
+            guessBtn.style.display = 'inline-block';
+            nextRoundBtn.style.display = 'none';
+            if (marker) marker.remove();
+            marker = null;
+        }
+
+        function endGame() {
+            alert(`Game Over! Your final score is: ${totalScore}`);
+            if (selectedRounds === 20) {
+                submitGlobalHighscore(totalScore); // Submit 20-round score
+            }
+            showPage('game-setup'); // Go back to game setup
+        }
+
+        // Authentication functions
+        function generateRandomString(length) {
+            const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let randomString = '';
+            for (let i = 0; i < length; i++) {
+                randomString += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+            return randomString;
+        }
+
+        function startOAuthFlow() {
+            const state = generateRandomString(16);
+            localStorage.setItem('oauth_state', state);
+            const authUrl = `${AUTH_SERVER_BASE_URL}/oauth/authorize?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${state}`;
+            window.location.href = authUrl;
+        }
 
         async function handleOAuthCallback() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             const state = urlParams.get('state');
-            const error = urlParams.get('error');
+            const storedState = localStorage.getItem('oauth_state');
 
-
-            if (error) {
-                console.error('OAuth error:', error, urlParams.get('error_description'));
-                // Using a custom message box instead of alert()
-                showMessageBox(`OAuth Error: ${error} - ${urlParams.get('error_description') || 'Unknown error'}`);
+            if (!code || !state || state !== storedState) {
+                alert('OAuth callback error: Invalid state or missing code.');
                 return false;
             }
-
-
-            const storedState = sessionStorage.getItem('oauth_state');
-            if (!state || state !== storedState) {
-                console.error('Invalid state parameter');
-                showMessageBox('Error: Invalid state. CSRF attack suspected.');
-                return false;
-            }
-
-
-            const codeVerifier = sessionStorage.getItem('code_verifier');
-            if (!codeVerifier) {
-                console.error('Code verifier not found');
-                showMessageBox('Error: Code verifier missing. Please try logging in again.');
-                return false;
-            }
-
 
             try {
-                const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/token`, {
+                const tokenResponse = await fetch(`${AUTH_SERVER_BASE_URL}/oauth/token`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Origin': window.location.origin
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         grant_type: 'authorization_code',
+                        client_id: CLIENT_ID,
+                        redirect_uri: REDIRECT_URI,
                         code: code,
-                        client_id: OAUTH_CLIENT_ID,
-                        redirect_uri: OAUTH_REDIRECT_URI,
-                        code_verifier: codeVerifier
-                    })
+                    }),
                 });
-                const tokenData = await response.json();
 
-
-                if (tokenData.error) {
-                    console.error('Token error:', tokenData.error, tokenData.error_description);
-                    showMessageBox(`Token Error: ${tokenData.error} - ${tokenData.error_description || 'Failed to get token'}`);
-                    return false;
+                if (!tokenResponse.ok) {
+                    const errorData = await tokenResponse.json();
+                    throw new Error(`Failed to get token: ${errorData.error_description || tokenResponse.statusText}`);
                 }
 
-
+                const tokenData = await tokenResponse.json();
                 localStorage.setItem('access_token', tokenData.access_token);
-                localStorage.setItem('refresh_token', tokenData.refresh_token);
-                localStorage.setItem('token_expiry', Date.now() + (tokenData.expires_in * 1000));
+                localStorage.setItem('refresh_token', tokenData.refresh_token); // Store refresh token if available
+                localStorage.setItem('token_expiry', Date.now() + tokenData.expires_in * 1000);
 
-
-                sessionStorage.removeItem('code_verifier');
-                sessionStorage.removeItem('oauth_state');
+                await fetchUserInfo();
+                updateAuthUI();
+                alert('Login successful!');
                 return true;
-            } catch (err) {
-                console.error('Token exchange error:', err);
-                showMessageBox('Error exchanging code for token. Please check console.');
-                return false;
-            }
-        }
 
-
-        async function refreshToken() {
-            const refreshTokenVal = localStorage.getItem('refresh_token');
-            if (!refreshTokenVal) return false;
-
-
-            try {
-                const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/token`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Origin': window.location.origin
-                    },
-                    body: JSON.stringify({
-                        grant_type: 'refresh_token',
-                        refresh_token: refreshTokenVal,
-                        client_id: OAUTH_CLIENT_ID
-                    })
-                });
-                const tokenData = await response.json();
-
-
-                if (tokenData.error) {
-                    console.error('Refresh error:', tokenData.error, tokenData.error_description);
-                    localStorage.clear();
-                    return false;
-                }
-                localStorage.setItem('access_token', tokenData.access_token);
-                if (tokenData.refresh_token) {
-                    localStorage.setItem('refresh_token', tokenData.refresh_token);
-                }
-                localStorage.setItem('token_expiry', Date.now() + (tokenData.expires_in * 1000));
-                return true;
             } catch (error) {
-                console.error('Token refresh error:', error);
+                console.error('OAuth callback error:', error);
+                alert('Login failed: ' + error.message);
                 return false;
+            } finally {
+                localStorage.removeItem('oauth_state');
             }
         }
 
+        async function fetchUserInfo() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                currentUserId = null;
+                currentUserName = '';
+                return false;
+            }
+            try {
+                const response = await fetch('/api/user', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const userData = await response.json();
+                    if (userData.valid && userData.user) {
+                        currentUserId = userData.user.id;
+                        currentUserName = userData.user.name || userData.user.email; // Use name or email
+                        usernameDisplay.textContent = currentUserName;
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.error('Error fetching user info:', e);
+            }
+            currentUserId = null;
+            currentUserName = '';
+            return false;
+        }
 
         async function ensureValidToken() {
-            const accessToken = localStorage.getItem('access_token');
-            if (!accessToken) return false;
+            const token = localStorage.getItem('access_token');
+            const expiry = localStorage.getItem('token_expiry');
 
-
-            const expiryTime = parseInt(localStorage.getItem('token_expiry'), 10);
-            if (isNaN(expiryTime)) {
-                localStorage.clear();
-                return false;
+            if (!token || !expiry || Date.now() >= expiry) {
+                // Token expired or not present, try refreshing or require login
+                const refreshToken = localStorage.getItem('refresh_token');
+                if (refreshToken) {
+                    try {
+                        const refreshResponse = await fetch(`${AUTH_SERVER_BASE_URL}/oauth/token`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                grant_type: 'refresh_token',
+                                client_id: CLIENT_ID,
+                                refresh_token: refreshToken,
+                            }),
+                        });
+                        if (refreshResponse.ok) {
+                            const data = await refreshResponse.json();
+                            localStorage.setItem('access_token', data.access_token);
+                            localStorage.setItem('token_expiry', Date.now() + data.expires_in * 1000);
+                            await fetchUserInfo();
+                            return true;
+                        } else {
+                            console.error('Failed to refresh token:', await refreshResponse.json());
+                            appLogout(); // Clear tokens if refresh fails
+                            return false;
+                        }
+                    } catch (e) {
+                        console.error('Error refreshing token:', e);
+                        appLogout();
+                        return false;
+                    }
+                }
+                return false; // No refresh token or refresh failed
             }
-            if (Date.now() > expiryTime - 60000) { // Refresh if expiring in the next minute
-                console.log("Token expired or expiring soon, attempting refresh...");
-                return await refreshToken();
-            }
+            await fetchUserInfo(); // Fetch user info if token is still valid
             return true;
         }
 
-
-        async function appLogout() {
-            const refreshTokenVal = localStorage.getItem('refresh_token');
-            if (refreshTokenVal) {
-                try {
-                    await fetch(`${AUTH_SERVER_BASE_URL}/external/revoke`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Origin': window.location.origin
-                        },
-                        body: JSON.stringify({
-                            token: refreshTokenVal,
-                            token_type_hint: 'refresh_token'
-                        })
-                    });
-                } catch (error) {
-                    console.error('Error revoking token:', error);
-                }
-            }
+        function appLogout() {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('token_expiry');
             isAuthenticated = false;
-            resetGameAndUI();
+            currentUserId = null;
+            currentUserName = '';
             updateAuthUI();
-            currentPage = 'game'; // Reset to game page on logout
-            showPage(currentPage);
-        }
-       
-        function resetGameAndUI() {
-            // Remove map instances if they exist
-            if (mainMap) { mainMap.remove(); mainMap = null; }
-            if (overlayMap) { overlayMap.remove(); overlayMap = null; }
-
-
-            // Clear markers and pins
-            if (currentMarker) { currentMarker.remove(); currentMarker = null; }
-            if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; }
-            if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; }
-           
-            // Reset game state variables
-            userGuessLngLat = null;
-            currentLocationCoords = null;
-            totalScore = 0;
-            roundCount = 1;
-            lineLayerVisible = false; // Assuming this should be reset
-
-
-            // Reset UI text elements
-            document.getElementById('location-text').textContent = 'The location label/place goes here/coordinates';
-            document.getElementById('guessed-coords').textContent = 'The guessed coordinates';
-            document.getElementById('submit-status').textContent = 'Submit button clicked? status goes here';
-            document.getElementById('points-score').textContent = 'Future points/scores system goes here';
-            document.getElementById('round-count').textContent = 'Round: 1';
-           
-            const existingNextButton = document.getElementById('next-round-btn');
-            if (existingNextButton) existingNextButton.remove();
-
-
-            document.getElementById('round-score-display').style.display = 'none';
-            document.getElementById('total-score-display').style.display = 'none';
-
-
-            // Disable game buttons
-            const submitGuessBtnElem = document.getElementById('submit-guess');
-            if(submitGuessBtnElem) submitGuessBtnElem.disabled = true;
-            const newLocationBtnElem = document.getElementById('new-location');
-            if(newLocationBtnElem) newLocationBtnElem.disabled = true;
+            alert('Logged out.');
+            showPage('game-setup'); // Go back to game setup
         }
 
-
-        // Custom message box function instead of alert()
-        function showMessageBox(message) {
-            const messageBox = document.createElement('div');
-            messageBox.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background-color: #f44336; /* Red background for error */
-                color: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                z-index: 2000;
-                font-size: 1.2em;
-                text-align: center;
-                max-width: 80%;
-            `;
-            messageBox.textContent = message;
-            document.body.appendChild(messageBox);
-
-
-            setTimeout(() => {
-                messageBox.remove();
-            }, 5000); // Remove after 5 seconds
-        }
-
-
-        async function fetchAndDisplayUserInfo() {
-            const accessToken = localStorage.getItem('access_token');
-            if (!accessToken) {
-                document.getElementById('account-user-id').textContent = 'Not logged in.';
-                return;
-            }
-
-
-            try {
-                const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/introspect`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Origin': window.location.origin
-                    },
-                    body: JSON.stringify({
-                        token: accessToken,
-                        token_type_hint: 'access_token'
-                    })
-                });
-                const userData = await response.json();
-
-
-                if (userData.active) {
-                    document.getElementById('account-user-id').textContent = userData.sub || 'N/A';
-                    document.getElementById('account-client-id').textContent = userData.client_id || 'N/A';
-                    document.getElementById('account-token-type').textContent = userData.token_type || 'N/A';
-                    document.getElementById('account-token-active').textContent = 'Yes';
-
-
-                    if (userData.exp) {
-                        const expiryDate = new Date(userData.exp * 1000);
-                        document.getElementById('account-token-expiry').textContent = expiryDate.toLocaleString();
-                    } else {
-                        document.getElementById('account-token-expiry').textContent = 'N/A';
-                    }
-
-
-                    if (userData.iat) {
-                        const issuedAtDate = new Date(userData.iat * 1000);
-                        document.getElementById('account-token-iat').textContent = issuedAtDate.toLocaleString();
-                    } else {
-                        document.getElementById('account-token-iat').textContent = 'N/A';
-                    }
-                    document.getElementById('user-info').textContent = `Logged In as: ${userData.sub || 'User'}`;
-                } else {
-                    document.getElementById('account-user-id').textContent = 'Token is inactive.';
-                    document.getElementById('account-client-id').textContent = 'N/A';
-                    document.getElementById('account-token-expiry').textContent = 'N/A';
-                    document.getElementById('account-token-iat').textContent = 'N/A';
-                    document.getElementById('account-token-type').textContent = 'N/A';
-                    document.getElementById('account-token-active').textContent = 'No';
-                    document.getElementById('user-info').textContent = `Logged In (Token Inactive)`;
-                }
-
-
-            } catch (error) {
-                console.error('Error fetching user info:', error);
-                document.getElementById('account-user-id').textContent = 'Error fetching user info.';
-                document.getElementById('user-info').textContent = `Logged In (Error)`;
-            }
-        }
-
-
-        // --- UI Update Functions ---
         function updateAuthUI() {
-            const loginBtn = document.getElementById('login-btn');
-            const registerBtn = document.getElementById('register-btn');
-            const logoutBtn = document.getElementById('logout-btn');
-            const myAccountBtn = document.getElementById('my-account-btn');
-            const userInfoDisplay = document.getElementById('user-info');
-            const mainContent = document.querySelector('main');
-
-
             if (isAuthenticated) {
+                authInfoSection.style.display = 'block';
                 loginBtn.style.display = 'none';
                 registerBtn.style.display = 'none';
-                logoutBtn.style.display = 'inline-block';
                 myAccountBtn.style.display = 'inline-block';
-                mainContent.style.display = 'block'; // Show main content area
-                fetchAndDisplayUserInfo(); // Fetch and display user info when authenticated
-                if (!mainMap && currentPage === 'game') { // Initialize game only if not already done and on game page
-                  initializeGame();
-                }
+                logoutBtn.style.display = 'inline-block';
             } else {
+                authInfoSection.style.display = 'none';
                 loginBtn.style.display = 'inline-block';
                 registerBtn.style.display = 'inline-block';
-                logoutBtn.style.display = 'none';
                 myAccountBtn.style.display = 'none';
-                userInfoDisplay.textContent = ''; // Clear user info
-                mainContent.style.display = 'none'; // Hide main content area
-                if (mainMap) { // If maps were initialized, remove them and reset state
-                    resetGameAndUI();
-                }
-                // Clear account info display
-                document.getElementById('account-user-id').textContent = 'Not logged in.';
-                document.getElementById('account-client-id').textContent = 'Not available';
-                document.getElementById('account-token-expiry').textContent = 'Not available';
-                document.getElementById('account-token-iat').textContent = 'Not available';
-                document.getElementById('account-token-type').textContent = 'Not available';
-                document.getElementById('account-token-active').textContent = 'Not available';
+                logoutBtn.style.display = 'none';
             }
-            showPage(currentPage); // Ensure correct page is shown
+            // Fetch and update leaderboard on auth change
+            fetchGlobalLeaderboard();
         }
 
-
-        function showPage(pageName) {
-            const gameSections = document.querySelectorAll('#game-section, #game-maps-section, #game-answers-section');
-            const accountPage = document.getElementById('account-page');
-
-
-            if (pageName === 'game') {
-                gameSections.forEach(section => section.style.display = 'block');
-                accountPage.style.display = 'none';
-                if (isAuthenticated && !mainMap) { // Re-initialize game if on game page and not initialized
-                    initializeGame();
-                }
-            } else if (pageName === 'account') {
-                gameSections.forEach(section => section.style.display = 'none');
-                accountPage.style.display = 'block';
-                // No need to de-initialize maps here, just hide game sections
-            }
-            currentPage = pageName;
-        }
-       
-        // --- Original Game Functions ---
-        function getRandomCoordinateInBounds(bounds) {
-            const minLng = bounds[0];
-            const minLat = bounds[1];
-            const maxLng = bounds[2];
-            const maxLat = bounds[3];
-            const buffer = 0.001;
-            const bufferedMinLng = minLng + (maxLng - minLng) * buffer;
-            const bufferedMinLat = minLat + (maxLat - minLat) * buffer;
-            const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer;
-            const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
-            const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
-            const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
-            return [randomLng, randomLat];
-        }
-
-
-        function addOrUpdateMarker(lngLatInput) {
-            const lngLatObject = Array.isArray(lngLatInput) ? new maptilersdk.LngLat(lngLatInput[0], lngLatInput[1]) : lngLatInput;
-            if (!(lngLatObject instanceof maptilersdk.LngLat) || typeof lngLatObject.lng !== 'number' || typeof lngLatObject.lat !== 'number') {
-                console.error("addOrUpdateMarker received invalid LngLat data:", lngLatInput);
-                return;
-            }
-            if (currentMarker) {
-                currentMarker.remove();
-            }
-            currentMarker = new maptilersdk.Marker()
-                .setLngLat(lngLatObject)
-                .addTo(mainMap);
-            currentLocationCoords = lngLatObject;
-            if (currentMarker && currentMarker.getElement()) {
-                currentMarker.getElement().style.display = 'none';
-            }
-            console.log("currentLocationCoords set to LngLat object:", currentLocationCoords);
-        }
-
-
-        function calculateDistanceInMeters(lat1, lon1, lat2, lon2) {
-            if (typeof lat1 !== 'number' || typeof lon1 !== 'number' || typeof lat2 !== 'number' || typeof lon2 !== 'number') {
-                console.error("Invalid input types for calculateDistanceInMeters:", lat1, lon1, lat2, lon2);
-                return NaN;
-            }
-            const R = 6371e3; // Earth's radius in meters
-            const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
-            const φ2 = lat2 * Math.PI / 180;
-            const Δφ = (lat2 - lat1) * Math.PI / 180;
-            const Δλ = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            const c = 2 * Math.atan2(Math.sqrt(Math.max(0, a)), Math.sqrt(Math.max(0, 1 - a)));
-            const distance = R * c; // Distance in meters
-            return distance;
-        }
-
-
-        function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) {
-            const MAX_SCORE = 5000; // Maximum points per round
-            const FIVE_K_THRESHOLD_METERS = 100; // A small distance for a guaranteed 5000
-            const distance = calculateDistanceInMeters(lat1, lon1, lat2, lon2);
-            if (isNaN(distance)) {
-                console.error("Distance calculation returned NaN.");
-                return { distance: NaN, score: NaN }; // Propagate NaN if distance is invalid
-            }
-            let score;
-            if (distance <= FIVE_K_THRESHOLD_METERS) {
-                score = MAX_SCORE;
-            } else {
-                const decayFactor = 2000000; // Adjust based on desired scoring curve
-                score = MAX_SCORE * Math.exp(-distance / decayFactor);
-                score = Math.max(0, Math.round(score));
-            }
-            return { distance: distance, score: score };
-        }
-
-
-        function updateGuessPinPosition() {
-            if (!overlayMap || !userGuessLngLat || !guessPinElement) return;
-            if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number') {
-                console.error("Invalid userGuessLngLat object for positioning:", userGuessLngLat);
-                return;
-            }
-            const pixelCoords = overlayMap.project(userGuessLngLat);
-            guessPinElement.style.left = `${pixelCoords.x}px`;
-            guessPinElement.style.top = `${pixelCoords.y}px`;
-            guessPinElement.style.display = 'block';
-        }
-
-
-        function updateRealLocationPinPosition() {
-            if (!overlayMap || !currentLocationCoords || !realLocationPinElement) return;
-            if (!(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') {
-                console.error("Invalid currentLocationCoords object for positioning:", currentLocationCoords);
-                return;
-            }
-            const pixelCoords = overlayMap.project(currentLocationCoords);
-            realLocationPinElement.style.left = `${pixelCoords.x}px`;
-            realLocationPinElement.style.top = `${pixelCoords.y}px`;
-            realLocationPinElement.style.display = 'block';
-        }
-       
-        function placeCustomGuessPinOnOverlay(lngLat) {
-            console.log('Attempting to place custom guess pin at LngLat:', lngLat);
-            userGuessLngLat = lngLat;
-            if (guessPinElement) {
-                console.log('Removing existing custom guess pin element.');
-                guessPinElement.remove();
-            }
-            guessPinElement = document.createElement('div');
-            guessPinElement.className = 'guess-pin';
-            overlayMap.getCanvasContainer().appendChild(guessPinElement);
-            console.log('New custom guess pin element created:', guessPinElement);
-            updateGuessPinPosition();
-            document.getElementById('guessed-coords').textContent = `Guessed Location: Lng: ${lngLat.lng.toFixed(6)}, Lat: ${lngLat.lat.toFixed(6)}`;
-            document.getElementById('submit-status').textContent = 'Guess placed. Click Submit!';
-            overlayMap.off('move', updateGuessPinPosition); // Remove previous to avoid duplicates
-            overlayMap.on('move', updateGuessPinPosition);
-            console.log("Guess pin placed and move listener added. userGuessLngLat:", userGuessLngLat);
-        }
-
-
-        function placeCustomRealLocationPinOnOverlay(lngLat) {
-            console.log('Attempting to place custom real location pin at LngLat:', lngLat);
-            if (realLocationPinElement) {
-                console.log('Removing existing custom real location pin element.');
-                realLocationPinElement.remove();
-            }
-            realLocationPinElement = document.createElement('div');
-            realLocationPinElement.className = 'real-location-pin';
-            overlayMap.getCanvasContainer().appendChild(realLocationPinElement);
-            console.log('New custom real location pin element created:', realLocationPinElement);
-            updateRealLocationPinPosition();
-            overlayMap.off('move', updateRealLocationPinPosition); // Remove previous to avoid duplicates
-            overlayMap.on('move', updateRealLocationPinPosition);
-            console.log("Real location pin placed and move listener added. currentLocationCoords:", currentLocationCoords);
-        }
-       
-        function updateLineBetweenPins() {
-            if (!lineLayerVisible || !overlayMap || !userGuessLngLat || !currentLocationCoords) return;
-            if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number' ||
-                !(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') {
-                console.error("Invalid LngLat objects for drawing line:", userGuessLngLat, currentLocationCoords);
-                return;
-            }
-            const lineGeoJSON = {
-                'type': 'Feature',
-                'geometry': { 'type': 'LineString', 'coordinates': [ [userGuessLngLat.lng, userGuessLngLat.lat], [currentLocationCoords.lng, currentLocationCoords.lat] ] }
-            };
-            if (overlayMap.getSource('line-source')) {
-                overlayMap.getSource('line-source').setData(lineGeoJSON);
-            }
-        }
-
-
-        async function findRandomCityAndSpot(attempt = 1) {
-            const locationText = document.getElementById('location-text');
-            const newLocationBtn = document.getElementById('new-location');
-            const submitGuessBtn = document.getElementById('submit-guess');
-
-
-            locationText.textContent = 'Finding a new location...';
-            document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map...';
-            document.getElementById('submit-status').textContent = 'Place your guess on the overlay map...';
-            document.getElementById('points-score').textContent = 'Points: - | Total: ' + totalScore + ' points';
-            document.getElementById('round-score-display').style.display = 'none';
-            document.getElementById('total-score-display').style.display = 'none';
-
-
-            if (currentMarker) { currentMarker.remove(); currentMarker = null; }
-            if (guessPinElement) {
-                guessPinElement.remove(); guessPinElement = null;
-                userGuessLngLat = null;
-                if(overlayMap) overlayMap.off('move', updateGuessPinPosition);
-                console.log("Custom guess pin element and move listener removed.");
-            }
-            if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; if(overlayMap) overlayMap.off('move', updateRealLocationPinPosition); }
-            currentLocationCoords = null;
-
-
-            if (overlayMap && overlayMap.getLayer('line-layer')) {
-                overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
-                lineLayerVisible = false;
-            }
-
-
-            const existingNextButton = document.getElementById('next-round-btn');
-            if (existingNextButton) existingNextButton.remove();
-
-
-            submitGuessBtn.disabled = false;
-            newLocationBtn.disabled = false;
-
-
-            const MAX_LOCATION_RETRIES = 10;
-            if (attempt > MAX_LOCATION_RETRIES) {
-                locationText.textContent = `Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts. Please check the console for errors.`;
-                console.error(`Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts.`);
-                return;
-            }
-            console.log(`Attempting to find random city (Attempt ${attempt}/${MAX_LOCATION_RETRIES})...`);
-            locationText.textContent = `Finding a random city (Attempt ${attempt})...`;
-
+        // Functions for My Account section
+        async function fetchAccountDetails() {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
 
             try {
-                const cityResponse = await fetch(randomCityApiUrl);
-                if (!cityResponse.ok) throw new Error(`HTTP error fetching random city: ${cityResponse.status}`);
-                const cityData = await cityResponse.json();
-                const cityName = cityData.city;
-                if (!cityName) {
-                    console.warn(`Random City API returned no city name (Attempt ${attempt}). Retrying...`);
-                    findRandomCityAndSpot(attempt + 1);
-                    return;
-                }
-                console.log(`Successfully fetched city: ${cityName}. Finding geocoding data...`);
-                locationText.textContent = `Finding a random spot in ${cityName}...`;
+                const userResponse = await fetch('/api/user', { headers: { 'Authorization': `Bearer ${token}` } });
+                const scoreResponse = await fetch('/api/score', { headers: { 'Authorization': `Bearer ${token}` } });
+                const roleResponse = await fetch('/api/user/role', { headers: { 'Authorization': `Bearer ${token}` } });
+                const idResponse = await fetch('/api/user/id', { headers: { 'Authorization': `Bearer ${token}` } });
 
-
-                const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`;
-                const geocodingResponse = await fetch(geocodingUrl);
-                if (!geocodingResponse.ok) {
-                    console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}): ${geocodingResponse.status}. Retrying...`);
-                    findRandomCityAndSpot(attempt + 1);
-                    return;
+                if (userResponse.ok) {
+                    const userData = await userResponse.json();
+                    document.getElementById('account-user-id').textContent = userData.user.id || 'N/A';
+                    document.getElementById('account-user-email').textContent = userData.user.email || 'N/A';
                 }
-                const geocodingData = await geocodingResponse.json();
-                if (geocodingData && geocodingData.features && geocodingData.features.length > 0) {
-                    const feature = geocodingData.features[0];
-                    const bounds = feature.bbox;
-                    const center = feature.center;
-                    let randomLngLatArray;
-                    if (bounds) {
-                        randomLngLatArray = getRandomCoordinateInBounds(bounds);
-                        console.log("Using bounds to find random coordinate array:", randomLngLatArray);
-                    } else if (center) {
-                        const randomLng = center[0] + (Math.random() - 0.5) * 0.02;
-                        const randomLat = center[1] + (Math.random() - 0.5) * 0.02;
-                        randomLngLatArray = [randomLng, randomLat];
-                        console.log("Using center with offset to find random coordinate array:", randomLngLatArray);
-                    } else {
-                        console.warn(`MapTiler Geocoding could not find detailed location data for "${cityName}" (Attempt ${attempt}). Retrying...`);
-                        findRandomCityAndSpot(attempt + 1);
-                        return;
-                    }
-                    console.log("Setting main map view to:", randomLngLatArray, "at zoom", zoomLevel);
-                    if (mainMap) {
-                        mainMap.jumpTo({ center: randomLngLatArray, zoom: zoomLevel, essential: true });
-                    } else {
-                        console.error("mainMap not initialized when trying to jumpTo.");
-                    }
-                    document.getElementById('location-text').textContent = `Location: A random spot in ${feature.place_name || cityName}`;
-                    addOrUpdateMarker(randomLngLatArray);
-                    console.log("New location setup complete via API. currentLocationCoords:", currentLocationCoords);
-                } else {
-                    console.warn(`MapTiler Geocoding could not find the location for "${cityName}" (Attempt ${attempt}). Retrying...`);
-                    findRandomCityAndSpot(attempt + 1);
+                if (scoreResponse.ok) {
+                    const scoreData = await scoreResponse.json();
+                    document.getElementById('account-user-score').textContent = scoreData.score !== undefined ? scoreData.score : 'N/A';
+                }
+                if (roleResponse.ok) {
+                    const roleData = await roleResponse.json();
+                    document.getElementById('account-user-role').textContent = roleData.role || 'N/A';
                 }
             } catch (error) {
-                console.error(`Error during API call (Attempt ${attempt}):`, error);
-                locationText.textContent = `An error occurred fetching location: ${error.message}. Retrying...`;
-                findRandomCityAndSpot(attempt + 1);
+                console.error('Error fetching account details:', error);
+                alert('Failed to load account details.');
             }
         }
-       
-        // --- Game Initialization (Called after successful authentication) ---
-        function initializeGame() {
-            if (mainMap) return; // Ensure this runs only once
 
 
-            const newLocationBtn = document.getElementById('new-location');
-            const submitGuessBtn = document.getElementById('submit-guess');
-            const roundScoreDisplay = document.getElementById('round-score-display');
-            const totalScoreDisplay = document.getElementById('total-score-display');
+        // Global Leaderboard Functions
 
-
-            mainMap = new maptilersdk.Map({
-                container: 'maptiler-map',
-                style: customStyleUrl,
-                center: [0, 0],
-                zoom: 1,
-                interactive: false
-            });
-
-
-            overlayMap = new maptilersdk.Map({
-                container: 'overlay-map',
-                style: overlayStyleUrl,
-                center: initialCenter,
-                zoom: initialZoom,
-                interactive: true
-            });
-           
-            mainMap.on('error', (e) => {
-                console.error('Main map loading error:', e.error);
-                document.getElementById('location-text').textContent = "Error loading main map. Check console.";
-            });
-            overlayMap.on('error', (e) => {
-                console.error('Overlay map loading error:', e.error);
-                document.getElementById('guessed-coords').textContent = "Error loading overlay map. Check console.";
-            });
-
-
-            mainMap.on('style.load', () => {
-                console.log('Main map style loaded.');
-                findRandomCityAndSpot();
-                try {
-                    mainMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
-                } catch (e) { console.warn("Could not remove controls programmatically for main map:", e); }
-            });
-
-
-            overlayMap.on('style.load', () => {
-                console.log('Overlay map style loaded.');
-                try {
-                    overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
-                } catch (e) { console.warn("Could not remove controls programmatically for overlay map:", e); }
-
-
-                overlayMap.addSource('line-source', {
-                    'type': 'geojson',
-                    'data': { 'type': 'Feature', 'geometry': { 'type': 'LineString', 'coordinates': [] } }
+        async function submitGlobalHighscore(score) {
+            if (!isAuthenticated || !currentUserId || !currentUserName) {
+                console.warn("User not authenticated or ID/Name missing. Highscore not submitted.");
+                return;
+            }
+            const token = localStorage.getItem('access_token');
+            try {
+                const response = await fetch('/api/score/20round', { // New backend endpoint
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: currentUserId,
+                        score: score,
+                        userName: currentUserName,
+                        gameRoundCount: 20 // Explicitly send round count
+                    })
                 });
-                overlayMap.addLayer({
-                    'id': 'line-layer', 'type': 'line', 'source': 'line-source',
-                    'layout': { 'line-join': 'round', 'line-cap': 'round', 'visibility': 'none' },
-                    'paint': { 'line-color': '#000', 'line-width': 2, 'line-dasharray': [0.5, 2] }
-                });
-                overlayMap.on('move', updateLineBetweenPins);
-            });
-
-
-            overlayMap.on('click', (e) => {
-                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
-                    const clickedLngLat = e.lngLat;
-                    console.log('Overlay map left-clicked at:', clickedLngLat);
-                    placeCustomGuessPinOnOverlay(clickedLngLat);
+                const data = await response.json();
+                if (response.ok) {
+                    console.log('Highscore submitted successfully:', data);
+                    fetchGlobalLeaderboard(); // Refresh leaderboard after submitting score
+                } else {
+                    console.error('Failed to submit highscore:', data.error);
+                    alert('Failed to submit highscore: ' + (data.error || 'Unknown error'));
                 }
-            });
-            overlayMap.on('contextmenu', (e) => {
-                e.preventDefault();
-                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
-                    const clickedLngLat = e.lngLat;
-                    console.log('Overlay map right-clicked at:', clickedLngLat);
-                    placeCustomGuessPinOnOverlay(clickedLngLat);
-                }
-            });
-           
-            const overlayMapElement = document.getElementById('overlay-map');
-            overlayMapElement.addEventListener('transitionend', () => {
-                console.log('Overlay map container transition ended. Resizing map.');
-                if (overlayMap) {
-                    overlayMap.resize();
-                    if (guessPinElement && userGuessLngLat) updateGuessPinPosition();
-                    if (realLocationPinElement && currentLocationCoords) updateRealLocationPinPosition();
-                    updateLineBetweenPins();
-                }
-            });
-
-
-            newLocationBtn.addEventListener('click', findRandomCityAndSpot);
-           
-            submitGuessBtn.addEventListener('click', function handleSubmitGuess() {
-                console.log("Submit button clicked.");
-                if (!userGuessLngLat || !(userGuessLngLat instanceof maptilersdk.LngLat)) {
-                    document.getElementById('submit-status').textContent = 'Please make a guess by clicking or right-clicking on the map.';
-                    console.warn("Submit clicked without a valid guess location.");
-                    return;
-                }
-                if (!currentLocationCoords || !(currentLocationCoords instanceof maptilersdk.LngLat)) {
-                    document.getElementById('submit-status').textContent = 'Error: No location set for scoring.';
-                    console.error('Error: Submit clicked but currentLocationCoords is null or not a LngLat object.');
-                    return;
-                }
-                const guessedLngLat = userGuessLngLat;
-                const actualLngLat = currentLocationCoords;
-                console.log("Actual LngLat for scoring:", actualLngLat);
-                console.log("Guessed LngLat for scoring:", guessedLngLat);
-                if (typeof actualLngLat.lat !== 'number' || typeof actualLngLat.lng !== 'number' || typeof guessedLngLat.lat !== 'number' || typeof guessedLngLat.lng !== 'number') {
-                    console.error("Score Calculation Error: One or more coordinate values are not numbers.", {actual: actualLngLat, guessed: guessedLngLat});
-                    document.getElementById('submit-status').textContent = 'Error: Cannot calculate score due to invalid coordinate data.';
-                    return;
-                }
-                const scoreResult = calculateGeoGuessrScore(actualLngLat.lat, actualLngLat.lng, guessedLngLat.lat, guessedLngLat.lng);
-                console.log("Score Calculation Result:", scoreResult);
-                if (isNaN(scoreResult.score) || isNaN(scoreResult.distance)) {
-                    console.error("Score calculation returned NaN.", scoreResult);
-                    document.getElementById('submit-status').textContent = 'Error: Score calculation failed.';
-                    return;
-                }
-                totalScore += scoreResult.score;
-                document.getElementById('points-score').textContent = `Round Score: ${scoreResult.score} points (${(scoreResult.distance/1000).toFixed(2)} km) | Total Score: ${totalScore} points`;
-                document.getElementById('submit-status').textContent = `Guess submitted! You were ${(scoreResult.distance/1000).toFixed(2)} km away.`;
-                if (currentMarker && currentMarker.getElement()) {
-                    currentMarker.getElement().style.display = 'block';
-                    console.log("Showing actual location marker on main map.");
-                } else { console.warn("Could not find currentMarker element to show."); }
-
-
-                const overlayMapElem = document.getElementById('overlay-map');
-                overlayMapElem.classList.add('overlay-map-fullscreen');
-                overlayMap.resize();
-                const bounds = new maptilersdk.LngLatBounds();
-                bounds.extend(guessedLngLat);
-                bounds.extend(actualLngLat);
-                setTimeout(() => {
-                    overlayMap.fitBounds(bounds, { padding: 50, duration: 1000, essential: true });
-                }, 300);
-
-
-                placeCustomRealLocationPinOnOverlay(actualLngLat);
-                updateLineBetweenPins();
-                if (overlayMap.getLayer('line-layer')) {
-                    overlayMap.setLayoutProperty('line-layer', 'visibility', 'visible');
-                    lineLayerVisible = true;
-                }
-
-
-                roundScoreDisplay.textContent = `Round Score: ${scoreResult.score} points`;
-                totalScoreDisplay.textContent = `Total Score: ${totalScore} points`;
-                roundScoreDisplay.style.display = 'block';
-                totalScoreDisplay.style.display = 'block';
-
-
-                let nextButton = document.getElementById('next-round-btn');
-                if (!nextButton) {
-                    nextButton = document.createElement('button');
-                    nextButton.textContent = 'Next Round';
-                    nextButton.id = 'next-round-btn';
-                    const mapsContainer = document.querySelector('.maps-container');
-                    mapsContainer.appendChild(nextButton);
-                    nextButton.addEventListener('click', () => {
-                        overlayMapElem.classList.remove('overlay-map-fullscreen');
-                        overlayMap.flyTo({ center: initialCenter, zoom: initialZoom, essential: true, duration: 500 });
-                        if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; }
-                        if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; }
-                        userGuessLngLat = null;
-                        if (overlayMap.getLayer('line-layer')) {
-                            overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
-                            lineLayerVisible = false;
-                        }
-                        roundScoreDisplay.style.display = 'none';
-                        totalScoreDisplay.style.display = 'none';
-                        nextButton.remove();
-                        setTimeout(() => { if(overlayMap) overlayMap.resize(); }, 500); // Added check for overlayMap
-                        roundCount++;
-                        document.getElementById('round-count').textContent = `Round: ${roundCount}`;
-                        findRandomCityAndSpot();
-                    });
-                }
-                submitGuessBtn.disabled = true;
-                newLocationBtn.disabled = true;
-            });
+            } catch (error) {
+                console.error('Error submitting highscore:', error);
+                alert('Error submitting highscore: ' + error.message);
+            }
         }
 
+        async function fetchGlobalLeaderboard() {
+            const leaderboardTableBody = document.querySelector('#global-leaderboard-table tbody');
+            const userGlobalRank = document.getElementById('user-global-rank');
+            leaderboardTableBody.innerHTML = '<tr><td colspan="3">Loading leaderboard...</td></tr>';
+            userGlobalRank.textContent = 'Loading...';
 
-        // --- DOMContentLoaded ---
+            try {
+                const token = localStorage.getItem('access_token'); // Get the user's token
+                let headers = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
+                const response = await fetch('/api/leaderboard/global/20round', { // New backend endpoint
+                    headers: headers
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    leaderboardTableBody.innerHTML = '';
+                    if (data.leaderboard && data.leaderboard.length > 0) {
+                        // Display top 5
+                        data.leaderboard.slice(0, 5).forEach((entry, index) => {
+                            const row = leaderboardTableBody.insertRow();
+                            row.insertCell(0).textContent = entry.rank;
+                            row.insertCell(1).textContent = entry.name;
+                            row.insertCell(2).textContent = entry.score;
+                        });
+                    } else {
+                        leaderboardTableBody.innerHTML = '<tr><td colspan="3">No 20-round highscores yet.</td></tr>';
+                    }
+
+                    // Display user's global rank
+                    if (data.userRank) {
+                        userGlobalRank.textContent = `Rank: ${data.userRank.rank} (Score: ${data.userRank.score})`;
+                    } else if (isAuthenticated) {
+                        userGlobalRank.textContent = 'You have not completed a 20-round game yet.';
+                    } else {
+                        userGlobalRank.textContent = 'Login to see your rank.';
+                    }
+                } else {
+                    console.error('Failed to fetch leaderboard:', data.error);
+                    leaderboardTableBody.innerHTML = `<tr><td colspan="3">Error loading leaderboard: ${data.error || 'Unknown'}</td></tr>`;
+                    userGlobalRank.textContent = `Error loading your rank: ${data.error || 'Unknown'}`;
+                }
+            } catch (error) {
+                console.error('Error fetching leaderboard:', error);
+                leaderboardTableBody.innerHTML = `<tr><td colspan="3">Error loading leaderboard: ${error.message}</td></tr>`;
+                userGlobalRank.textContent = `Error loading your rank: ${error.message}`;
+            }
+        }
+
+        // Event Listeners
         document.addEventListener('DOMContentLoaded', async () => {
-            document.getElementById('login-btn').addEventListener('click', startOAuthFlow);
-            document.getElementById('register-btn').addEventListener('click', startOAuthFlow); // Register can also start the same flow
-            document.getElementById('logout-btn').addEventListener('click', appLogout);
-            document.getElementById('my-account-btn').addEventListener('click', () => {
-                showPage(currentPage === 'account' ? 'game' : 'account');
+            await initMap(); // Initialize map once
+
+            loginBtn.addEventListener('click', startOAuthFlow);
+            registerBtn.addEventListener('click', startOAuthFlow);
+            logoutBtn.addEventListener('click', appLogout);
+            myAccountBtn.addEventListener('click', () => {
+                if (currentPage === 'account') {
+                    showPage('game-setup');
+                } else {
+                    fetchAccountDetails();
+                    showPage('account');
+                }
             });
 
+            numRoundsSelect.addEventListener('change', (event) => {
+                selectedRounds = parseInt(event.target.value);
+            });
 
-            // Handle OAuth callback
+            startGameBtn.addEventListener('click', () => {
+                resetGame();
+                showPage('game'); // Show game section
+                startNewRound(); // Start the first round
+            });
+
+            guessBtn.addEventListener('click', () => {
+                if (!marker || !randomLatLng) {
+                    alert('Please click on the map to place your guess!');
+                    return;
+                }
+
+                const guessedLatLng = marker.getLngLat();
+                const distance = calculateDistance(
+                    randomLatLng[1], randomLatLng[0],
+                    guessedLatLng.lat, guessedLatLng.lng
+                );
+                const score = calculateScore(distance);
+
+                totalScore += score;
+                scoreDisplay.textContent = `Round Score: ${score}`;
+                distanceDisplay.textContent = `Distance: ${distance.toFixed(2)} km`;
+                totalScoreDisplay.textContent = `Total Score: ${totalScore}`;
+
+                // Fly to the actual location
+                map.flyTo({ center: randomLatLng, zoom: 6, speed: 0.8 });
+
+                // Add a marker for the actual location
+                new maptilersdk.Marker({ color: "#0000FF" })
+                    .setLngLat(randomLatLng)
+                    .addTo(map);
+
+                guessBtn.style.display = 'none';
+                nextRoundBtn.style.display = 'inline-block';
+            });
+
+            nextRoundBtn.addEventListener('click', () => {
+                if (roundCount < selectedRounds) {
+                    roundCount++;
+                    roundCountDisplay.textContent = `Round: ${roundCount}`;
+                    startNewRound();
+                } else {
+                    endGame();
+                }
+            });
+
+            // Handle OAuth callback on page load
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('code') && urlParams.has('state')) {
                 const success = await handleOAuthCallback();
                 if (success) {
                     isAuthenticated = true;
-                    // Clean URL - remove OAuth parameters
                     window.history.replaceState({}, document.title, window.location.pathname);
                 } else {
                     isAuthenticated = false;
-                    // Error already alerted in handleOAuthCallback
                 }
             } else {
-                // Regular page load, check if already logged in via stored token
                 isAuthenticated = await ensureValidToken();
             }
-            updateAuthUI(); // This will show/hide game content and init if authenticated
+            updateAuthUI(); // Update UI based on auth status
+            showPage('game-setup'); // Always start on game setup page
         });
     </script>
 </body>
