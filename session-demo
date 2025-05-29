@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Map Guessr</title>
+  <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptiler-sdk.umd.min.js"></script>
+  <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptilersdk.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    
+    header {
+      background-color: #0cc0df;
+      padding: 20px;
+      border-radius: 0 0 5px 5px;
+    }
+    h1 {
+      color: #444;
+      margin-top: 0;
+    }
+    main {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    section {
+      margin-bottom: 30px;
+    }
+    .maps-container {
+      position: relative;
+      height: 600px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    #maptiler-map {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+      background-color: #eaeaea;
+    }
+    #overlay-map {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 250px;
+      height: 150px;
+      border: 2px solid #555;
+      border-radius: 5px;
+      overflow: hidden;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 10;
+      transition: all 0.3s ease-in-out;
+    }
+    #overlay-map:hover {
+      width: 400px;
+      height: 300px;
+    }
+    .submit-container {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .submit-btn, .new-location-btn, .init-btn, .refresh-leaderboard-btn {
+      background-color: #0cc0df;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1.1em;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin: 0 10px;
+    }
+    .submit-btn:hover, .new-location-btn:hover, .init-btn:hover, .refresh-leaderboard-btn:hover {
+      background-color: #0aa8c4;
+    }
+    .submit-btn:disabled, .new-location-btn:disabled, .init-btn:disabled, .refresh-leaderboard-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    /* Token authentication styles */
+    .api-auth-section {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    .token-input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .token-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+    .token-status {
+      padding: 5px 10px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .token-status.valid {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .token-status.invalid {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .token-status.pending {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+
+    /* Leaderboard styles */
+    .leaderboard-section {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 5px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .leaderboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .leaderboard-table th,
+    .leaderboard-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .leaderboard-table th {
+      background-color: #0cc0df;
+      color: white;
+      font-weight: bold;
+    }
+    .leaderboard-table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .leaderboard-table tr:hover {
+      background-color: #e9ecef;
+    }
+    .rank-1 { font-weight: bold; color: #ffd700; }
+    .rank-2 { font-weight: bold; color: #c0c0c0; }
+    .rank-3 { font-weight: bold; color: #cd7f32; }
+    .leaderboard-status {
+      font-style: italic;
+      color: #666;
+      margin-top: 10px;
+    }
+    .score-post-status {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    footer {
+      background-color: #0cc0df;
+      padding: 10px;
+      text-align: center;
+      border-radius: 5px;
+      font-size: 0.9em;
+      margin-top: 40px;
+    }
+    
+    /* CSS to hide default MapTiler controls */
+    .maptiler-ctrl-group,
+    .maptiler-ctrl,
+    .maplibregl-ctrl-group,
+    .maplibregl-ctrl {
+      display: none !important;
+    }
+
+    /* Style for the custom guess pin */
+    .guess-pin {
+        position: absolute;
+        width: 24px;
+        height: 36px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%23e53e3e" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
+        background-size: contain;
+        background-repeat: no-repeat;
+        transform: translate3d(-50%, -100%, 0);
+        z-index: 11;
+        cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Map Guessr</h1>
+    <p>Play Game Below</p>
+  </header>
+  <main>
+    <section>
+      <h2>About</h2>
+      <p>Game Rules: Enter your API token to load maps and begin playing. All map data and styles are loaded through the authenticated API.</p>
+      
+      <div class="api-auth-section">
+        <h3>API Configuration</h3>
+        <div class="token-input-group">
+          <label for="api-token">API Token:</label>
+          <input type="text" id="api-token" class="token-input" placeholder="Enter your API token from transitgames.xyz here" />
+          <button class="init-btn" id="init-maps">Initialize Maps</button>
+          <span id="token-status" class="token-status pending">Enter token</span>
+        </div>
+        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+          <strong>Token Required:</strong> All APIs including map styles are accessed through your authenticated token.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <div class="leaderboard-section">
+        <div class="leaderboard-header">
+          <h3>🏆 Leaderboard</h3>
+          <button class="refresh-leaderboard-btn" id="refresh-leaderboard" disabled>Refresh</button>
+        </div>
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <tr>
+              <td colspan="4" style="text-align: center; color: #666;">Initialize maps to load leaderboard</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="leaderboard-status" id="leaderboard-status">Leaderboard will load after initialization</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Maps</h2>
+      <div class="maps-container">
+        <div id="maptiler-map">
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+            <p>Enter API token and click "Initialize Maps" to load the game</p>
+          </div>
+        </div>
+        <div id="overlay-map">
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 12px; text-align: center; padding: 10px;">
+            <p>Maps will load after initialization</p>
+          </div>
+        </div>
+      </div>
+      <div class="submit-container">
+        <button class="new-location-btn" id="new-location" disabled>New Location</button>
+        <button class="submit-btn" id="submit-guess" disabled>Submit</button>
+      </div>
+    </section>
+    <section>
+      <h2>Game Answers</h2>
+      <ul>
+        <li id="location-text">Initialize maps to begin playing</li>
+        <li id="guessed-coords">The guessed coordinates will appear here</li>
+        <li id="submit-status">Game status will appear here</li>
+        <li id="points-score">Points will be calculated here</li>
+        <li id="round-count">Round: 1</li>
+        <li class="score-post-status" id="score-post-status">Score posting status will appear here</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    <p>Styles and HTML made by Nathan | Map data and tiles by <a href="https://www.maptiler.com/" target="_blank" style="color: #fff; text-decoration: underline;">MapTiler</a> | Authentication powered by <a href="https://transitspotter.com/" target="_blank" style="color: #fff; text-decoration: underline;">transitspotter</a> & Team Social Group</p>
+  </footer>
+
+  <script>
+    // --- Configuration ---
+    // No hard-coded API keys - everything goes through your authenticated API!
+    
+    // API configuration
+    let API_BASE_URL = 'https://mapguessr-worker.games-6cb.workers.dev';
+    let API_TOKEN = '';
+
+    let currentMarker = null;
+    let userGuessLngLat = null;
+    let guessPinElement = null;
+    let currentLocationCoords = null;
+    let totalScore = 0;
+    let mainMap = null;
+    let overlayMap = null;
+    let roundCount = 1;
+    let mapsInitialized = false;
+    let userScore = null; // Store current user score info
+
+    const zoomLevel = 15;
+    const initialCenter = [0, 0];
+    const initialZoom = -1.0;
+
+    // Style IDs for your custom MapTiler styles
+    const MAIN_STYLE_ID = '0196cb69-f55f-71f8-9a8f-90fa083f0f67';
+    const OVERLAY_STYLE_ID = '0196cb7f-9914-7a9b-aed1-8bfa7b9a0705';
+
+    // --- Token Authentication Functions ---
+    function updateTokenStatus(status, message) {
+        const statusElement = document.getElementById('token-status');
+        statusElement.className = `token-status ${status}`;
+        statusElement.textContent = message;
+    }
+
+    function validateToken(token) {
+        if (!token || token.trim() === '') {
+            updateTokenStatus('invalid', 'Token required');
+            return false;
+        }
+        
+        if (token.length < 10) {
+            updateTokenStatus('invalid', 'Token too short');
+            return false;
+        }
+        
+        updateTokenStatus('valid', 'Token format valid');
+        return true;
+    }
+
+    async function testTokenAuth() {
+        if (!API_TOKEN) {
+            updateTokenStatus('invalid', 'No token set');
+            return false;
+        }
+
+        try {
+            // Test the token with a simple API call
+            const response = await fetch(`${API_BASE_URL}/api/cities?token=${API_TOKEN}`);
+            
+            if (response.ok) {
+                updateTokenStatus('valid', 'Token verified');
+                return true;
+            } else if (response.status === 401 || response.status === 403) {
+                updateTokenStatus('invalid', 'Invalid token');
+                return false;
+            } else {
+                updateTokenStatus('invalid', 'API error');
+                return false;
+            }
+        } catch (error) {
+            updateTokenStatus('invalid', 'Connection error');
+            return false;
+        }
+    }
+
+    async function loadMapStyles() {
+        if (!API_TOKEN) {
+            throw new Error('No API token available');
+        }
+
+        // Build style URLs using your API endpoints
+        const customStyleUrl = `${API_BASE_URL}/api/mapstyle?style=${MAIN_STYLE_ID}&token=${API_TOKEN}`;
+        const overlayStyleUrl = `${API_BASE_URL}/api/mapstyle?style=${OVERLAY_STYLE_ID}&token=${API_TOKEN}`;
+
+        // Test that the style endpoints are accessible
+        try {
+            const mainStyleTest = await fetch(customStyleUrl);
+            const overlayStyleTest = await fetch(overlayStyleUrl);
+            
+            if (!mainStyleTest.ok || !overlayStyleTest.ok) {
+                throw new Error('Cannot access map style APIs');
+            }
+            
+            console.log('Map styles accessible via API');
+            return { customStyleUrl, overlayStyleUrl };
+            
+        } catch (error) {
+            console.error('Error testing map style APIs:', error);
+            throw new Error('Map style APIs not accessible');
+        }
+    }
+
+    // --- Leaderboard Functions ---
+    async function fetchLeaderboard() {
+        const statusElement = document.getElementById('leaderboard-status');
+        
+        try {
+            statusElement.textContent = 'Loading leaderboard...';
+            
+            // Fetch leaderboard (no authentication required)
+            const response = await fetch(`${API_BASE_URL}/api/leaderboard`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            displayLeaderboard(data.leaderboard);
+            statusElement.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+            
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
+            statusElement.textContent = `Error loading leaderboard: ${error.message}`;
+            
+            // Show error in leaderboard table
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #dc3545;">
+                        Failed to load leaderboard
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    function displayLeaderboard(leaderboard) {
+        const tbody = document.getElementById('leaderboard-body');
+        
+        if (!leaderboard || leaderboard.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #666;">
+                        No players on leaderboard yet
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = leaderboard.map(player => {
+            const rankClass = `rank-${player.rank}`;
+            const lastUpdated = new Date(player.lastUpdated).toLocaleDateString();
+            
+            return `
+                <tr>
+                    <td class="${rankClass}">#${player.rank}</td>
+                    <td class="${rankClass}">${player.name}</td>
+                    <td class="${rankClass}">${player.score.toLocaleString()}</td>
+                    <td>${lastUpdated}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function fetchUserScore() {
+        if (!API_TOKEN) {
+            return null;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/score?token=${API_TOKEN}`);
+            
+            if (response.ok) {
+                const scoreData = await response.json();
+                userScore = scoreData;
+                console.log('Current user score:', userScore);
+                return scoreData;
+            } else if (response.status === 401 || response.status === 403) {
+                console.warn('Score fetch failed: Authentication error');
+                return null;
+            } else {
+                console.warn('Score fetch failed:', response.status);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching user score:', error);
+            return null;
+        }
+    }
+
+    async function postScore(score) {
+        if (!API_TOKEN || !score || score <= 0) {
+            return false;
+        }
+
+        const statusElement = document.getElementById('score-post-status');
+        
+        try {
+            statusElement.textContent = 'Posting score to leaderboard...';
+            
+            const response = await fetch(`${API_BASE_URL}/api/score?token=${API_TOKEN}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ score: score })
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                statusElement.textContent = `Score posted! New total: ${result.newTotalScore.toLocaleString()} (+${score})`;
+                
+                // Update local user score
+                userScore = {
+                    score: result.newTotalScore,
+                    userId: result.userId,
+                    name: result.name,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                // Refresh leaderboard to show updated scores
+                setTimeout(() => {
+                    fetchLeaderboard();
+                }, 1000);
+                
+                return true;
+            } else if (response.status === 401 || response.status === 403) {
+                statusElement.textContent = 'Score posting failed: Authentication error';
+                return false;
+            } else {
+                statusElement.textContent = `Score posting failed: HTTP ${response.status}`;
+                return false;
+            }
+        } catch (error) {
+            console.error('Error posting score:', error);
+            statusElement.textContent = `Score posting failed: ${error.message}`;
+            return false;
+        }
+    }
+
+    // --- Map Initialization ---
+    async function initializeMaps() {
+        const tokenInput = document.getElementById('api-token');
+        const token = tokenInput.value.trim();
+        
+        if (!validateToken(token)) {
+            return false;
+        }
+        
+        API_TOKEN = token;
+        
+        // Test token authentication
+        const authValid = await testTokenAuth();
+        if (!authValid) {
+            return false;
+        }
+
+        // Load map styles through API
+        let styleUrls;
+        try {
+            updateTokenStatus('pending', 'Loading styles...');
+            styleUrls = await loadMapStyles();
+        } catch (error) {
+            updateTokenStatus('invalid', 'Style load failed');
+            console.error('Failed to load map styles:', error);
+            return false;
+        }
+
+        try {
+            // Clear the placeholder content
+            document.getElementById('maptiler-map').innerHTML = '';
+            document.getElementById('overlay-map').innerHTML = '';
+
+            // Configure MapTiler SDK to use your API as a source transform
+            // This tells the SDK how to handle requests
+            maptilersdk.config.apiKey = 'dummy'; // Required but not used since we're using custom URLs
+
+            // Initialize the main map with your API style URL
+            mainMap = new maptilersdk.Map({
+                container: 'maptiler-map',
+                style: styleUrls.customStyleUrl,
+                center: [0, 0],
+                zoom: 1,
+                interactive: false
+            });
+
+            // Initialize the overlay map with your API style URL
+            overlayMap = new maptilersdk.Map({
+                container: 'overlay-map',
+                style: styleUrls.overlayStyleUrl,
+                center: initialCenter,
+                zoom: initialZoom,
+                interactive: true
+            });
+
+            // Set up event listeners
+            setupMapEventListeners();
+            
+            mapsInitialized = true;
+            updateTokenStatus('valid', 'Maps loaded');
+            
+            // Enable game buttons
+            document.getElementById('new-location').disabled = false;
+            document.getElementById('submit-guess').disabled = false;
+            document.getElementById('refresh-leaderboard').disabled = false;
+            
+            // Update status
+            document.getElementById('location-text').textContent = 'Maps initialized! Click "New Location" to start playing.';
+            
+            // Load user score and leaderboard
+            await fetchUserScore();
+            await fetchLeaderboard();
+            
+            return true;
+            
+        } catch (error) {
+            console.error('Error initializing maps:', error);
+            updateTokenStatus('invalid', 'Map init failed');
+            return false;
+        }
+    }
+
+    function setupMapEventListeners() {
+        // Add error listeners
+        mainMap.on('error', (e) => {
+            console.error('Main map loading error:', e.error);
+            document.getElementById('location-text').textContent = "Error loading main map. Check console.";
+        });
+
+        overlayMap.on('error', (e) => {
+            console.error('Overlay map loading error:', e.error);
+            document.getElementById('guessed-coords').textContent = "Error loading overlay map. Check console.";
+        });
+
+        // Style load handlers
+        mainMap.on('style.load', () => {
+            console.log('Main map style loaded from API.');
+            try {
+                mainMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
+            } catch (e) {
+                console.warn("Could not remove controls programmatically for main map:", e);
+            }
+        });
+
+        overlayMap.on('style.load', () => {
+            console.log('Overlay map style loaded from API.');
+            try {
+                overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
+            } catch (e) {
+                console.warn("Could not remove controls programmatically for overlay map:", e);
+            }
+        });
+
+        // Click handlers for overlay map
+        overlayMap.on('click', (e) => {
+            const clickedLngLat = e.lngLat;
+            console.log('Overlay map left-clicked at:', clickedLngLat);
+            placeCustomGuessPinOnOverlay(clickedLngLat);
+        });
+
+        overlayMap.on('contextmenu', (e) => {
+            e.preventDefault();
+            const clickedLngLat = e.lngLat;
+            console.log('Overlay map right-clicked at:', clickedLngLat);
+            placeCustomGuessPinOnOverlay(clickedLngLat);
+        });
+
+        // Resize handler
+        const overlayMapElement = document.getElementById('overlay-map');
+        overlayMapElement.addEventListener('transitionend', () => {
+            console.log('Overlay map container transition ended. Resizing map.');
+            if (overlayMap) {
+                overlayMap.resize();
+                setTimeout(() => {
+                    updateGuessPinPosition();
+                }, 50);
+            }
+        });
+    }
+
+    // --- Game Functions ---
+    function getRandomCoordinateInBounds(bounds) {
+        const minLng = bounds[0];
+        const minLat = bounds[1];
+        const maxLng = bounds[2];
+        const maxLat = bounds[3];
+
+        const buffer = 0.001;
+        const bufferedMinLng = minLng + (maxLng - minLng) * buffer;
+        const bufferedMinLat = minLat + (maxLat - minLat) * buffer;
+        const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer;
+        const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
+
+        const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
+        const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * buffer;
+
+        return [randomLng, randomLat];
+    }
+
+    function addOrUpdateMarker(lngLatInput) {
+        const lngLatObject = Array.isArray(lngLatInput) ?
+                           new maptilersdk.LngLat(lngLatInput[0], lngLatInput[1]) :
+                           lngLatInput;
+
+         if (!(lngLatObject instanceof maptilersdk.LngLat) || typeof lngLatObject.lng !== 'number' || typeof lngLatObject.lat !== 'number') {
+              console.error("addOrUpdateMarker received invalid LngLat data:", lngLatInput);
+              return;
+         }
+
+        if (currentMarker) {
+            currentMarker.remove();
+        }
+        currentMarker = new maptilersdk.Marker()
+            .setLngLat(lngLatObject)
+            .addTo(mainMap);
+
+        currentLocationCoords = lngLatObject;
+
+         if (currentMarker && currentMarker.getElement()) {
+            currentMarker.getElement().style.display = 'none';
+        }
+         console.log("currentLocationCoords set to LngLat object:", currentLocationCoords);
+    }
+
+    function calculateDistanceInMeters(lat1, lon1, lat2, lon2) {
+        if (typeof lat1 !== 'number' || typeof lon1 !== 'number' || typeof lat2 !== 'number' || typeof lon2 !== 'number') {
+            console.error("Invalid input types for calculateDistanceInMeters:", lat1, lon1, lat2, lon2);
+            return NaN;
+        }
+
+        const R = 6371e3;
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+        const a =
+            Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+
+        const c = 2 * Math.atan2(Math.sqrt(Math.max(0, a)), Math.sqrt(Math.max(0, 1 - a)));
+
+        const distance = R * c;
+        return distance;
+    }
+
+    function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) {
+        const MAX_SCORE = 5000;
+        const FIVE_K_THRESHOLD_METERS = 100;
+
+        const distance = calculateDistanceInMeters(lat1, lon1, lat2, lon2);
+
+         if (isNaN(distance)) {
+            console.error("Distance calculation returned NaN.");
+            return { distance: NaN, score: NaN };
+        }
+
+        let score;
+
+        if (distance <= FIVE_K_THRESHOLD_METERS) {
+            score = MAX_SCORE;
+        } else {
+            const decayFactor = 2000000;
+            score = MAX_SCORE * Math.exp(-distance / decayFactor);
+            score = Math.max(0, Math.round(score));
+        }
+
+        return {
+            distance: distance,
+            score: score
+        };
+    }
+
+    function updateGuessPinPosition() {
+        if (!overlayMap || !userGuessLngLat || !guessPinElement) {
+            return;
+        }
+
+         if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number') {
+             console.error("Invalid userGuessLngLat object for positioning:", userGuessLngLat);
+             return;
+        }
+
+        const pixelCoords = overlayMap.project(userGuessLngLat);
+
+        guessPinElement.style.left = `${pixelCoords.x}px`;
+        guessPinElement.style.top = `${pixelCoords.y}px`;
+    }
+
+    function placeCustomGuessPinOnOverlay(lngLat) {
+        console.log('Attempting to place custom guess pin at LngLat:', lngLat);
+
+        userGuessLngLat = lngLat;
+
+        if (guessPinElement) {
+            console.log('Removing existing custom guess pin element.');
+            guessPinElement.remove();
+        }
+
+        guessPinElement = document.createElement('div');
+        guessPinElement.className = 'guess-pin';
+
+        overlayMap.getCanvasContainer().appendChild(guessPinElement);
+
+        console.log('New custom guess pin element created:', guessPinElement);
+
+        updateGuessPinPosition();
+
+        document.getElementById('guessed-coords').textContent = `Guessed Location: Lng: ${lngLat.lng.toFixed(6)}, Lat: ${lngLat.lat.toFixed(6)}`;
+        document.getElementById('submit-status').textContent = 'Guess placed. Click Submit!';
+
+        overlayMap.off('move', updateGuessPinPosition);
+        overlayMap.on('move', updateGuessPinPosition);
+
+         console.log("Guess pin placed and move listener added. userGuessLngLat:", userGuessLngLat);
+    }
+
+    async function findRandomCityAndSpot(attempt = 1) {
+        const locationText = document.getElementById('location-text');
+
+        if (!API_TOKEN || !mapsInitialized) {
+            locationText.textContent = 'Please initialize maps first.';
+            return;
+        }
+
+        locationText.textContent = 'Finding a new location...';
+        document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map...';
+        document.getElementById('submit-status').textContent = 'Place your guess on the overlay map...';
+        document.getElementById('points-score').textContent = 'Points: - | Total: ' + totalScore + ' points';
+        document.getElementById('score-post-status').textContent = '';
+
+        if (currentMarker) {
+            currentMarker.remove();
+            currentMarker = null;
+        }
+         if (guessPinElement) {
+            guessPinElement.remove();
+            guessPinElement = null;
+            userGuessLngLat = null;
+            if(overlayMap) overlayMap.off('move', updateGuessPinPosition);
+             console.log("Custom guess pin element and move listener removed.");
+        }
+         currentLocationCoords = null;
+
+        const MAX_LOCATION_RETRIES = 10;
+        if (attempt > MAX_LOCATION_RETRIES) {
+            locationText.textContent = `Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts.`;
+            console.error(`Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts.`);
+            return;
+        }
+
+        console.log(`Attempting to find random city (Attempt ${attempt}/${MAX_LOCATION_RETRIES})...`);
+        locationText.textContent = `Working on a random city (Attempt ${attempt})...`;
+
+        try {
+            // Fetch random city via your API
+            const cityApiUrl = `${API_BASE_URL}/api/cities?token=${API_TOKEN}`;
+            const cityResponse = await fetch(cityApiUrl);
+            
+            if (!cityResponse.ok) {
+                if (cityResponse.status === 401 || cityResponse.status === 403) {
+                    updateTokenStatus('invalid', 'Token expired');
+                    locationText.textContent = 'Authentication failed. Please refresh your token.';
+                    return;
+                }
+                throw new Error(`HTTP error fetching random city: ${cityResponse.status}`);
+            }
+            
+            const cityData = await cityResponse.json();
+            const cityName = cityData.city;
+
+            if (!cityName) {
+                console.warn(`Random City API returned no city name (Attempt ${attempt}). Retrying...`);
+                findRandomCityAndSpot(attempt + 1);
+                return;
+            }
+
+            console.log(`Successfully fetched city: ${cityName}. Finding geocoding data...`);
+            locationText.textContent = `Finding a random spot in ${cityName}...`;
+
+            // Get geocoding data via your API
+            const geocodingUrl = `${API_BASE_URL}/api/geocode?city=${encodeURIComponent(cityName)}&token=${API_TOKEN}`;
+            const geocodingResponse = await fetch(geocodingUrl);
+            
+            if (!geocodingResponse.ok) {
+                if (geocodingResponse.status === 401 || geocodingResponse.status === 403) {
+                    updateTokenStatus('invalid', 'Token expired');
+                    locationText.textContent = 'Authentication failed. Please refresh your token.';
+                    return;
+                }
+                console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}): ${geocodingResponse.status}. Retrying...`);
+                findRandomCityAndSpot(attempt + 1);
+                return;
+            }
+            
+            const geocodingData = await geocodingResponse.json();
+
+            if (geocodingData && geocodingData.features && geocodingData.features.length > 0) {
+                const feature = geocodingData.features[0];
+                const bounds = feature.bbox;
+                const center = feature.center;
+
+                let randomLngLatArray;
+
+                if (bounds) {
+                    randomLngLatArray = getRandomCoordinateInBounds(bounds);
+                     console.log("Using bounds to find random coordinate array:", randomLngLatArray);
+                } else if (center) {
+                    const randomLng = center[0] + (Math.random() - 0.5) * 0.02;
+                    const randomLat = center[1] + (Math.random() - 0.5) * 0.02;
+                    randomLngLatArray = [randomLng, randomLat];
+                     console.log("Using center with offset to find random coordinate array:", randomLngLatArray);
+                } else {
+                    console.warn(`Geocoding API could not find detailed location data for "${cityName}" (Attempt ${attempt}). Retrying...`);
+                    findRandomCityAndSpot(attempt + 1);
+                    return;
+                }
+
+                 console.log("Setting main map view to:", randomLngLatArray, "at zoom", zoomLevel);
+                if (mainMap) {
+                     mainMap.jumpTo({
+                         center: randomLngLatArray,
+                         zoom: zoomLevel,
+                         essential: true
+                     });
+                } else {
+                     console.error("mainMap not initialized when trying to jumpTo.");
+                }
+
+                document.getElementById('location-text').textContent = `Location: A random spot in ${feature.place_name || cityName}`;
+
+                addOrUpdateMarker(randomLngLatArray);
+
+                 console.log("New location setup complete via API. currentLocationCoords:", currentLocationCoords);
+
+            } else {
+                console.warn(`Geocoding API could not find the location for "${cityName}" (Attempt ${attempt}). Retrying...`);
+                findRandomCityAndSpot(attempt + 1);
+            }
+
+        } catch (error) {
+            console.error(`Error during API call (Attempt ${attempt}):`, error);
+            locationText.textContent = `An error occurred fetching location: ${error.message}. Retrying...`;
+            findRandomCityAndSpot(attempt + 1);
+        }
+    }
+
+    // --- Event Listeners ---
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize maps button
+        document.getElementById('init-maps').addEventListener('click', async function() {
+            this.disabled = true;
+            this.textContent = 'Initializing...';
+            
+            const success = await initializeMaps();
+            
+            if (success) {
+                this.textContent = 'Maps Loaded';
+                document.getElementById('api-token').disabled = true;
+            } else {
+                this.disabled = false;
+                this.textContent = 'Initialize Maps';
+            }
+        });
+
+        // Token input validation
+        const tokenInput = document.getElementById('api-token');
+        tokenInput.addEventListener('input', function() {
+            const token = this.value.trim();
+            if (token) {
+                validateToken(token);
+            } else {
+                updateTokenStatus('pending', 'Enter token');
+            }
+        });
+
+        // Refresh leaderboard button
+        document.getElementById('refresh-leaderboard').addEventListener('click', function() {
+            if (mapsInitialized) {
+                fetchLeaderboard();
+            }
+        });
+
+        // New Location button
+        document.getElementById('new-location').addEventListener('click', function() {
+            if (mapsInitialized && API_TOKEN) {
+                findRandomCityAndSpot();
+            }
+        });
+
+        // Submit button
+        document.getElementById('submit-guess').addEventListener('click', async function() {
+            console.log("Submit button clicked.");
+            
+            if (!userGuessLngLat || !(userGuessLngLat instanceof maptilersdk.LngLat)) {
+                document.getElementById('submit-status').textContent = 'Please make a guess by clicking on the map.';
+                console.warn("Submit clicked without a valid guess location.");
+                return;
+            }
+
+            if (!currentLocationCoords || !(currentLocationCoords instanceof maptilersdk.LngLat)) {
+                document.getElementById('submit-status').textContent = 'Error: No location set for scoring.';
+                 console.error('Error: Submit clicked but currentLocationCoords is null or not a LngLat object.');
+                return;
+            }
+
+            const guessedLngLat = userGuessLngLat;
+            const actualLngLat = currentLocationCoords;
+
+            console.log("Actual LngLat for scoring:", actualLngLat);
+            console.log("Guessed LngLat for scoring:", guessedLngLat);
+
+             if (typeof actualLngLat.lat !== 'number' || typeof actualLngLat.lng !== 'number' || typeof guessedLngLat.lat !== 'number' || typeof guessedLngLat.lng !== 'number') {
+                console.error("Score Calculation Error: One or more coordinate values are not numbers.", {actual: actualLngLat, guessed: guessedLngLat});
+                document.getElementById('submit-status').textContent = 'Error: Cannot calculate score due to invalid coordinate data.';
+                return;
+            }
+
+            const scoreResult = calculateGeoGuessrScore(
+                actualLngLat.lat,
+                actualLngLat.lng,
+                guessedLngLat.lat,
+                guessedLngLat.lng
+            );
+
+             console.log("Score Calculation Result:", scoreResult);
+             if (isNaN(scoreResult.score) || isNaN(scoreResult.distance)) {
+                  console.error("Score calculation returned NaN.", scoreResult);
+                  document.getElementById('submit-status').textContent = 'Error: Score calculation failed.';
+                  return;
+             }
+
+            totalScore += scoreResult.score;
+
+            document.getElementById('points-score').textContent =
+                `Round Score: ${scoreResult.score} points (${(scoreResult.distance/1000).toFixed(2)} km) | Total Score: ${totalScore} points`;
+
+            document.getElementById('submit-status').textContent = `Guess submitted! You were ${(scoreResult.distance/1000).toFixed(2)} km away.`;
+
+            if (currentMarker && currentMarker.getElement()) {
+                 currentMarker.getElement().style.display = 'block';
+                 console.log("Showing actual location marker on main map.");
+            } else {
+                 console.warn("Could not find currentMarker element to show.");
+            }
+
+            // Post score to leaderboard
+            if (scoreResult.score > 0) {
+                await postScore(scoreResult.score);
+            }
+
+            roundCount++;
+            document.getElementById('round-count').textContent = `Round: ${roundCount}`;
+
+            setTimeout(() => {
+                console.log("Starting next round...");
+                findRandomCityAndSpot();
+            }, 5000);
+        });
+    });
+  </script>
+</body>
+</html>
