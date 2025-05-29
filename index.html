@@ -8,1194 +8,1071 @@
     <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptilersdk.css" rel="stylesheet" />
     <style>
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            color: #333;
+            font-family: Arial, sans-serif; [cite: 1365]
+            line-height: 1.6; [cite: 1365]
+            margin: 0; [cite: 1365]
+            padding: 0; [cite: 1365]
+            color: #333; [cite: 1365]
         }
-
-
         header {
-            background-color: #0cc0df;
-            padding: 20px;
-            border-radius: 0 0 5px 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            background-color: #0cc0df; [cite: 1366]
+            padding: 20px; [cite: 1366]
+            border-radius: 0 0 5px 5px; [cite: 1366]
+            display: flex; [cite: 1366]
+            justify-content: space-between; [cite: 1366]
+            align-items: center; [cite: 1366]
+            flex-wrap: wrap; [cite: 1367]
         }
         header div {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
+            display: flex; [cite: 1368]
+            align-items: center; [cite: 1368]
+            flex-wrap: wrap; [cite: 1368]
         }
         h1 {
-            color: #444;
-            margin-top: 0;
-            margin-right: 20px; /* Space between title and buttons */
+            color: #444; [cite: 1369]
+            margin-top: 0; [cite: 1369]
+            margin-right: 20px; [cite: 1369]
         }
         main {
-            padding: 20px;
-            max-width: 1900px;
-            margin: 0 auto;
+            padding: 20px; [cite: 1370]
+            max-width: 1900px; [cite: 1370]
+            margin: 0 auto; [cite: 1370]
         }
         section {
-            margin-bottom: 30px;
+            margin-bottom: 30px; [cite: 1371]
         }
         .maps-container {
-            position: relative;
-            height: 900px; /* Fixed height for the container */
-            width: 100%;
-            margin-bottom: 20px;
-            overflow: hidden;
+            position: relative; [cite: 1372]
+            height: 700px; /* Adjusted height */
+            width: 100%; [cite: 1373]
+            margin-bottom: 20px; [cite: 1373]
+            overflow: hidden; [cite: 1373]
         }
         #maptiler-map {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            overflow: hidden;
-            background-color: #eaeaea;
+            position: relative; [cite: 1374]
+            width: 100%; [cite: 1374]
+            height: 100%; [cite: 1374]
+            border: 1px solid #ddd; [cite: 1374]
+            border-radius: 5px; [cite: 1374]
+            overflow: hidden; [cite: 1374]
+            background-color: #eaeaea; [cite: 1375]
         }
         #overlay-map {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 250px;
-            height: 150px;
-            border: 2px solid #555;
-            border-radius: 5px;
-            overflow: hidden;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 10;
-            transition: all 0.4s ease-in-out;
+            position: absolute; [cite: 1376]
+            bottom: 20px; [cite: 1376]
+            right: 20px; [cite: 1376]
+            width: 250px; [cite: 1376]
+            height: 150px; [cite: 1376]
+            border: 2px solid #555; [cite: 1377]
+            border-radius: 5px; [cite: 1377]
+            overflow: hidden; [cite: 1377]
+            background-color: #fff; [cite: 1377]
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); [cite: 1377]
+            z-index: 10; [cite: 1378]
+            transition: all 0.4s ease-in-out; [cite: 1378]
         }
         #overlay-map:hover:not(.overlay-map-fullscreen) {
-            width: 400px;
-            height: 300px;
+            width: 400px; [cite: 1379]
+            height: 300px; [cite: 1379]
         }
         .overlay-map-fullscreen {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important; /* Fill the entire maps-container */
-            z-index: 100 !important;
-            border: none !important;
-            border-radius: 0 !important;
-            box-shadow: none !important; /* Remove shadow when fullscreen */
+            position: absolute !important; [cite: 1380]
+            top: 0 !important; [cite: 1380]
+            left: 0 !important; [cite: 1380]
+            width: 100% !important; [cite: 1380]
+            height: 100% !important; [cite: 1381]
+            z-index: 100 !important; [cite: 1382]
+            border: none !important; [cite: 1382]
+            border-radius: 0 !important; [cite: 1382]
+            box-shadow: none !important; [cite: 1382]
         }
         .submit-container {
-            text-align: center;
-            margin-bottom: 30px;
+            text-align: center; [cite: 1383]
+            margin-bottom: 30px; [cite: 1383]
         }
-        .submit-btn, .new-location-btn, .auth-btn {
-            background-color: #0cc0df;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 1.1em;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin: 0 10px;
+        .submit-btn, .new-location-btn, .auth-btn, #start-game-btn, #view-leaderboard-btn, #close-leaderboard-btn { /* Added new buttons */
+            background-color: #0cc0df; [cite: 1384]
+            color: white; [cite: 1384]
+            border: none; [cite: 1384]
+            padding: 12px 30px; [cite: 1384]
+            font-size: 1.1em; [cite: 1384]
+            border-radius: 5px; [cite: 1384]
+            cursor: pointer; [cite: 1384]
+            transition: background-color 0.3s; [cite: 1384]
+            margin: 5px 10px; /* Adjusted margin for better spacing */
         }
-        .submit-btn:hover, .new-location-btn:hover, .auth-btn:hover {
-            background-color: #0aa8c4;
+        .submit-btn:hover, .new-location-btn:hover, .auth-btn:hover, #start-game-btn:hover, #view-leaderboard-btn:hover, #close-leaderboard-btn:hover { /* Added new buttons */
+            background-color: #0aa8c4; [cite: 1386]
         }
         .auth-btn {
-            padding: 8px 15px;
-            font-size: 1em;
-            margin-left: 10px;
-            background-color: #007bff; /* Default for login/account */
+            padding: 8px 15px; [cite: 1387]
+            font-size: 1em; [cite: 1387]
+            margin-left: 10px; [cite: 1387]
+            background-color: #007bff; [cite: 1387]
         }
-        #register-btn {
-            background-color: #28a745;
-        }
-        #logout-btn {
-            background-color: #dc3545;
-        }
-        #my-account-btn {
-            background-color: #6c757d; /* Grey for account button */
-        }
+        #register-btn { background-color: #28a745; [cite: 1388] }
+        #logout-btn { background-color: #dc3545; [cite: 1389] }
+        #my-account-btn { background-color: #6c757d; [cite: 1390] }
+        #view-leaderboard-btn { background-color: #17a2b8; } /* Teal for leaderboard button */
+        #close-leaderboard-btn { background-color: #6c757d; padding: 5px 10px; float: right; }
+
         footer {
-            background-color: #0cc0df;
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
-            font-size: 0.9em;
-            margin-top: 40px;
+            background-color: #0cc0df; [cite: 1391]
+            padding: 10px; [cite: 1391]
+            text-align: center; [cite: 1391]
+            border-radius: 5px; [cite: 1391]
+            font-size: 0.9em; [cite: 1391]
+            margin-top: 40px; [cite: 1392]
         }
-        .maptiler-ctrl-group,
-        .maptiler-ctrl,
-        .maplibregl-ctrl-group,
-        .maplibregl-ctrl {
-            display: none !important;
-        }
+        .maptiler-ctrl-group, .maptiler-ctrl, .maplibregl-ctrl-group, .maplibregl-ctrl { display: none !important; [cite: 1393] }
         .guess-pin {
-            position: absolute;
-            width: 24px; /* Width of the pin */
-            height: 36px; /* Height of the pin */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%23e53e3e" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
-            background-size: contain;
-            background-repeat: no-repeat;
-            transform: translate3d(-50%, -100%, 0);
-            z-index: 101;
-            pointer-events: none;
+            position: absolute; [cite: 1394] width: 24px; [cite: 1394] height: 36px; [cite: 1395]
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%23e53e3e" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>'); [cite: 1396]
+            background-size: contain; [cite: 1396] background-repeat: no-repeat; [cite: 1396]
+            transform: translate3d(-50%, -100%, 0); [cite: 1397] z-index: 101; [cite: 1397] pointer-events: none; [cite: 1397]
         }
         .real-location-pin {
-            position: absolute;
-            width: 24px; /* Width of the pin */
-            height: 36px; /* Height of the pin */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%2328a745" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
-            background-size: contain;
-            background-repeat: no-repeat;
-            transform: translate3d(-50%, -100%, 0);
-            z-index: 102;
-            pointer-events: none;
+            position: absolute; [cite: 1398] width: 24px; [cite: 1398] height: 36px; [cite: 1399]
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%2328a745" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>'); [cite: 1400]
+            background-size: contain; [cite: 1400] background-repeat: no-repeat; [cite: 1400]
+            transform: translate3d(-50%, -100%, 0); [cite: 1401] z-index: 102; [cite: 1401] pointer-events: none; [cite: 1401]
         }
         #next-round-btn {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 30px;
-            font-size: 1.1em;
-            background-color: #0cc0df;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 110; /* Ensure it's above the maps */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s;
+            position: absolute; [cite: 1402] bottom: 20px; [cite: 1402] left: 50%; [cite: 1402] transform: translateX(-50%); [cite: 1402]
+            padding: 12px 30px; [cite: 1402] font-size: 1.1em; [cite: 1402] background-color: #0cc0df; [cite: 1402] color: white; [cite: 1402]
+            border: none; [cite: 1402] border-radius: 5px; [cite: 1403] cursor: pointer; [cite: 1403] z-index: 110; [cite: 1403]
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); [cite: 1404] transition: background-color 0.3s; [cite: 1404]
         }
-        #next-round-btn:hover {
-            background-color: #0aa8c4;
-        }
+        #next-round-btn:hover { background-color: #0aa8c4; [cite: 1405] }
         #round-score-display, #total-score-display {
-            position: fixed; /* Fixed position relative to viewport */
-            padding: 10px 15px;
-            background-color: black; /* Changed to solid black */
-            color: white;
-            font-size: 1.2em;
-            border-radius: 5px;
-            z-index: 1000; /* High z-index to be on top */
-            display: none; /* Hidden by default */
-            transition: opacity 0.3s ease-in-out;
-            pointer-events: none;
-            border: 1px solid white; /* Added white border */
+            position: fixed; [cite: 1406] padding: 10px 15px; [cite: 1407] background-color: black; [cite: 1407] color: white; [cite: 1408]
+            font-size: 1.2em; [cite: 1408] border-radius: 5px; [cite: 1408] z-index: 1000; [cite: 1408] display: none; [cite: 1409]
+            transition: opacity 0.3s ease-in-out; [cite: 1410] pointer-events: none; [cite: 1410] border: 1px solid white; [cite: 1410]
         }
-        #round-score-display {
-            bottom: 20px;
-            left: 20px;
-        }
-        #total-score-display {
-            bottom: 20px;
-            right: 20px;
-        }
+        #round-score-display { bottom: 20px; [cite: 1411] left: 20px; [cite: 1411] }
+        #total-score-display { bottom: 20px; [cite: 1412] right: 20px; [cite: 1412] }
         #account-page {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 30px;
-            margin-top: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            display: none; /* Hidden by default */
+            background-color: #f9f9f9; [cite: 1413] border: 1px solid #ddd; [cite: 1413] border-radius: 8px; [cite: 1413]
+            padding: 30px; [cite: 1413] margin-top: 20px; [cite: 1413] box-shadow: 0 2px 4px rgba(0,0,0,0.1); [cite: 1413]
+            max-width: 600px; [cite: 1414] margin-left: auto; [cite: 1414] margin-right: auto; [cite: 1414] display: none; [cite: 1414]
         }
-        #account-page h2 {
-            color: #0cc0df;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
+        #account-page h2 { color: #0cc0df; [cite: 1415] margin-bottom: 20px; [cite: 1415] border-bottom: 2px solid #eee; [cite: 1415] padding-bottom: 10px; [cite: 1415] }
+        #account-page p { font-size: 1.1em; [cite: 1416] margin-bottom: 10px; [cite: 1416] }
+        #account-page strong { color: #555; [cite: 1417] }
+
+        /* Styles for new sections */
+        #game-setup-section { text-align: center; margin-bottom: 20px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; }
+        #game-setup-section label { margin-right: 10px; }
+        #round-selection { padding: 8px; border-radius: 4px; border: 1px solid #ced4da; margin-right: 15px;}
+        #game-section, #game-maps-section, #game-answers-section { /* These were original game sections */
+             /* display: none; */ /* Initially hidden, controlled by JS */
         }
-        #account-page p {
-            font-size: 1.1em;
-            margin-bottom: 10px;
+        #leaderboard-section {
+            margin-top: 20px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;
         }
-        #account-page strong {
-            color: #555;
+        #player-ranked-stats { margin-bottom: 20px; padding: 10px; background-color: #e9ecef; border-radius: 5px; }
+        #top-players-table { width: 100%; border-collapse: collapse; }
+        #top-players-table th, #top-players-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        #leaderboard-message { margin-top: 15px; color: #6c757d; }
+        .message-box { /* For showMessageBox */
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background-color: #007bff; color: white; padding: 15px 25px; border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 2000; font-size: 1.1em;
+            text-align: center; max-width: 90%;
         }
+        .message-box.error { background-color: #f44336; /* Red for errors */ }
     </style>
 </head>
 <body>
     <header>
         <div>
             <h1>Map Guessr</h1>
-            <p>May 15th 2025 - V9 (Score Calculation Fix)</p>
-        </div>
+            <p>May 29th 2025 - V10 (Leaderboard & Rounds)</p> </div>
         <div id="auth-container">
             <button id="login-btn" class="auth-btn">Login</button>
             <button id="register-btn" class="auth-btn">Register</button>
-            <button id="my-account-btn" class="auth-btn" style="display:none;">My Account</button>
-            <button id="logout-btn" class="auth-btn" style="display:none;">Logout</button>
+            <button id="my-account-btn" class="auth-btn" style="display:none;">My Account</button> <button id="logout-btn" class="auth-btn" style="display:none;">Logout</button>
             <span id="user-info" style="margin-left: 20px; color: #fff;"></span>
         </div>
     </header>
+
     <main style="display:none;">
-        <section id="game-section">
-            <h2>About</h2>
-            <p>Game Rules.</p>
+        <section id="game-setup-section" style="display:none;">
+            <h2>Game Setup</h2>
+            <div style="margin-bottom: 15px;">
+                <label for="round-selection">Select Number of Rounds (20 for Ranked):</label>
+                <select id="round-selection">
+                    <option value="5">5 Rounds</option>
+                    <option value="10">10 Rounds</option>
+                    <option value="15">15 Rounds</option>
+                    <option value="20" selected>20 Rounds (Ranked)</option>
+                </select>
+            </div>
+            <button id="start-game-btn">Start Game</button>
+            <button id="view-leaderboard-btn">View Leaderboard</button>
         </section>
-        <section id="game-maps-section">
+
+        <section id="game-section" style="display:none;">
+            <h2>About</h2>
+            <p>Select the number of rounds and click "Start Game". Try to guess the location shown on the main map by placing a pin on the smaller overlay map. The closer you are, the more points you get! A 20-round game is eligible for the ranked leaderboard.</p>
+        </section>
+        <section id="game-maps-section" style="display:none;">
             <h2>Maps</h2>
             <div class="maps-container">
                 <div id="maptiler-map"></div>
                 <div id="overlay-map"></div>
             </div>
             <div class="submit-container">
-                <button class="new-location-btn" id="new-location">New Location</button>
-                <button class="submit-btn" id="submit-guess">Submit</button>
-            </div>
+                 <button class="new-location-btn" id="new-location" disabled>Skip Round (0 Pts)</button> <button class="submit-btn" id="submit-guess" disabled>Submit Guess</button> </div>
         </section>
-        <section id="game-answers-section">
-            <h2>Game Answers</h2>
-            <ul>
-                <li id="location-text">The location label/place goes here/coordinates</li>
-                <li id="guessed-coords">The guessed coordinates</li>
-                <li id="submit-status">Submit button clicked? status goes here</li>
-                <li id="points-score">Future points/scores system goes here</li>
-                <li id="round-count">Round: 1</li>
+        <section id="game-answers-section" style="display:none;">
+            <h2>Game Status</h2> <ul>
+                <li id="location-text">The location label/place goes here/coordinates</li> <li id="guessed-coords">The guessed coordinates</li> <li id="submit-status">Submit button clicked? status goes here</li> <li id="points-score">Points: - | Total: 0 points</li> <li id="round-count">Round: 0 / 0</li>
             </ul>
         </section>
 
-
+        <section id="leaderboard-section" style="display:none;">
+            <h2>20-Round Ranked Leaderboard</h2>
+            <button id="close-leaderboard-btn">Close</button>
+            <div id="player-ranked-stats">
+                <h4>Your 20-Round Stats</h4>
+                <p><strong>High Score:</strong> <span id="player-highscore">Fetching...</span></p>
+                <p><strong>Rank:</strong> <span id="player-rank">Fetching...</span></p>
+            </div>
+            <h3>Top Players</h3>
+            <table id="top-players-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="top-players-tbody">
+                    </tbody>
+            </table>
+            <p id="leaderboard-message"></p>
+        </section>
+        
         <section id="account-page" style="display:none;">
             <h2>Account Information</h2>
-            <p><strong>User ID:</strong> <span id="account-user-id">Not available</span></p>
-            <p><strong>Client ID:</strong> <span id="account-client-id">Not available</span></p>
-            <p><strong>Token Expiry:</strong> <span id="account-token-expiry">Not available</span></p>
-            <p><strong>Token Issued At:</strong> <span id="account-token-iat">Not available</span></p>
-            <p><strong>Token Type:</strong> <span id="account-token-type">Not available</span></p>
-            <p><strong>Token Active:</strong> <span id="account-token-active">Not available</span></p>
-        </section>
+            <p><strong>User ID:</strong> <span id="account-user-id">Not available</span></p> <p><strong>Display Name:</strong> <span id="account-display-name">Not available</span></p> <p><strong>Client ID:</strong> <span id="account-client-id">Not available</span></p> <p><strong>Token Expiry:</strong> <span id="account-token-expiry">Not available</span></p> <p><strong>Token Issued At:</strong> <span id="account-token-iat">Not available</span></p> <p><strong>Token Type:</strong> <span id="account-token-type">Not available</span></p> <p><strong>Token Active:</strong> <span id="account-token-active">Not available</span></p> </section>
     </main>
     <footer>
-        <p>Made by Nathann and Jason</p>
-    </footer>
-
+         <p>Made by Nathann and Jason</p> </footer>
 
     <div id="round-score-display"></div>
     <div id="total-score-display"></div>
 
-
     <script>
         // --- OAuth Configuration ---
-        const OAUTH_CLIENT_ID = 'mapguessr-github-io.pages.dev'; // IMPORTANT: Replace with your actual client_id from transitspotter
-        const OAUTH_REDIRECT_URI = window.location.href.split('?')[0]; // Assumes the current page handles the callback and is registered
-        const AUTH_SERVER_BASE_URL = 'https://auth.transitspotter.com';
-
-
+        const OAUTH_CLIENT_ID = 'mapguessr-github-io.pages.dev'; [cite: 1425]
+        const OAUTH_REDIRECT_URI = window.location.href.split('?')[0]; [cite: 1426]
+        const AUTH_SERVER_BASE_URL = 'https://auth.transitspotter.com'; [cite: 1427]
         // --- Map Guessr Configuration ---
-        const apiKey = 'ZS9RHHRim7f1OZRKuI6n';
-        maptilersdk.config.apiKey = apiKey;
-        const randomCityApiUrl = 'https://random-city-api.vercel.app/api/random-city';
-        let currentMarker = null;
-        let userGuessLngLat = null;
-        let guessPinElement = null;
-        let currentLocationCoords = null;
-        let totalScore = 0;
-        let mainMap = null;
-        let overlayMap = null;
-        let realLocationPinElement = null;
-        let roundCount = 1;
-        const zoomLevel = 15;
-        const customStyleUrl = 'https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=' + apiKey;
-        const overlayStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey;
-        const initialCenter = [0, 0];
-        const initialZoom = -1.0;
-        let lineLayerVisible = false;
-
-
-
-
+        const apiKey = 'ZS9RHHRim7f1OZRKuI6n'; // Your MapTiler API Key [cite: 1428]
+        maptilersdk.config.apiKey = apiKey; [cite: 1428]
+        const randomCityApiUrl = 'https://random-city-api.vercel.app/api/random-city'; [cite: 1428]
+        let currentMarker = null; [cite: 1428]
+        let userGuessLngLat = null; [cite: 1428]
+        let guessPinElement = null; [cite: 1428]
+        let currentLocationCoords = null; [cite: 1429]
+        let totalScore = 0; [cite: 1429]
+        let mainMap = null; [cite: 1429]
+        let overlayMap = null; [cite: 1429]
+        let realLocationPinElement = null; [cite: 1429]
+        let currentRound = 0; // Renamed from roundCount for clarity with selectedNumRounds [cite: 1429]
+        const zoomLevel = 15; [cite: 1430]
+        const customStyleUrl = `https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=${apiKey}`; [cite: 1431]
+        const overlayStyleUrl = `https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=${apiKey}`; [cite: 1431]
+        const initialCenter = [0, 0]; [cite: 1431]
+        const initialZoom = -1.0; [cite: 1431]
+        let lineLayerVisible = false; [cite: 1432]
         // --- Application State ---
-        let isAuthenticated = false;
-        let currentPage = 'game'; // 'game' or 'account'
+        let isAuthenticated = false; [cite: 1432]
+        let currentPage = 'game'; [cite: 1433]
+        let selectedNumRounds = 20;
+        let gameInProgress = false;
+        let currentAccessToken = null; // Store fetched user name
 
+        // --- API Base URL ---
+        // Assuming backend worker is deployed at the same origin or a known URL
+        const API_BASE_URL = ''; // Example: '/api' if on same origin, or full URL if different
 
-        // --- OAuth Helper Functions ---
-        async function generateCodeVerifierAndChallenge() {
-            const codeVerifier = generateRandomString(64);
-            const encoder = new TextEncoder();
-            const data = encoder.encode(codeVerifier);
-            const digest = await crypto.subtle.digest('SHA-256', data);
+        // --- OAuth Helper Functions (largely unchanged from original) ---
+        async function generateCodeVerifierAndChallenge() { /* ... */ 
+            const codeVerifier = generateRandomString(64); [cite: 1434]
+            const encoder = new TextEncoder(); [cite: 1434]
+            const data = encoder.encode(codeVerifier); [cite: 1434]
+            const digest = await crypto.subtle.digest('SHA-256', data); [cite: 1435]
             const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
                 .replace(/\+/g, '-')
                 .replace(/\//g, '_')
-                .replace(/=/g, '');
-            return { codeVerifier, codeChallenge };
+                .replace(/=/g, ''); [cite: 1435]
+            return { codeVerifier, codeChallenge }; [cite: 1436]
         }
-
-
-        function generateRandomString(length) {
-            const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-            let result = '';
-            const randomValues = new Uint8Array(length);
-            crypto.getRandomValues(randomValues);
+        function generateRandomString(length) { /* ... */ 
+            const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'; [cite: 1437]
+            let result = ''; [cite: 1437]
+            const randomValues = new Uint8Array(length); [cite: 1438]
+            crypto.getRandomValues(randomValues); [cite: 1438]
             for (let i = 0; i < length; i++) {
-                result += charset[randomValues[i] % charset.length];
+                result += charset[randomValues[i] % charset.length]; [cite: 1439]
             }
-            return result;
+            return result; [cite: 1440]
         }
+        async function startOAuthFlow() { /* ... */ 
+            const { codeVerifier, codeChallenge } = await generateCodeVerifierAndChallenge(); [cite: 1441]
+            const state = generateRandomString(32); [cite: 1441]
+            sessionStorage.setItem('code_verifier', codeVerifier); [cite: 1441]
+            sessionStorage.setItem('oauth_state', state); [cite: 1441]
 
-
-        async function startOAuthFlow() {
-            const { codeVerifier, codeChallenge } = await generateCodeVerifierAndChallenge();
-            const state = generateRandomString(32);
-            sessionStorage.setItem('code_verifier', codeVerifier);
-            sessionStorage.setItem('oauth_state', state);
-
-
-            const authUrl = new URL(`${AUTH_SERVER_BASE_URL}/external/authorize`);
-            authUrl.searchParams.append('response_type', 'code');
-            authUrl.searchParams.append('client_id', OAUTH_CLIENT_ID);
-            authUrl.searchParams.append('redirect_uri', OAUTH_REDIRECT_URI);
-            authUrl.searchParams.append('code_challenge', codeChallenge);
-            authUrl.searchParams.append('code_challenge_method', 'S256');
-            authUrl.searchParams.append('state', state);
-            window.location.href = authUrl.toString();
+            const authUrl = new URL(`${AUTH_SERVER_BASE_URL}/external/authorize`); [cite: 1442]
+            authUrl.searchParams.append('response_type', 'code'); [cite: 1442]
+            authUrl.searchParams.append('client_id', OAUTH_CLIENT_ID); [cite: 1442]
+            authUrl.searchParams.append('redirect_uri', OAUTH_REDIRECT_URI); [cite: 1442]
+            authUrl.searchParams.append('code_challenge', codeChallenge); [cite: 1442]
+            authUrl.searchParams.append('code_challenge_method', 'S256'); [cite: 1442]
+            authUrl.searchParams.append('state', state); [cite: 1442]
+            window.location.href = authUrl.toString(); [cite: 1442]
         }
-
-
-        async function handleOAuthCallback() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const state = urlParams.get('state');
-            const error = urlParams.get('error');
-
-
+        async function handleOAuthCallback() { /* ... */ 
+            const urlParams = new URLSearchParams(window.location.search); [cite: 1443]
+            const code = urlParams.get('code'); [cite: 1443]
+            const state = urlParams.get('state'); [cite: 1443]
+            const error = urlParams.get('error'); [cite: 1444]
             if (error) {
-                console.error('OAuth error:', error, urlParams.get('error_description'));
-                // Using a custom message box instead of alert()
-                showMessageBox(`OAuth Error: ${error} - ${urlParams.get('error_description') || 'Unknown error'}`);
-                return false;
+                console.error('OAuth error:', error, urlParams.get('error_description')); [cite: 1445]
+                showMessageBox(`OAuth Error: ${error} - ${urlParams.get('error_description') || 'Unknown error'}`, true); [cite: 1446]
+                return false; [cite: 1446]
             }
-
-
-            const storedState = sessionStorage.getItem('oauth_state');
+            const storedState = sessionStorage.getItem('oauth_state'); [cite: 1447]
             if (!state || state !== storedState) {
-                console.error('Invalid state parameter');
-                showMessageBox('Error: Invalid state. CSRF attack suspected.');
-                return false;
+                console.error('Invalid state parameter'); [cite: 1448]
+                showMessageBox('Error: Invalid state. CSRF attack suspected.', true); [cite: 1448]
+                return false; [cite: 1448]
             }
-
-
-            const codeVerifier = sessionStorage.getItem('code_verifier');
+            const codeVerifier = sessionStorage.getItem('code_verifier'); [cite: 1449]
             if (!codeVerifier) {
-                console.error('Code verifier not found');
-                showMessageBox('Error: Code verifier missing. Please try logging in again.');
-                return false;
+                console.error('Code verifier not found'); [cite: 1450]
+                showMessageBox('Error: Code verifier missing. Please try logging in again.', true); [cite: 1450]
+                return false; [cite: 1451]
             }
-
-
             try {
-                const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/token`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Origin': window.location.origin
-                    },
-                    body: JSON.stringify({
-                        grant_type: 'authorization_code',
-                        code: code,
-                        client_id: OAUTH_CLIENT_ID,
-                        redirect_uri: OAUTH_REDIRECT_URI,
-                        code_verifier: codeVerifier
-                    })
+                const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/token`, { [cite: 1452]
+                    method: 'POST', [cite: 1452]
+                    headers: { 'Content-Type': 'application/json', 'Origin': window.location.origin }, [cite: 1452]
+                    body: JSON.stringify({  grant_type: 'authorization_code', code: code, client_id: OAUTH_CLIENT_ID, redirect_uri: OAUTH_REDIRECT_URI, code_verifier: codeVerifier }) [cite: 1453, 1454]
                 });
-                const tokenData = await response.json();
-
-
+                const tokenData = await response.json(); [cite: 1455]
                 if (tokenData.error) {
-                    console.error('Token error:', tokenData.error, tokenData.error_description);
-                    showMessageBox(`Token Error: ${tokenData.error} - ${tokenData.error_description || 'Failed to get token'}`);
-                    return false;
+                    console.error('Token error:', tokenData.error, tokenData.error_description); [cite: 1456]
+                    showMessageBox(`Token Error: ${tokenData.error} - ${tokenData.error_description || 'Failed to get token'}`, true); [cite: 1456]
+                    return false; [cite: 1457]
                 }
-
-
-                localStorage.setItem('access_token', tokenData.access_token);
-                localStorage.setItem('refresh_token', tokenData.refresh_token);
-                localStorage.setItem('token_expiry', Date.now() + (tokenData.expires_in * 1000));
-
-
-                sessionStorage.removeItem('code_verifier');
-                sessionStorage.removeItem('oauth_state');
-                return true;
+                localStorage.setItem('access_token', tokenData.access_token); [cite: 1458]
+                localStorage.setItem('refresh_token', tokenData.refresh_token); [cite: 1458]
+                localStorage.setItem('token_expiry', Date.now() + (tokenData.expires_in * 1000)); [cite: 1458]
+                sessionStorage.removeItem('code_verifier'); [cite: 1459]
+                sessionStorage.removeItem('oauth_state'); [cite: 1459]
+                return true; [cite: 1459]
             } catch (err) {
-                console.error('Token exchange error:', err);
-                showMessageBox('Error exchanging code for token. Please check console.');
-                return false;
+                console.error('Token exchange error:', err); [cite: 1460]
+                showMessageBox('Error exchanging code for token. Please check console.', true); [cite: 1460]
+                return false; [cite: 1461]
             }
         }
-
-
-        async function refreshToken() {
-            const refreshTokenVal = localStorage.getItem('refresh_token');
-            if (!refreshTokenVal) return false;
-
-
+        async function refreshToken() { /* ... */ 
+             const refreshTokenVal = localStorage.getItem('refresh_token'); [cite: 1462]
+            if (!refreshTokenVal) return false; [cite: 1462]
             try {
-                const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/token`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Origin': window.location.origin
-                    },
-                    body: JSON.stringify({
-                        grant_type: 'refresh_token',
-                        refresh_token: refreshTokenVal,
-                        client_id: OAUTH_CLIENT_ID
-                    })
+                const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/token`, { [cite: 1463]
+                    method: 'POST', [cite: 1463]
+                    headers: { 'Content-Type': 'application/json', 'Origin': window.location.origin }, [cite: 1463]
+                    body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: refreshTokenVal, client_id: OAUTH_CLIENT_ID }) [cite: 1464]
                 });
-                const tokenData = await response.json();
-
-
+                const tokenData = await response.json(); [cite: 1465]
                 if (tokenData.error) {
-                    console.error('Refresh error:', tokenData.error, tokenData.error_description);
-                    localStorage.clear();
-                    return false;
+                    console.error('Refresh error:', tokenData.error, tokenData.error_description); [cite: 1466]
+                    localStorage.clear(); [cite: 1466]
+                    return false; [cite: 1466]
                 }
-                localStorage.setItem('access_token', tokenData.access_token);
-                if (tokenData.refresh_token) {
-                    localStorage.setItem('refresh_token', tokenData.refresh_token);
-                }
-                localStorage.setItem('token_expiry', Date.now() + (tokenData.expires_in * 1000));
-                return true;
+                localStorage.setItem('access_token', tokenData.access_token); [cite: 1467]
+                if (tokenData.refresh_token) { localStorage.setItem('refresh_token', tokenData.refresh_token); } [cite: 1468]
+                localStorage.setItem('token_expiry', Date.now() + (tokenData.expires_in * 1000)); [cite: 1469]
+                return true; [cite: 1469]
             } catch (error) {
-                console.error('Token refresh error:', error);
-                return false;
+                console.error('Token refresh error:', error); [cite: 1470]
+                return false; [cite: 1470]
             }
         }
-
-
-        async function ensureValidToken() {
-            const accessToken = localStorage.getItem('access_token');
-            if (!accessToken) return false;
-
-
-            const expiryTime = parseInt(localStorage.getItem('token_expiry'), 10);
-            if (isNaN(expiryTime)) {
-                localStorage.clear();
-                return false;
-            }
-            if (Date.now() > expiryTime - 60000) { // Refresh if expiring in the next minute
-                console.log("Token expired or expiring soon, attempting refresh...");
-                return await refreshToken();
-            }
-            return true;
+        async function ensureValidToken() { /* ... */ 
+            const accessToken = localStorage.getItem('access_token'); [cite: 1471]
+            currentAccessToken = accessToken; // Store for API calls
+            if (!accessToken) return false; [cite: 1471]
+            const expiryTime = parseInt(localStorage.getItem('token_expiry'), 10); [cite: 1472]
+            if (isNaN(expiryTime)) { localStorage.clear(); return false; } [cite: 1472]
+            if (Date.now() > expiryTime - 60000) { console.log("Token expired or expiring soon, attempting refresh..."); return await refreshToken(); } [cite: 1473]
+            return true; [cite: 1474]
         }
-
-
-        async function appLogout() {
-            const refreshTokenVal = localStorage.getItem('refresh_token');
+        async function appLogout() { /* ... */ 
+            const refreshTokenVal = localStorage.getItem('refresh_token'); [cite: 1475]
             if (refreshTokenVal) {
                 try {
-                    await fetch(`${AUTH_SERVER_BASE_URL}/external/revoke`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Origin': window.location.origin
-                        },
-                        body: JSON.stringify({
-                            token: refreshTokenVal,
-                            token_type_hint: 'refresh_token'
-                        })
+                    await fetch(`${AUTH_SERVER_BASE_URL}/external/revoke`, { [cite: 1476]
+                        method: 'POST', [cite: 1476]
+                        headers: { 'Content-Type': 'application/json', 'Origin': window.location.origin }, [cite: 1476]
+                        body: JSON.stringify({ token: refreshTokenVal, token_type_hint: 'refresh_token' }) [cite: 1477, 1478]
                     });
-                } catch (error) {
-                    console.error('Error revoking token:', error);
-                }
+                } catch (error) { console.error('Error revoking token:', error); } [cite: 1479]
             }
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('refresh_token');
-            localStorage.removeItem('token_expiry');
-            isAuthenticated = false;
-            resetGameAndUI();
-            updateAuthUI();
-            currentPage = 'game'; // Reset to game page on logout
-            showPage(currentPage);
-        }
-       
-        function resetGameAndUI() {
-            // Remove map instances if they exist
-            if (mainMap) { mainMap.remove(); mainMap = null; }
-            if (overlayMap) { overlayMap.remove(); overlayMap = null; }
-
-
-            // Clear markers and pins
-            if (currentMarker) { currentMarker.remove(); currentMarker = null; }
-            if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; }
-            if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; }
-           
-            // Reset game state variables
-            userGuessLngLat = null;
-            currentLocationCoords = null;
-            totalScore = 0;
-            roundCount = 1;
-            lineLayerVisible = false; // Assuming this should be reset
-
-
-            // Reset UI text elements
-            document.getElementById('location-text').textContent = 'The location label/place goes here/coordinates';
-            document.getElementById('guessed-coords').textContent = 'The guessed coordinates';
-            document.getElementById('submit-status').textContent = 'Submit button clicked? status goes here';
-            document.getElementById('points-score').textContent = 'Future points/scores system goes here';
-            document.getElementById('round-count').textContent = 'Round: 1';
-           
-            const existingNextButton = document.getElementById('next-round-btn');
-            if (existingNextButton) existingNextButton.remove();
-
-
-            document.getElementById('round-score-display').style.display = 'none';
-            document.getElementById('total-score-display').style.display = 'none';
-
-
-            // Disable game buttons
-            const submitGuessBtnElem = document.getElementById('submit-guess');
-            if(submitGuessBtnElem) submitGuessBtnElem.disabled = true;
-            const newLocationBtnElem = document.getElementById('new-location');
-            if(newLocationBtnElem) newLocationBtnElem.disabled = true;
+            localStorage.removeItem('access_token'); [cite: 1480]
+            localStorage.removeItem('refresh_token'); [cite: 1480]
+            localStorage.removeItem('token_expiry'); [cite: 1480]
+            isAuthenticated = false; [cite: 1480]
+            currentAccessToken = null;
+            gameInProgress = false; // Ensure game is marked as not in progress
+            resetGameAndUI(); [cite: 1480]
+            updateAuthUI(); [cite: 1481]
+            currentPage = 'game'; [cite: 1481]
+            showPage(currentPage); [cite: 1482]
         }
 
-
-        // Custom message box function instead of alert()
-        function showMessageBox(message) {
-            const messageBox = document.createElement('div');
-            messageBox.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background-color: #f44336; /* Red background for error */
-                color: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                z-index: 2000;
-                font-size: 1.2em;
-                text-align: center;
-                max-width: 80%;
-            `;
-            messageBox.textContent = message;
-            document.body.appendChild(messageBox);
-
-
-            setTimeout(() => {
-                messageBox.remove();
-            }, 5000); // Remove after 5 seconds
-        }
-
-
-        async function fetchAndDisplayUserInfo() {
-            const accessToken = localStorage.getItem('access_token');
-            if (!accessToken) {
-                document.getElementById('account-user-id').textContent = 'Not logged in.';
-                return;
-            }
-
-
-            try {
-                const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/introspect`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Origin': window.location.origin
-                    },
-                    body: JSON.stringify({
-                        token: accessToken,
-                        token_type_hint: 'access_token'
-                    })
-                });
-                const userData = await response.json();
-
-
-                if (userData.active) {
-                    document.getElementById('account-user-id').textContent = userData.sub || 'N/A';
-                    document.getElementById('account-client-id').textContent = userData.client_id || 'N/A';
-                    document.getElementById('account-token-type').textContent = userData.token_type || 'N/A';
-                    document.getElementById('account-token-active').textContent = 'Yes';
-
-
-                    if (userData.exp) {
-                        const expiryDate = new Date(userData.exp * 1000);
-                        document.getElementById('account-token-expiry').textContent = expiryDate.toLocaleString();
-                    } else {
-                        document.getElementById('account-token-expiry').textContent = 'N/A';
-                    }
-
-
-                    if (userData.iat) {
-                        const issuedAtDate = new Date(userData.iat * 1000);
-                        document.getElementById('account-token-iat').textContent = issuedAtDate.toLocaleString();
-                    } else {
-                        document.getElementById('account-token-iat').textContent = 'N/A';
-                    }
-                    document.getElementById('user-info').textContent = `Logged In as: ${userData.sub || 'User'}`;
-                } else {
-                    document.getElementById('account-user-id').textContent = 'Token is inactive.';
-                    document.getElementById('account-client-id').textContent = 'N/A';
-                    document.getElementById('account-token-expiry').textContent = 'N/A';
-                    document.getElementById('account-token-iat').textContent = 'N/A';
-                    document.getElementById('account-token-type').textContent = 'N/A';
-                    document.getElementById('account-token-active').textContent = 'No';
-                    document.getElementById('user-info').textContent = `Logged In (Token Inactive)`;
-                }
-
-
-            } catch (error) {
-                console.error('Error fetching user info:', error);
-                document.getElementById('account-user-id').textContent = 'Error fetching user info.';
-                document.getElementById('user-info').textContent = `Logged In (Error)`;
-            }
-        }
-
-
-        // --- UI Update Functions ---
-        function updateAuthUI() {
-            const loginBtn = document.getElementById('login-btn');
-            const registerBtn = document.getElementById('register-btn');
-            const logoutBtn = document.getElementById('logout-btn');
-            const myAccountBtn = document.getElementById('my-account-btn');
-            const userInfoDisplay = document.getElementById('user-info');
-            const mainContent = document.querySelector('main');
-
-
-            if (isAuthenticated) {
-                loginBtn.style.display = 'none';
-                registerBtn.style.display = 'none';
-                logoutBtn.style.display = 'inline-block';
-                myAccountBtn.style.display = 'inline-block';
-                mainContent.style.display = 'block'; // Show main content area
-                fetchAndDisplayUserInfo(); // Fetch and display user info when authenticated
-                if (!mainMap && currentPage === 'game') { // Initialize game only if not already done and on game page
-                  initializeGame();
-                }
-            } else {
-                loginBtn.style.display = 'inline-block';
-                registerBtn.style.display = 'inline-block';
-                logoutBtn.style.display = 'none';
-                myAccountBtn.style.display = 'none';
-                userInfoDisplay.textContent = ''; // Clear user info
-                mainContent.style.display = 'none'; // Hide main content area
-                if (mainMap) { // If maps were initialized, remove them and reset state
-                    resetGameAndUI();
-                }
-                // Clear account info display
-                document.getElementById('account-user-id').textContent = 'Not logged in.';
-                document.getElementById('account-client-id').textContent = 'Not available';
-                document.getElementById('account-token-expiry').textContent = 'Not available';
-                document.getElementById('account-token-iat').textContent = 'Not available';
-                document.getElementById('account-token-type').textContent = 'Not available';
-                document.getElementById('account-token-active').textContent = 'Not available';
-            }
-            showPage(currentPage); // Ensure correct page is shown
-        }
-
-
-        function showPage(pageName) {
-            const gameSections = document.querySelectorAll('#game-section, #game-maps-section, #game-answers-section');
+        // --- UI Update and Game State Functions ---
+        function updateUIVisibility() {
+            const gameSetupSection = document.getElementById('game-setup-section');
+            const gameInfoSection = document.getElementById('game-section'); // "About" game rules
+            const gameMapsSection = document.getElementById('game-maps-section');
+            const gameAnswersSection = document.getElementById('game-answers-section');
+            const leaderboardSection = document.getElementById('leaderboard-section');
             const accountPage = document.getElementById('account-page');
 
+            // Hide all sections first
+            [gameSetupSection, gameInfoSection, gameMapsSection, gameAnswersSection, leaderboardSection, accountPage].forEach(s => s.style.display = 'none');
 
-            if (pageName === 'game') {
-                gameSections.forEach(section => section.style.display = 'block');
-                accountPage.style.display = 'none';
-                if (isAuthenticated && !mainMap) { // Re-initialize game if on game page and not initialized
-                    initializeGame();
-                }
-            } else if (pageName === 'account') {
-                gameSections.forEach(section => section.style.display = 'none');
+            if (!isAuthenticated) {
+                // login/register buttons are visible via updateAuthUI, main content hidden
+                return;
+            }
+
+            if (currentPage === 'account') {
                 accountPage.style.display = 'block';
-                // No need to de-initialize maps here, just hide game sections
-            }
-            currentPage = pageName;
-        }
-       
-        // --- Original Game Functions ---
-        function getRandomCoordinateInBounds(bounds) {
-            const minLng = bounds[0];
-            const minLat = bounds[1];
-            const maxLng = bounds[2];
-            const maxLat = bounds[3];
-            const buffer = 0.001;
-            const bufferedMinLng = minLng + (maxLng - minLng) * buffer;
-            const bufferedMinLat = minLat + (maxLat - minLat) * buffer;
-            const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer;
-            const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
-            const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
-            const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
-            return [randomLng, randomLat];
-        }
-
-
-        function addOrUpdateMarker(lngLatInput) {
-            const lngLatObject = Array.isArray(lngLatInput) ? new maptilersdk.LngLat(lngLatInput[0], lngLatInput[1]) : lngLatInput;
-            if (!(lngLatObject instanceof maptilersdk.LngLat) || typeof lngLatObject.lng !== 'number' || typeof lngLatObject.lat !== 'number') {
-                console.error("addOrUpdateMarker received invalid LngLat data:", lngLatInput);
-                return;
-            }
-            if (currentMarker) {
-                currentMarker.remove();
-            }
-            currentMarker = new maptilersdk.Marker()
-                .setLngLat(lngLatObject)
-                .addTo(mainMap);
-            currentLocationCoords = lngLatObject;
-            if (currentMarker && currentMarker.getElement()) {
-                currentMarker.getElement().style.display = 'none';
-            }
-            console.log("currentLocationCoords set to LngLat object:", currentLocationCoords);
-        }
-
-
-        function calculateDistanceInMeters(lat1, lon1, lat2, lon2) {
-            if (typeof lat1 !== 'number' || typeof lon1 !== 'number' || typeof lat2 !== 'number' || typeof lon2 !== 'number') {
-                console.error("Invalid input types for calculateDistanceInMeters:", lat1, lon1, lat2, lon2);
-                return NaN;
-            }
-            const R = 6371e3; // Earth's radius in meters
-            const φ1 = lat1 * Math.PI / 180; // φ, λ in radians
-            const φ2 = lat2 * Math.PI / 180;
-            const Δφ = (lat2 - lat1) * Math.PI / 180;
-            const Δλ = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-            const c = 2 * Math.atan2(Math.sqrt(Math.max(0, a)), Math.sqrt(Math.max(0, 1 - a)));
-            const distance = R * c; // Distance in meters
-            return distance;
-        }
-
-
-        function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) {
-            const MAX_SCORE = 5000; // Maximum points per round
-            const FIVE_K_THRESHOLD_METERS = 100; // A small distance for a guaranteed 5000
-            const distance = calculateDistanceInMeters(lat1, lon1, lat2, lon2);
-            if (isNaN(distance)) {
-                console.error("Distance calculation returned NaN.");
-                return { distance: NaN, score: NaN }; // Propagate NaN if distance is invalid
-            }
-            let score;
-            if (distance <= FIVE_K_THRESHOLD_METERS) {
-                score = MAX_SCORE;
-            } else {
-                const decayFactor = 2000000; // Adjust based on desired scoring curve
-                score = MAX_SCORE * Math.exp(-distance / decayFactor);
-                score = Math.max(0, Math.round(score));
-            }
-            return { distance: distance, score: score };
-        }
-
-
-        function updateGuessPinPosition() {
-            if (!overlayMap || !userGuessLngLat || !guessPinElement) return;
-            if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number') {
-                console.error("Invalid userGuessLngLat object for positioning:", userGuessLngLat);
-                return;
-            }
-            const pixelCoords = overlayMap.project(userGuessLngLat);
-            guessPinElement.style.left = `${pixelCoords.x}px`;
-            guessPinElement.style.top = `${pixelCoords.y}px`;
-            guessPinElement.style.display = 'block';
-        }
-
-
-        function updateRealLocationPinPosition() {
-            if (!overlayMap || !currentLocationCoords || !realLocationPinElement) return;
-            if (!(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') {
-                console.error("Invalid currentLocationCoords object for positioning:", currentLocationCoords);
-                return;
-            }
-            const pixelCoords = overlayMap.project(currentLocationCoords);
-            realLocationPinElement.style.left = `${pixelCoords.x}px`;
-            realLocationPinElement.style.top = `${pixelCoords.y}px`;
-            realLocationPinElement.style.display = 'block';
-        }
-       
-        function placeCustomGuessPinOnOverlay(lngLat) {
-            console.log('Attempting to place custom guess pin at LngLat:', lngLat);
-            userGuessLngLat = lngLat;
-            if (guessPinElement) {
-                console.log('Removing existing custom guess pin element.');
-                guessPinElement.remove();
-            }
-            guessPinElement = document.createElement('div');
-            guessPinElement.className = 'guess-pin';
-            overlayMap.getCanvasContainer().appendChild(guessPinElement);
-            console.log('New custom guess pin element created:', guessPinElement);
-            updateGuessPinPosition();
-            document.getElementById('guessed-coords').textContent = `Guessed Location: Lng: ${lngLat.lng.toFixed(6)}, Lat: ${lngLat.lat.toFixed(6)}`;
-            document.getElementById('submit-status').textContent = 'Guess placed. Click Submit!';
-            overlayMap.off('move', updateGuessPinPosition); // Remove previous to avoid duplicates
-            overlayMap.on('move', updateGuessPinPosition);
-            console.log("Guess pin placed and move listener added. userGuessLngLat:", userGuessLngLat);
-        }
-
-
-        function placeCustomRealLocationPinOnOverlay(lngLat) {
-            console.log('Attempting to place custom real location pin at LngLat:', lngLat);
-            if (realLocationPinElement) {
-                console.log('Removing existing custom real location pin element.');
-                realLocationPinElement.remove();
-            }
-            realLocationPinElement = document.createElement('div');
-            realLocationPinElement.className = 'real-location-pin';
-            overlayMap.getCanvasContainer().appendChild(realLocationPinElement);
-            console.log('New custom real location pin element created:', realLocationPinElement);
-            updateRealLocationPinPosition();
-            overlayMap.off('move', updateRealLocationPinPosition); // Remove previous to avoid duplicates
-            overlayMap.on('move', updateRealLocationPinPosition);
-            console.log("Real location pin placed and move listener added. currentLocationCoords:", currentLocationCoords);
-        }
-       
-        function updateLineBetweenPins() {
-            if (!lineLayerVisible || !overlayMap || !userGuessLngLat || !currentLocationCoords) return;
-            if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number' ||
-                !(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') {
-                console.error("Invalid LngLat objects for drawing line:", userGuessLngLat, currentLocationCoords);
-                return;
-            }
-            const lineGeoJSON = {
-                'type': 'Feature',
-                'geometry': { 'type': 'LineString', 'coordinates': [ [userGuessLngLat.lng, userGuessLngLat.lat], [currentLocationCoords.lng, currentLocationCoords.lat] ] }
-            };
-            if (overlayMap.getSource('line-source')) {
-                overlayMap.getSource('line-source').setData(lineGeoJSON);
+            } else if (currentPage === 'leaderboard') {
+                leaderboardSection.style.display = 'block';
+            } else { // Game page context
+                if (gameInProgress) {
+                    gameInfoSection.style.display = 'block';
+                    gameMapsSection.style.display = 'block';
+                    gameAnswersSection.style.display = 'block';
+                } else {
+                    gameSetupSection.style.display = 'block';
+                }
             }
         }
-
-
-        async function findRandomCityAndSpot(attempt = 1) {
-            const locationText = document.getElementById('location-text');
-            const newLocationBtn = document.getElementById('new-location');
+        
+        function updateGameButtonStates() {
+            const startGameBtn = document.getElementById('start-game-btn');
+            const newLocationBtn = document.getElementById('new-location'); // Skip button
             const submitGuessBtn = document.getElementById('submit-guess');
+            const roundSelectionEl = document.getElementById('round-selection');
 
+            if (gameInProgress) {
+                if(startGameBtn) startGameBtn.disabled = true;
+                if(roundSelectionEl) roundSelectionEl.disabled = true;
+                if(newLocationBtn) newLocationBtn.disabled = false; // Skip is available during a round
+                if(submitGuessBtn) submitGuessBtn.disabled = !userGuessLngLat; // Enable only if guess is made
+            } else {
+                if(startGameBtn) startGameBtn.disabled = false;
+                if(roundSelectionEl) roundSelectionEl.disabled = false;
+                if(newLocationBtn) newLocationBtn.disabled = true;
+                if(submitGuessBtn) submitGuessBtn.disabled = true;
+            }
+        }
 
-            locationText.textContent = 'Finding a new location...';
-            document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map...';
-            document.getElementById('submit-status').textContent = 'Place your guess on the overlay map...';
-            document.getElementById('points-score').textContent = 'Points: - | Total: ' + totalScore + ' points';
+        async function startGame() {
+            if (!isAuthenticated) {
+                showMessageBox("Please login to start the game.", true);
+                return;
+            }
+            console.log("Starting game...");
+            gameInProgress = true;
+            totalScore = 0;
+            currentRound = 1;
+            selectedNumRounds = parseInt(document.getElementById('round-selection').value) || 20;
+            
+            document.getElementById('points-score').textContent = `Points: - | Total: ${totalScore} points`;
+            document.getElementById('round-count').textContent = `Round: ${currentRound} / ${selectedNumRounds}`;
+            
+            const existingNextButton = document.getElementById('next-round-btn');
+            if (existingNextButton) existingNextButton.remove();
             document.getElementById('round-score-display').style.display = 'none';
             document.getElementById('total-score-display').style.display = 'none';
-
-
-            if (currentMarker) { currentMarker.remove(); currentMarker = null; }
-            if (guessPinElement) {
-                guessPinElement.remove(); guessPinElement = null;
-                userGuessLngLat = null;
-                if(overlayMap) overlayMap.off('move', updateGuessPinPosition);
-                console.log("Custom guess pin element and move listener removed.");
+            
+            if (!mainMap || !overlayMap) {
+                 await initializeGameMaps(); 
+            } else {
+                 await findRandomCityAndSpot();
             }
-            if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; if(overlayMap) overlayMap.off('move', updateRealLocationPinPosition); }
-            currentLocationCoords = null;
+            updateUIVisibility();
+            updateGameButtonStates();
+            console.log(`Game started with ${selectedNumRounds} rounds.`);
+        }
 
-
-            if (overlayMap && overlayMap.getLayer('line-layer')) {
-                overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
-                lineLayerVisible = false;
-            }
-
+        async function endGame() {
+            gameInProgress = false;
+            const finalMessage = `Game Over! Final Score: ${totalScore} after ${selectedNumRounds} rounds.`;
+            document.getElementById('submit-status').textContent = finalMessage;
+            showMessageBox(finalMessage, false, 7000); // Show for 7 seconds
 
             const existingNextButton = document.getElementById('next-round-btn');
             if (existingNextButton) existingNextButton.remove();
 
+            if (selectedNumRounds === 20 && isAuthenticated) {
+                console.log("20-round game finished. Submitting score:", totalScore);
+                await submitTwentyRoundScore(totalScore);
+            }
+            updateUIVisibility();
+            updateGameButtonStates();
+        }
+        
+        function resetGameAndUI() { /* Resets game state and UI elements */
+            if (mainMap) { mainMap.remove(); mainMap = null; } [cite: 1483]
+            if (overlayMap) { overlayMap.remove(); overlayMap = null; } [cite: 1484]
+            if (currentMarker) { currentMarker.remove(); currentMarker = null; } [cite: 1485]
+            if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; } [cite: 1486]
+            if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; } [cite: 1487]
+            userGuessLngLat = null; [cite: 1488]
+            currentLocationCoords = null; [cite: 1488]
+            totalScore = 0; [cite: 1489]
+            currentRound = 0; // Reset currentRound
+            lineLayerVisible = false; [cite: 1489]
+            document.getElementById('location-text').textContent = 'The location label/place goes here/coordinates'; [cite: 1490]
+            document.getElementById('guessed-coords').textContent = 'The guessed coordinates'; [cite: 1490]
+            document.getElementById('submit-status').textContent = 'Submit button clicked? status goes here'; [cite: 1491]
+            document.getElementById('points-score').textContent = 'Future points/scores system goes here'; [cite: 1491]
+            document.getElementById('round-count').textContent = `Round: 0 / 0`; // Update round count display
+            const existingNextButton = document.getElementById('next-round-btn');
+            if (existingNextButton) existingNextButton.remove();
+            document.getElementById('round-score-display').style.display = 'none'; [cite: 1492]
+            document.getElementById('total-score-display').style.display = 'none'; [cite: 1492]
+            
+            gameInProgress = false; // Explicitly set gameInProgress to false
+            updateGameButtonStates(); // Ensure buttons are reset
+            updateUIVisibility(); // Update overall UI
+        }
 
-            submitGuessBtn.disabled = false;
-            newLocationBtn.disabled = false;
+        function showMessageBox(message, isError = false, duration = 5000) { /* Custom message box */
+            const existingMessageBox = document.querySelector('.message-box');
+            if (existingMessageBox) existingMessageBox.remove();
 
+            const messageBox = document.createElement('div');
+            messageBox.className = 'message-box';
+            if (isError) messageBox.classList.add('error'); // Add error class for specific styling
+            messageBox.textContent = message;
+            document.body.appendChild(messageBox);
+            setTimeout(() => { messageBox.remove(); }, duration); [cite: 1499]
+        }
 
-            const MAX_LOCATION_RETRIES = 10;
-            if (attempt > MAX_LOCATION_RETRIES) {
-                locationText.textContent = `Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts. Please check the console for errors.`;
-                console.error(`Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts.`);
+        async function fetchAndDisplayUserInfo() { /* Fetches and displays user info */
+            const accessToken = localStorage.getItem('access_token'); [cite: 1500]
+            if (!accessToken) {
+                document.getElementById('account-user-id').textContent = 'Not logged in.'; [cite: 1501]
+                document.getElementById('account-display-name').textContent = 'N/A';
                 return;
             }
-            console.log(`Attempting to find random city (Attempt ${attempt}/${MAX_LOCATION_RETRIES})...`);
-            locationText.textContent = `Finding a random city (Attempt ${attempt})...`;
+             try {
+                const response = await fetch(`${AUTH_SERVER_BASE_URL}/external/introspect`, { /* ... */
+                    method: 'POST', [cite: 1502]
+                    headers: { 'Content-Type': 'application/json', 'Origin': window.location.origin }, [cite: 1502]
+                    body: JSON.stringify({ token: accessToken, token_type_hint: 'access_token' }) [cite: 1503]
+                });
+                const userData = await response.json(); [cite: 1504]
+                if (userData.active) {
+                    const userId = userData.sub || 'N/A'; // Use 'sub' as User ID
+                    // For display name, ideally, it comes from a /userinfo endpoint or is part of introspect response.
+                    // Assuming `userData.username` or similar might exist, or using userId if not.
+                    const displayName = userData.username || userId; 
+                    currentAccessToken = accessToken; // Keep this for later
 
+                    document.getElementById('user-info').textContent = `Logged In as: ${displayName}`; [cite: 1511] // (adapted)
+                    document.getElementById('account-user-id').textContent = userId; [cite: 1505]
+                    document.getElementById('account-display-name').textContent = displayName;
+                    document.getElementById('account-client-id').textContent = userData.client_id || 'N/A'; [cite: 1506]
+                    document.getElementById('account-token-type').textContent = userData.token_type || 'N/A'; [cite: 1506]
+                    document.getElementById('account-token-active').textContent = 'Yes'; [cite: 1506]
+                    if (userData.exp) { const expiryDate = new Date(userData.exp * 1000); document.getElementById('account-token-expiry').textContent = expiryDate.toLocaleString(); } [cite: 1507]
+                    else { document.getElementById('account-token-expiry').textContent = 'N/A'; } [cite: 1508]
+                    if (userData.iat) { const issuedAtDate = new Date(userData.iat * 1000); document.getElementById('account-token-iat').textContent = issuedAtDate.toLocaleString(); } [cite: 1509]
+                    else { document.getElementById('account-token-iat').textContent = 'N/A'; } [cite: 1510]
+                } else { /* ... handle inactive token ... */ 
+                    document.getElementById('user-info').textContent = `Logged In (Token Inactive)`; [cite: 1513]
+                    document.getElementById('account-user-id').textContent = 'Token is inactive.'; [cite: 1512]
+                    // ... clear other account fields ...
+                }
+            } catch (error) { /* ... handle error ... */ 
+                console.error('Error fetching user info:', error); [cite: 1514]
+                document.getElementById('user-info').textContent = `Logged In (Error)`; [cite: 1515]
+                document.getElementById('account-user-id').textContent = 'Error fetching user info.'; [cite: 1514]
+            }
+        }
 
+        function updateAuthUI() { /* Updates UI based on authentication state */
+            const loginBtn = document.getElementById('login-btn'); [cite: 1516]
+            const registerBtn = document.getElementById('register-btn'); [cite: 1516]
+            const logoutBtn = document.getElementById('logout-btn'); [cite: 1517]
+            const myAccountBtn = document.getElementById('my-account-btn'); [cite: 1517]
+            const userInfoDisplay = document.getElementById('user-info'); [cite: 1517]
+            const mainContent = document.querySelector('main'); [cite: 1517]
+
+            if (isAuthenticated) {
+                loginBtn.style.display = 'none'; [cite: 1518]
+                registerBtn.style.display = 'none'; [cite: 1518]
+                logoutBtn.style.display = 'inline-block'; [cite: 1518]
+                myAccountBtn.style.display = 'inline-block'; [cite: 1518]
+                mainContent.style.display = 'block'; [cite: 1519]
+                fetchAndDisplayUserInfo(); [cite: 1520]
+            } else {
+                loginBtn.style.display = 'inline-block'; [cite: 1522]
+                registerBtn.style.display = 'inline-block'; [cite: 1522]
+                logoutBtn.style.display = 'none'; [cite: 1523]
+                myAccountBtn.style.display = 'none'; [cite: 1523]
+                userInfoDisplay.textContent = ''; [cite: 1523]
+                mainContent.style.display = 'none'; [cite: 1524]
+                resetGameAndUI(); // Ensures game is fully reset on logout/auth failure
+                 // Clear account info display
+                document.getElementById('account-user-id').textContent = 'Not logged in.'; [cite: 1526]
+                document.getElementById('account-display-name').textContent = 'Not available';
+                document.getElementById('account-client-id').textContent = 'Not available'; [cite: 1526]
+                document.getElementById('account-token-expiry').textContent = 'Not available'; [cite: 1527]
+                // ... and other fields
+            }
+            updateUIVisibility(); // Centralized UI visibility logic
+            updateGameButtonStates();
+        }
+
+        function showPage(pageName) { /* Manages page/section visibility */
+            currentPage = pageName; [cite: 1533]
+            updateUIVisibility();
+        }
+        
+        // --- API Interaction Functions for Leaderboard ---
+        async function submitTwentyRoundScore(score) {
+            if (!isAuthenticated || !(await ensureValidToken())) {
+                showMessageBox("Authentication required to submit score. Please log in.", true);
+                return;
+            }
+            const accessToken = localStorage.getItem('access_token');
             try {
-                const cityResponse = await fetch(randomCityApiUrl);
-                if (!cityResponse.ok) throw new Error(`HTTP error fetching random city: ${cityResponse.status}`);
-                const cityData = await cityResponse.json();
-                const cityName = cityData.city;
-                if (!cityName) {
-                    console.warn(`Random City API returned no city name (Attempt ${attempt}). Retrying...`);
-                    findRandomCityAndSpot(attempt + 1);
-                    return;
-                }
-                console.log(`Successfully fetched city: ${cityName}. Finding geocoding data...`);
-                locationText.textContent = `Finding a random spot in ${cityName}...`;
-
-
-                const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`;
-                const geocodingResponse = await fetch(geocodingUrl);
-                if (!geocodingResponse.ok) {
-                    console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}): ${geocodingResponse.status}. Retrying...`);
-                    findRandomCityAndSpot(attempt + 1);
-                    return;
-                }
-                const geocodingData = await geocodingResponse.json();
-                if (geocodingData && geocodingData.features && geocodingData.features.length > 0) {
-                    const feature = geocodingData.features[0];
-                    const bounds = feature.bbox;
-                    const center = feature.center;
-                    let randomLngLatArray;
-                    if (bounds) {
-                        randomLngLatArray = getRandomCoordinateInBounds(bounds);
-                        console.log("Using bounds to find random coordinate array:", randomLngLatArray);
-                    } else if (center) {
-                        const randomLng = center[0] + (Math.random() - 0.5) * 0.02;
-                        const randomLat = center[1] + (Math.random() - 0.5) * 0.02;
-                        randomLngLatArray = [randomLng, randomLat];
-                        console.log("Using center with offset to find random coordinate array:", randomLngLatArray);
-                    } else {
-                        console.warn(`MapTiler Geocoding could not find detailed location data for "${cityName}" (Attempt ${attempt}). Retrying...`);
-                        findRandomCityAndSpot(attempt + 1);
-                        return;
-                    }
-                    console.log("Setting main map view to:", randomLngLatArray, "at zoom", zoomLevel);
-                    if (mainMap) {
-                        mainMap.jumpTo({ center: randomLngLatArray, zoom: zoomLevel, essential: true });
-                    } else {
-                        console.error("mainMap not initialized when trying to jumpTo.");
-                    }
-                    document.getElementById('location-text').textContent = `Location: A random spot in ${feature.place_name || cityName}`;
-                    addOrUpdateMarker(randomLngLatArray);
-                    console.log("New location setup complete via API. currentLocationCoords:", currentLocationCoords);
+                const response = await fetch(`${API_BASE_URL}/api/ranked-score`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`, 'Origin': window.location.origin },
+                    body: JSON.stringify({ rounds: 20, score: score })
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Ranked score submitted successfully:', result);
+                    showMessageBox(`20-Round score of ${score} submitted!`);
+                    fetchAndDisplayPlayerRankData(); // Refresh player's rank
                 } else {
-                    console.warn(`MapTiler Geocoding could not find the location for "${cityName}" (Attempt ${attempt}). Retrying...`);
-                    findRandomCityAndSpot(attempt + 1);
+                    const errorData = await response.json();
+                    console.error('Failed to submit ranked score:', response.status, errorData);
+                    showMessageBox(`Error submitting score: ${errorData.error || response.statusText}`, true);
                 }
             } catch (error) {
-                console.error(`Error during API call (Attempt ${attempt}):`, error);
-                locationText.textContent = `An error occurred fetching location: ${error.message}. Retrying...`;
-                findRandomCityAndSpot(attempt + 1);
+                console.error('Error submitting 20-round score:', error);
+                showMessageBox('Network error while submitting score.', true);
             }
         }
-       
-        // --- Game Initialization (Called after successful authentication) ---
-        function initializeGame() {
-            if (mainMap) return; // Ensure this runs only once
 
-
-            const newLocationBtn = document.getElementById('new-location');
-            const submitGuessBtn = document.getElementById('submit-guess');
-            const roundScoreDisplay = document.getElementById('round-score-display');
-            const totalScoreDisplay = document.getElementById('total-score-display');
-
-
-            mainMap = new maptilersdk.Map({
-                container: 'maptiler-map',
-                style: customStyleUrl,
-                center: [0, 0],
-                zoom: 1,
-                interactive: false
-            });
-
-
-            overlayMap = new maptilersdk.Map({
-                container: 'overlay-map',
-                style: overlayStyleUrl,
-                center: initialCenter,
-                zoom: initialZoom,
-                interactive: true
-            });
-           
-            mainMap.on('error', (e) => {
-                console.error('Main map loading error:', e.error);
-                document.getElementById('location-text').textContent = "Error loading main map. Check console.";
-            });
-            overlayMap.on('error', (e) => {
-                console.error('Overlay map loading error:', e.error);
-                document.getElementById('guessed-coords').textContent = "Error loading overlay map. Check console.";
-            });
-
-
-            mainMap.on('style.load', () => {
-                console.log('Main map style loaded.');
-                findRandomCityAndSpot();
-                try {
-                    mainMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
-                } catch (e) { console.warn("Could not remove controls programmatically for main map:", e); }
-            });
-
-
-            overlayMap.on('style.load', () => {
-                console.log('Overlay map style loaded.');
-                try {
-                    overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
-                } catch (e) { console.warn("Could not remove controls programmatically for overlay map:", e); }
-
-
-                overlayMap.addSource('line-source', {
-                    'type': 'geojson',
-                    'data': { 'type': 'Feature', 'geometry': { 'type': 'LineString', 'coordinates': [] } }
+        async function fetchLeaderboardData() {
+            const leaderboardTbody = document.getElementById('top-players-tbody');
+            const leaderboardMessage = document.getElementById('leaderboard-message');
+            leaderboardTbody.innerHTML = '<tr><td colspan="3">Fetching leaderboard...</td></tr>';
+            leaderboardMessage.textContent = '';
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/leaderboard/20rounds`);
+                if (response.ok) {
+                    const data = await response.json();
+                    leaderboardTbody.innerHTML = ''; 
+                    if (data && data.leaderboard && data.leaderboard.length > 0) {
+                        data.leaderboard.forEach((player, index) => { // Assuming data is { leaderboard: [...] }
+                            const row = leaderboardTbody.insertRow();
+                            row.insertCell().textContent = player.rank !== undefined ? player.rank : (index + 1);
+                            row.insertCell().textContent = player.name || 'Anonymous';
+                            row.insertCell().textContent = player.score;
+                        });
+                    } else {
+                        leaderboardTbody.innerHTML = '<tr><td colspan="3">Leaderboard is empty or unavailable.</td></tr>';
+                    }
+                } else {
+                    console.error('Failed to fetch leaderboard:', response.status);
+                    leaderboardTbody.innerHTML = `<tr><td colspan="3">Error fetching leaderboard: ${response.statusText}</td></tr>`;
+                }
+            } catch (error) {
+                console.error('Error fetching leaderboard data:', error);
+                leaderboardTbody.innerHTML = '<tr><td colspan="3">Network error fetching leaderboard.</td></tr>';
+                leaderboardMessage.textContent = 'Could not load leaderboard. Check connection or try again later.';
+            }
+        }
+        
+        async function fetchAndDisplayPlayerRankData() {
+            if (!isAuthenticated || !(await ensureValidToken())) {
+                document.getElementById('player-highscore').textContent = 'N/A (Login required)';
+                document.getElementById('player-rank').textContent = 'N/A (Login required)';
+                return;
+            }
+            const accessToken = localStorage.getItem('access_token');
+            document.getElementById('player-highscore').textContent = 'Fetching...';
+            document.getElementById('player-rank').textContent = 'Fetching...';
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/user/stats/20rounds`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}`, 'Origin': window.location.origin }
                 });
-                overlayMap.addLayer({
-                    'id': 'line-layer', 'type': 'line', 'source': 'line-source',
-                    'layout': { 'line-join': 'round', 'line-cap': 'round', 'visibility': 'none' },
-                    'paint': { 'line-color': '#000', 'line-width': 2, 'line-dasharray': [0.5, 2] }
-                });
-                overlayMap.on('move', updateLineBetweenPins);
-            });
-
-
-            overlayMap.on('click', (e) => {
-                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
-                    const clickedLngLat = e.lngLat;
-                    console.log('Overlay map left-clicked at:', clickedLngLat);
-                    placeCustomGuessPinOnOverlay(clickedLngLat);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('player-highscore').textContent = data.highscore !== null && data.highscore !== undefined ? data.highscore : 'N/A';
+                    document.getElementById('player-rank').textContent = data.rank !== null && data.rank !== undefined ? data.rank : 'N/A';
+                } else {
+                    const errorData = await response.json();
+                    console.error('Failed to fetch player rank data:', response.status, errorData);
+                    document.getElementById('player-highscore').textContent = 'Error';
+                    document.getElementById('player-rank').textContent = 'Error';
+                     if (response.status === 404) { // No score submitted yet
+                        document.getElementById('player-highscore').textContent = 'N/A (No 20-round games played)';
+                        document.getElementById('player-rank').textContent = 'N/A';
+                    }
                 }
-            });
-            overlayMap.on('contextmenu', (e) => {
-                e.preventDefault();
-                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
-                    const clickedLngLat = e.lngLat;
-                    console.log('Overlay map right-clicked at:', clickedLngLat);
-                    placeCustomGuessPinOnOverlay(clickedLngLat);
-                }
-            });
-           
-            const overlayMapElement = document.getElementById('overlay-map');
-            overlayMapElement.addEventListener('transitionend', () => {
-                console.log('Overlay map container transition ended. Resizing map.');
-                if (overlayMap) {
-                    overlayMap.resize();
-                    if (guessPinElement && userGuessLngLat) updateGuessPinPosition();
-                    if (realLocationPinElement && currentLocationCoords) updateRealLocationPinPosition();
-                    updateLineBetweenPins();
-                }
-            });
-
-
-            newLocationBtn.addEventListener('click', findRandomCityAndSpot);
-           
-            submitGuessBtn.addEventListener('click', function handleSubmitGuess() {
-                console.log("Submit button clicked.");
-                if (!userGuessLngLat || !(userGuessLngLat instanceof maptilersdk.LngLat)) {
-                    document.getElementById('submit-status').textContent = 'Please make a guess by clicking or right-clicking on the map.';
-                    console.warn("Submit clicked without a valid guess location.");
-                    return;
-                }
-                if (!currentLocationCoords || !(currentLocationCoords instanceof maptilersdk.LngLat)) {
-                    document.getElementById('submit-status').textContent = 'Error: No location set for scoring.';
-                    console.error('Error: Submit clicked but currentLocationCoords is null or not a LngLat object.');
-                    return;
-                }
-                const guessedLngLat = userGuessLngLat;
-                const actualLngLat = currentLocationCoords;
-                console.log("Actual LngLat for scoring:", actualLngLat);
-                console.log("Guessed LngLat for scoring:", guessedLngLat);
-                if (typeof actualLngLat.lat !== 'number' || typeof actualLngLat.lng !== 'number' || typeof guessedLngLat.lat !== 'number' || typeof guessedLngLat.lng !== 'number') {
-                    console.error("Score Calculation Error: One or more coordinate values are not numbers.", {actual: actualLngLat, guessed: guessedLngLat});
-                    document.getElementById('submit-status').textContent = 'Error: Cannot calculate score due to invalid coordinate data.';
-                    return;
-                }
-                const scoreResult = calculateGeoGuessrScore(actualLngLat.lat, actualLngLat.lng, guessedLngLat.lat, guessedLngLat.lng);
-                console.log("Score Calculation Result:", scoreResult);
-                if (isNaN(scoreResult.score) || isNaN(scoreResult.distance)) {
-                    console.error("Score calculation returned NaN.", scoreResult);
-                    document.getElementById('submit-status').textContent = 'Error: Score calculation failed.';
-                    return;
-                }
-                totalScore += scoreResult.score;
-                document.getElementById('points-score').textContent = `Round Score: ${scoreResult.score} points (${(scoreResult.distance/1000).toFixed(2)} km) | Total Score: ${totalScore} points`;
-                document.getElementById('submit-status').textContent = `Guess submitted! You were ${(scoreResult.distance/1000).toFixed(2)} km away.`;
-                if (currentMarker && currentMarker.getElement()) {
-                    currentMarker.getElement().style.display = 'block';
-                    console.log("Showing actual location marker on main map.");
-                } else { console.warn("Could not find currentMarker element to show."); }
-
-
-                const overlayMapElem = document.getElementById('overlay-map');
-                overlayMapElem.classList.add('overlay-map-fullscreen');
-                overlayMap.resize();
-                const bounds = new maptilersdk.LngLatBounds();
-                bounds.extend(guessedLngLat);
-                bounds.extend(actualLngLat);
-                setTimeout(() => {
-                    overlayMap.fitBounds(bounds, { padding: 50, duration: 1000, essential: true });
-                }, 300);
-
-
-                placeCustomRealLocationPinOnOverlay(actualLngLat);
-                updateLineBetweenPins();
-                if (overlayMap.getLayer('line-layer')) {
-                    overlayMap.setLayoutProperty('line-layer', 'visibility', 'visible');
-                    lineLayerVisible = true;
-                }
-
-
-                roundScoreDisplay.textContent = `Round Score: ${scoreResult.score} points`;
-                totalScoreDisplay.textContent = `Total Score: ${totalScore} points`;
-                roundScoreDisplay.style.display = 'block';
-                totalScoreDisplay.style.display = 'block';
-
-
-                let nextButton = document.getElementById('next-round-btn');
-                if (!nextButton) {
-                    nextButton = document.createElement('button');
-                    nextButton.textContent = 'Next Round';
-                    nextButton.id = 'next-round-btn';
-                    const mapsContainer = document.querySelector('.maps-container');
-                    mapsContainer.appendChild(nextButton);
-                    nextButton.addEventListener('click', () => {
-                        overlayMapElem.classList.remove('overlay-map-fullscreen');
-                        overlayMap.flyTo({ center: initialCenter, zoom: initialZoom, essential: true, duration: 500 });
-                        if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; }
-                        if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; }
-                        userGuessLngLat = null;
-                        if (overlayMap.getLayer('line-layer')) {
-                            overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
-                            lineLayerVisible = false;
-                        }
-                        roundScoreDisplay.style.display = 'none';
-                        totalScoreDisplay.style.display = 'none';
-                        nextButton.remove();
-                        setTimeout(() => { if(overlayMap) overlayMap.resize(); }, 500); // Added check for overlayMap
-                        roundCount++;
-                        document.getElementById('round-count').textContent = `Round: ${roundCount}`;
-                        findRandomCityAndSpot();
-                    });
-                }
-                submitGuessBtn.disabled = true;
-                newLocationBtn.disabled = true;
-            });
+            } catch (error) {
+                console.error('Error fetching player rank data:', error);
+                document.getElementById('player-highscore').textContent = 'Network Error';
+                document.getElementById('player-rank').textContent = 'Network Error';
+            }
         }
 
+        // --- Original Game Functions (Adapted or Kept as is) ---
+        function getRandomCoordinateInBounds(bounds) { /* ... */ 
+            const minLng = bounds[0]; [cite: 1534] const minLat = bounds[1]; [cite: 1534]
+            const maxLng = bounds[2]; [cite: 1534] const maxLat = bounds[3]; [cite: 1534]
+            const buffer = 0.001; [cite: 1535]
+            const bufferedMinLng = minLng + (maxLng - minLng) * buffer; [cite: 1535]
+            const bufferedMinLat = minLat + (maxLat - minLat) * buffer; [cite: 1536]
+            const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer; [cite: 1536]
+            const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer; [cite: 1537]
+            const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random(); [cite: 1537]
+            const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random(); [cite: 1538]
+            return [randomLng, randomLat]; [cite: 1538]
+        }
+        function addOrUpdateMarker(lngLatInput) { /* ... */ 
+            const lngLatObject = Array.isArray(lngLatInput) ? new maptilersdk.LngLat(lngLatInput[0], lngLatInput[1]) : lngLatInput; [cite: 1539]
+            if (!(lngLatObject instanceof maptilersdk.LngLat) || typeof lngLatObject.lng !== 'number' || typeof lngLatObject.lat !== 'number') { console.error("addOrUpdateMarker received invalid LngLat data:", lngLatInput); return; } [cite: 1540]
+            if (currentMarker) { currentMarker.remove(); } [cite: 1541]
+            currentMarker = new maptilersdk.Marker().setLngLat(lngLatObject).addTo(mainMap); [cite: 1542]
+            currentLocationCoords = lngLatObject; [cite: 1542]
+            if (currentMarker && currentMarker.getElement()) { currentMarker.getElement().style.display = 'none'; } [cite: 1543]
+            console.log("currentLocationCoords set to LngLat object:", currentLocationCoords); [cite: 1544]
+        }
+        function calculateDistanceInMeters(lat1, lon1, lat2, lon2) { /* ... */ 
+             if (typeof lat1 !== 'number' || typeof lon1 !== 'number' || typeof lat2 !== 'number' || typeof lon2 !== 'number') { console.error("Invalid input types for calculateDistanceInMeters:", lat1, lon1, lat2, lon2); return NaN; } [cite: 1545]
+            const R = 6371e3; [cite: 1546]
+            const φ1 = lat1 * Math.PI / 180; [cite: 1547] const φ2 = lat2 * Math.PI / 180; [cite: 1548]
+            const Δφ = (lat2 - lat1) * Math.PI / 180; [cite: 1548] const Δλ = (lon2 - lon1) * Math.PI / 180; [cite: 1549]
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2); [cite: 1549]
+            const c = 2 * Math.atan2(Math.sqrt(Math.max(0, a)), Math.sqrt(Math.max(0, 1 - a))); [cite: 1550]
+            const distance = R * c; [cite: 1551]
+            return distance; [cite: 1552]
+        }
+        function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) { /* ... */ 
+            const MAX_SCORE = 5000; [cite: 1553]
+            const FIVE_K_THRESHOLD_METERS = 100; [cite: 1554]
+            const distance = calculateDistanceInMeters(lat1, lon1, lat2, lon2); [cite: 1555]
+            if (isNaN(distance)) { console.error("Distance calculation returned NaN."); return { distance: NaN, score: NaN }; } [cite: 1556]
+            let score; [cite: 1557]
+            if (distance <= FIVE_K_THRESHOLD_METERS) { score = MAX_SCORE; } [cite: 1558]
+            else { const decayFactor = 2000000; score = MAX_SCORE * Math.exp(-distance / decayFactor); score = Math.max(0, Math.round(score)); } [cite: 1559, 1560]
+            return { distance: distance, score: score }; [cite: 1561]
+        }
+        function updateGuessPinPosition() { /* ... */ 
+            if (!overlayMap || !userGuessLngLat || !guessPinElement) return; [cite: 1562]
+            if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number') { console.error("Invalid userGuessLngLat object for positioning:", userGuessLngLat); return; } [cite: 1563]
+            const pixelCoords = overlayMap.project(userGuessLngLat); [cite: 1564]
+            guessPinElement.style.left = `${pixelCoords.x}px`; [cite: 1564]
+            guessPinElement.style.top = `${pixelCoords.y}px`; [cite: 1564]
+            guessPinElement.style.display = 'block'; [cite: 1564]
+        }
+        function updateRealLocationPinPosition() { /* ... */ 
+            if (!overlayMap || !currentLocationCoords || !realLocationPinElement) return; [cite: 1565]
+            if (!(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') { console.error("Invalid currentLocationCoords object for positioning:", currentLocationCoords); return; } [cite: 1566]
+            const pixelCoords = overlayMap.project(currentLocationCoords); [cite: 1567]
+            realLocationPinElement.style.left = `${pixelCoords.x}px`; [cite: 1567]
+            realLocationPinElement.style.top = `${pixelCoords.y}px`; [cite: 1567]
+            realLocationPinElement.style.display = 'block'; [cite: 1567]
+        }
+        function placeCustomGuessPinOnOverlay(lngLat) { /* ... */ 
+            console.log('Attempting to place custom guess pin at LngLat:', lngLat); [cite: 1568]
+            userGuessLngLat = lngLat; [cite: 1568]
+            if (guessPinElement) { console.log('Removing existing custom guess pin element.'); guessPinElement.remove(); } [cite: 1569]
+            guessPinElement = document.createElement('div'); [cite: 1570]
+            guessPinElement.className = 'guess-pin'; [cite: 1570]
+            overlayMap.getCanvasContainer().appendChild(guessPinElement); [cite: 1570]
+            console.log('New custom guess pin element created:', guessPinElement); [cite: 1570]
+            updateGuessPinPosition(); [cite: 1571]
+            document.getElementById('guessed-coords').textContent = `Guessed Location: Lng: ${lngLat.lng.toFixed(6)}, Lat: ${lngLat.lat.toFixed(6)}`; [cite: 1571]
+            document.getElementById('submit-status').textContent = 'Guess placed. Click Submit!'; [cite: 1571]
+            overlayMap.off('move', updateGuessPinPosition); [cite: 1572]
+            overlayMap.on('move', updateGuessPinPosition); [cite: 1572]
+            console.log("Guess pin placed and move listener added. userGuessLngLat:", userGuessLngLat); [cite: 1572]
+            updateGameButtonStates(); // Enable submit button
+        }
+        function placeCustomRealLocationPinOnOverlay(lngLat) { /* ... */ 
+            console.log('Attempting to place custom real location pin at LngLat:', lngLat); [cite: 1573]
+            if (realLocationPinElement) { console.log('Removing existing custom real location pin element.'); realLocationPinElement.remove(); } [cite: 1574]
+            realLocationPinElement = document.createElement('div'); [cite: 1575]
+            realLocationPinElement.className = 'real-location-pin'; [cite: 1575]
+            overlayMap.getCanvasContainer().appendChild(realLocationPinElement); [cite: 1575]
+            console.log('New custom real location pin element created:', realLocationPinElement); [cite: 1575]
+            updateRealLocationPinPosition(); [cite: 1576]
+            overlayMap.off('move', updateRealLocationPinPosition); [cite: 1576]
+            overlayMap.on('move', updateRealLocationPinPosition); [cite: 1577]
+            console.log("Real location pin placed and move listener added. currentLocationCoords:", currentLocationCoords); [cite: 1578]
+        }
+        function updateLineBetweenPins() { /* ... */ 
+            if (!lineLayerVisible || !overlayMap || !userGuessLngLat || !currentLocationCoords) return; [cite: 1579]
+            if (!(userGuessLngLat instanceof maptilersdk.LngLat) || typeof userGuessLngLat.lng !== 'number' || typeof userGuessLngLat.lat !== 'number' ||
+                !(currentLocationCoords instanceof maptilersdk.LngLat) || typeof currentLocationCoords.lng !== 'number' || typeof currentLocationCoords.lat !== 'number') {
+                console.error("Invalid LngLat objects for drawing line:", userGuessLngLat, currentLocationCoords); return; [cite: 1580]
+            }
+            const lineGeoJSON = { 'type': 'Feature', 'geometry': { 'type': 'LineString', 'coordinates': [ [userGuessLngLat.lng, userGuessLngLat.lat], [currentLocationCoords.lng, currentLocationCoords.lat] ] } }; [cite: 1581]
+            if (overlayMap.getSource('line-source')) { overlayMap.getSource('line-source').setData(lineGeoJSON); } [cite: 1582]
+        }
 
-        // --- DOMContentLoaded ---
+        async function findRandomCityAndSpot(attempt = 1) { /* Fetches new location */
+            const locationText = document.getElementById('location-text'); [cite: 1583]
+            const newLocationBtn = document.getElementById('new-location'); // Skip button
+            const submitGuessBtn = document.getElementById('submit-guess');
+
+            locationText.textContent = 'Finding a new location...'; [cite: 1584]
+            document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map...'; [cite: 1584]
+            document.getElementById('submit-status').textContent = 'Place your guess on the overlay map...'; [cite: 1585]
+            document.getElementById('points-score').textContent = `Points: - | Total: ${totalScore} points`; [cite: 1585]
+            document.getElementById('round-count').textContent = `Round: ${currentRound} / ${selectedNumRounds}`;
+            document.getElementById('round-score-display').style.display = 'none'; [cite: 1586]
+            document.getElementById('total-score-display').style.display = 'none'; [cite: 1586]
+
+            if (currentMarker) { currentMarker.remove(); currentMarker = null; } [cite: 1586]
+            if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; userGuessLngLat = null; if(overlayMap) overlayMap.off('move', updateGuessPinPosition); } [cite: 1587, 1588]
+            if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; if(overlayMap) overlayMap.off('move', updateRealLocationPinPosition); } [cite: 1589]
+            currentLocationCoords = null; [cite: 1590]
+            if (overlayMap && overlayMap.getLayer('line-layer')) { overlayMap.setLayoutProperty('line-layer', 'visibility', 'none'); lineLayerVisible = false; } [cite: 1591]
+            
+            const existingNextButton = document.getElementById('next-round-btn');
+            if (existingNextButton) existingNextButton.remove(); [cite: 1592]
+
+            updateGameButtonStates(); // submitGuessBtn will be disabled, newLocationBtn (skip) enabled
+
+            const MAX_LOCATION_RETRIES = 10; [cite: 1593]
+            if (attempt > MAX_LOCATION_RETRIES) { /* ... error handling ... */ 
+                locationText.textContent = `Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts. Please check the console for errors.`; [cite: 1594]
+                console.error(`Failed to find a valid city location after ${MAX_LOCATION_RETRIES} attempts.`); [cite: 1594]
+                return; [cite: 1595]
+            }
+            console.log(`Attempting to find random city (Attempt ${attempt}/${MAX_LOCATION_RETRIES})...`); [cite: 1596]
+            locationText.textContent = `Finding a random city (Attempt ${attempt})...`; [cite: 1596]
+
+            try {
+                const cityResponse = await fetch(randomCityApiUrl); [cite: 1597]
+                if (!cityResponse.ok) throw new Error(`HTTP error fetching random city: ${cityResponse.status}`); [cite: 1597]
+                const cityData = await cityResponse.json(); [cite: 1598]
+                const cityName = cityData.city; [cite: 1598]
+                if (!cityName) { console.warn(`Random City API returned no city name (Attempt ${attempt}). Retrying...`); findRandomCityAndSpot(attempt + 1); return; } [cite: 1599]
+                console.log(`Successfully fetched city: ${cityName}. Finding geocoding data...`); [cite: 1600]
+                locationText.textContent = `Finding a random spot in ${cityName}...`; [cite: 1600]
+                const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`; [cite: 1601]
+                const geocodingResponse = await fetch(geocodingUrl); [cite: 1601]
+                if (!geocodingResponse.ok) { console.warn(`HTTP error geocoding "${cityName}" (Attempt ${attempt}): ${geocodingResponse.status}. Retrying...`); findRandomCityAndSpot(attempt + 1); return; } [cite: 1602]
+                const geocodingData = await geocodingResponse.json(); [cite: 1603]
+                if (geocodingData && geocodingData.features && geocodingData.features.length > 0) { /* ... process geocoding data ... */ 
+                    const feature = geocodingData.features[0]; [cite: 1604]
+                    const bounds = feature.bbox; [cite: 1605] const center = feature.center; [cite: 1605]
+                    let randomLngLatArray;
+                    if (bounds) { randomLngLatArray = getRandomCoordinateInBounds(bounds); console.log("Using bounds to find random coordinate array:", randomLngLatArray); } [cite: 1606]
+                    else if (center) { const randomLng = center[0] + (Math.random() - 0.5) * 0.02; const randomLat = center[1] + (Math.random() - 0.5) * 0.02; randomLngLatArray = [randomLng, randomLat]; console.log("Using center with offset to find random coordinate array:", randomLngLatArray); } [cite: 1607, 1608, 1609]
+                    else { console.warn(`MapTiler Geocoding could not find detailed location data for "${cityName}" (Attempt ${attempt}). Retrying...`); findRandomCityAndSpot(attempt + 1); return; } [cite: 1610]
+                    console.log("Setting main map view to:", randomLngLatArray, "at zoom", zoomLevel); [cite: 1611]
+                    if (mainMap) { mainMap.jumpTo({ center: randomLngLatArray, zoom: zoomLevel, essential: true }); } [cite: 1612]
+                    else { console.error("mainMap not initialized when trying to jumpTo."); } [cite: 1613]
+                    document.getElementById('location-text').textContent = `Location: A random spot in ${feature.place_name || cityName}`; [cite: 1614]
+                    addOrUpdateMarker(randomLngLatArray); [cite: 1615]
+                    console.log("New location setup complete via API. currentLocationCoords:", currentLocationCoords); [cite: 1615]
+                } else { console.warn(`MapTiler Geocoding could not find the location for "${cityName}" (Attempt ${attempt}). Retrying...`); findRandomCityAndSpot(attempt + 1); } [cite: 1616]
+            } catch (error) { console.error(`Error during API call (Attempt ${attempt}):`, error); locationText.textContent = `An error occurred fetching location: ${error.message}. Retrying...`; findRandomCityAndSpot(attempt + 1); } [cite: 1617, 1618]
+            updateGameButtonStates(); // Ensure submit is disabled initially
+        }
+        
+        // --- Game Initialization (Maps only, game logic starts with startGame) ---
+        async function initializeGameMaps() { /* Initializes MapTiler maps */
+            if (mainMap || overlayMap) return; // Ensure maps are init only once per page load
+            console.log("Initializing game maps...");
+
+            mainMap = new maptilersdk.Map({ container: 'maptiler-map', style: customStyleUrl, center: [0,0], zoom: 1, interactive: false }); [cite: 1622]
+            overlayMap = new maptilersdk.Map({ container: 'overlay-map', style: overlayStyleUrl, center: initialCenter, zoom: initialZoom, interactive: true }); [cite: 1623]
+
+            mainMap.on('error', (e) => { console.error('Main map loading error:', e.error); document.getElementById('location-text').textContent = "Error loading main map."; }); [cite: 1624]
+            overlayMap.on('error', (e) => { console.error('Overlay map loading error:', e.error); document.getElementById('guessed-coords').textContent = "Error loading overlay map."; }); [cite: 1625]
+            
+            const mainMapLoadPromise = new Promise(resolve => mainMap.on('style.load', () => {
+                console.log('Main map style loaded.'); [cite: 1626]
+                try { mainMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove()); } catch (e) { console.warn("Could not remove controls programmatically for main map:", e); } [cite: 1626]
+                resolve();
+            }));
+
+            const overlayMapLoadPromise = new Promise(resolve => overlayMap.on('style.load', () => {
+                console.log('Overlay map style loaded.'); [cite: 1627]
+                try { overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove()); } catch (e) { console.warn("Could not remove controls programmatically for overlay map:", e); }
+                overlayMap.addSource('line-source', { 'type': 'geojson', 'data': { 'type': 'Feature', 'geometry': { 'type': 'LineString', 'coordinates': [] } } }); [cite: 1628]
+                overlayMap.addLayer({ 'id': 'line-layer', 'type': 'line', 'source': 'line-source', 'layout': { 'line-join': 'round', 'line-cap': 'round', 'visibility': 'none' }, 'paint': { 'line-color': '#000', 'line-width': 2, 'line-dasharray': [0.5, 2] } }); [cite: 1629]
+                overlayMap.on('move', updateLineBetweenPins); [cite: 1630]
+                resolve();
+            }));
+
+            await Promise.all([mainMapLoadPromise, overlayMapLoadPromise]);
+
+            overlayMap.on('click', (e) => { if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) { placeCustomGuessPinOnOverlay(e.lngLat); } }); [cite: 1631, 1632]
+            overlayMap.on('contextmenu', (e) => { e.preventDefault(); if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) { placeCustomGuessPinOnOverlay(e.lngLat); } }); [cite: 1633, 1634]
+            
+            document.getElementById('overlay-map').addEventListener('transitionend', () => { [cite: 1635]
+                if (overlayMap) { overlayMap.resize(); if (guessPinElement && userGuessLngLat) updateGuessPinPosition(); if (realLocationPinElement && currentLocationCoords) updateRealLocationPinPosition(); updateLineBetweenPins(); } [cite: 1636]
+            });
+            console.log("Game maps initialized.");
+        }
+        
+        // --- Event Listeners Setup ---
         document.addEventListener('DOMContentLoaded', async () => {
-            document.getElementById('login-btn').addEventListener('click', startOAuthFlow);
-            document.getElementById('register-btn').addEventListener('click', startOAuthFlow); // Register can also start the same flow
-            document.getElementById('logout-btn').addEventListener('click', appLogout);
-            document.getElementById('my-account-btn').addEventListener('click', () => {
-                showPage(currentPage === 'account' ? 'game' : 'account');
+            // Auth buttons
+            document.getElementById('login-btn').addEventListener('click', startOAuthFlow); [cite: 1663]
+            document.getElementById('register-btn').addEventListener('click', startOAuthFlow); // Register can also start the same flow [cite: 1663]
+            document.getElementById('logout-btn').addEventListener('click', appLogout); [cite: 1663]
+            document.getElementById('my-account-btn').addEventListener('click', () => showPage('account')); [cite: 1663] // Simplified
+
+            // New Game Setup and Leaderboard Buttons
+            document.getElementById('start-game-btn').addEventListener('click', startGame);
+            document.getElementById('view-leaderboard-btn').addEventListener('click', () => {
+                showPage('leaderboard');
+                fetchLeaderboardData();
+                if(isAuthenticated) fetchAndDisplayPlayerRankData();
+            });
+            document.getElementById('close-leaderboard-btn').addEventListener('click', () => showPage('game')); // Go back to game setup or current game
+            
+            document.getElementById('round-selection').addEventListener('change', (event) => {
+                if (!gameInProgress) selectedNumRounds = parseInt(event.target.value);
             });
 
+            // Skip Round Button (repurposed "new-location" button)
+            document.getElementById('new-location').addEventListener('click', async () => {
+                 if (gameInProgress && currentRound <= selectedNumRounds) {
+                    showMessageBox(`Skipped round ${currentRound}. No points awarded.`);
+                    if (currentRound < selectedNumRounds) {
+                        currentRound++;
+                        document.getElementById('round-count').textContent = `Round: ${currentRound} / ${selectedNumRounds}`;
+                        await findRandomCityAndSpot();
+                    } else {
+                        await endGame();
+                    }
+                }
+            });
+
+            // Submit Guess Button
+            document.getElementById('submit-guess').addEventListener('click', async function handleSubmitGuess() {
+                console.log("Submit button clicked.");
+                if (!userGuessLngLat || !(userGuessLngLat instanceof maptilersdk.LngLat)) { /* ... validation ... */ [cite: 1638]
+                     document.getElementById('submit-status').textContent = 'Please make a guess by clicking or right-clicking on the map.'; [cite: 1638]
+                     return;
+                }
+                if (!currentLocationCoords || !(currentLocationCoords instanceof maptilersdk.LngLat)) { /* ... validation ... */ [cite: 1639]
+                     document.getElementById('submit-status').textContent = 'Error: No location set for scoring.'; [cite: 1639]
+                     return;
+                }
+                const guessedLngLat = userGuessLngLat; [cite: 1640]
+                const actualLngLat = currentLocationCoords; [cite: 1640]
+                if (typeof actualLngLat.lat !== 'number' || typeof actualLngLat.lng !== 'number' || typeof guessedLngLat.lat !== 'number' || typeof guessedLngLat.lng !== 'number') { /* ... validation ... */ [cite: 1641, 1642] 
+                    document.getElementById('submit-status').textContent = 'Error: Cannot calculate score due to invalid coordinate data.'; [cite: 1642] return;
+                }
+                const scoreResult = calculateGeoGuessrScore(actualLngLat.lat, actualLngLat.lng, guessedLngLat.lat, guessedLngLat.lng); [cite: 1644]
+                if (isNaN(scoreResult.score) || isNaN(scoreResult.distance)) { /* ... validation ... */ [cite: 1645]
+                     document.getElementById('submit-status').textContent = 'Error: Score calculation failed.'; [cite: 1645] return;
+                }
+                totalScore += scoreResult.score; [cite: 1646]
+                document.getElementById('points-score').textContent = `Round Score: ${scoreResult.score} points (${(scoreResult.distance/1000).toFixed(2)} km) | Total Score: ${totalScore} points`; [cite: 1646]
+                document.getElementById('submit-status').textContent = `Guess submitted! You were ${(scoreResult.distance/1000).toFixed(2)} km away.`; [cite: 1647]
+                if (currentMarker && currentMarker.getElement()) { currentMarker.getElement().style.display = 'block'; } [cite: 1648]
+
+                const overlayMapElem = document.getElementById('overlay-map'); [cite: 1650]
+                overlayMapElem.classList.add('overlay-map-fullscreen'); [cite: 1650]
+                overlayMap.resize(); [cite: 1650]
+                const bounds = new maptilersdk.LngLatBounds(); [cite: 1651]
+                bounds.extend(guessedLngLat); [cite: 1651] bounds.extend(actualLngLat); [cite: 1651]
+                setTimeout(() => { overlayMap.fitBounds(bounds, { padding: 50, duration: 1000, essential: true }); }, 300); [cite: 1651]
+                placeCustomRealLocationPinOnOverlay(actualLngLat); [cite: 1651]
+                updateLineBetweenPins(); [cite: 1652]
+                if (overlayMap.getLayer('line-layer')) { overlayMap.setLayoutProperty('line-layer', 'visibility', 'visible'); lineLayerVisible = true; } [cite: 1652]
+
+                document.getElementById('round-score-display').textContent = `Round Score: ${scoreResult.score} points`; [cite: 1653]
+                document.getElementById('total-score-display').textContent = `Total Score: ${totalScore} points`; [cite: 1653]
+                document.getElementById('round-score-display').style.display = 'block'; [cite: 1653]
+                document.getElementById('total-score-display').style.display = 'block'; [cite: 1653]
+
+                document.getElementById('submit-guess').disabled = true; [cite: 1662]
+                document.getElementById('new-location').disabled = true; // Disable skip after submitting [cite: 1662]
+
+                if (currentRound < selectedNumRounds) {
+                    let nextButton = document.getElementById('next-round-btn');
+                    if (!nextButton) { /* Create "Next Round" button */
+                        nextButton = document.createElement('button'); [cite: 1655]
+                        nextButton.textContent = 'Next Round'; [cite: 1655]
+                        nextButton.id = 'next-round-btn'; [cite: 1655]
+                         // Apply original styling for consistency
+                        nextButton.style.position = 'absolute'; nextButton.style.bottom = '20px'; nextButton.style.left = '50%';
+                        nextButton.style.transform = 'translateX(-50%)'; nextButton.style.padding = '12px 30px'; nextButton.style.fontSize = '1.1em';
+                        nextButton.style.backgroundColor = '#0cc0df'; nextButton.style.color = 'white'; nextButton.style.border = 'none';
+                        nextButton.style.borderRadius = '5px'; nextButton.style.cursor = 'pointer'; nextButton.style.zIndex = '110';
+                        nextButton.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)'; nextButton.style.transition = 'background-color 0.3s';
+                        nextButton.addEventListener('mouseover', () => nextButton.style.backgroundColor = '#0aa8c4');
+                        nextButton.addEventListener('mouseout', () => nextButton.style.backgroundColor = '#0cc0df');
+                        
+                        document.querySelector('.maps-container').appendChild(nextButton); [cite: 1656]
+                        nextButton.addEventListener('click', async () => { /* Next round logic */
+                            overlayMapElem.classList.remove('overlay-map-fullscreen'); [cite: 1657]
+                            overlayMap.flyTo({ center: initialCenter, zoom: initialZoom, essential: true, duration: 500 }); [cite: 1657]
+                            if (realLocationPinElement) { realLocationPinElement.remove(); realLocationPinElement = null; } [cite: 1657]
+                            if (guessPinElement) { guessPinElement.remove(); guessPinElement = null; } [cite: 1658]
+                            userGuessLngLat = null; [cite: 1658]
+                            if (overlayMap.getLayer('line-layer')) { overlayMap.setLayoutProperty('line-layer', 'visibility', 'none'); lineLayerVisible = false; } [cite: 1658]
+                            document.getElementById('round-score-display').style.display = 'none'; [cite: 1659]
+                            document.getElementById('total-score-display').style.display = 'none'; [cite: 1659]
+                            nextButton.remove(); [cite: 1660]
+                            setTimeout(() => { if(overlayMap) overlayMap.resize(); }, 500); [cite: 1660]
+                            currentRound++; [cite: 1661]
+                            document.getElementById('round-count').textContent = `Round: ${currentRound} / ${selectedNumRounds}`; [cite: 1661]
+                            await findRandomCityAndSpot(); [cite: 1661]
+                            updateGameButtonStates(); // Re-enable skip, submit still disabled
+                        });
+                    }
+                } else { // Game Over
+                    await endGame();
+                }
+            });
 
             // Handle OAuth callback
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('code') && urlParams.has('state')) {
-                const success = await handleOAuthCallback();
-                if (success) {
-                    isAuthenticated = true;
-                    // Clean URL - remove OAuth parameters
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                } else {
-                    isAuthenticated = false;
-                    // Error already alerted in handleOAuthCallback
-                }
-            } else {
-                // Regular page load, check if already logged in via stored token
-                isAuthenticated = await ensureValidToken();
+            const urlParams = new URLSearchParams(window.location.search); [cite: 1664]
+            if (urlParams.has('code') && urlParams.has('state')) { [cite: 1664]
+                const success = await handleOAuthCallback(); [cite: 1664]
+                if (success) { isAuthenticated = true; window.history.replaceState({}, document.title, window.location.pathname); } [cite: 1665]
+                else { isAuthenticated = false; } [cite: 1666]
+            } else { isAuthenticated = await ensureValidToken(); } [cite: 1667]
+            
+            updateAuthUI(); [cite: 1668]
+            if (isAuthenticated && !mainMap && !overlayMap) {
+                 await initializeGameMaps(); // Initialize maps after auth check if needed and not already done.
             }
-            updateAuthUI(); // This will show/hide game content and init if authenticated
         });
     </script>
 </body>
