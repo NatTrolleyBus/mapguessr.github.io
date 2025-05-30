@@ -291,15 +291,16 @@
         </section>
 
 
-        <section id="account-page" style="display:none;">
-            <h2>Account Information</h2>
-            <p><strong>User ID:</strong> <span id="account-user-id">Not available</span></p>
-            <p><strong>Client ID:</strong> <span id="account-client-id">Not available</span></p>
-            <p><strong>Token Expiry:</strong> <span id="account-token-expiry">Not available</span></p>
-            <p><strong>Token Issued At:</strong> <span id="account-token-iat">Not available</span></p>
-            <p><strong>Token Type:</strong> <span id="account-token-type">Not available</span></p>
-            <p><strong>Token Active:</strong> <span id="account-token-active">Not available</span></p>
-        </section>
+        <div id="account-page" class="container hidden">
+            <h2 class="page-title">My Account</h2>
+            <div id="account-details">
+                <p>User ID: <span id="account-user-id"></span></p>
+                <p>User Name: <span id="account-user-name"></span></p>
+                <p>User Email: <span id="account-user-email"></span></p>
+                <p>User Role: <span id="account-user-role"></span></p>
+                <p>Current Score: <span id="account-user-score"></span></p>
+                </div>
+        </div>
 
         <div id="leaderboard-page" class="container hidden">
             <h2 class="page-title">Leaderboard</h2>
