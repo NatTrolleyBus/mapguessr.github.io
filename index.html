@@ -77,6 +77,30 @@
             width: 400px;
             height: 300px;
         }
+
+        #account-page, #leaderboard-page {
+            display: none; /* Initially hidden */
+        }
+        .page-title {
+            color: #0cc0df;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #0cc0df;
+            color: white;
+        }
+        
         .overlay-map-fullscreen {
             position: absolute !important;
             top: 0 !important;
@@ -231,10 +255,11 @@
             <p>May 15th 2025 - V9 (Score Calculation Fix)</p>
         </div>
         <div id="auth-container">
-            <button id="login-btn" class="auth-btn">Login</button>
-            <button id="register-btn" class="auth-btn">Register</button>
-            <button id="my-account-btn" class="auth-btn" style="display:none;">My Account</button>
-            <button id="logout-btn" class="auth-btn" style="display:none;">Logout</button>
+            <button id="login-btn">Login</button>
+            <button id="register-btn">Register</button>
+            <button id="logout-btn" class="hidden">Logout</button>
+            <button id="my-account-btn" class="hidden">My Account</button>
+            <button id="leaderboard-btn" class="hidden">Leaderboard</button>
             <span id="user-info" style="margin-left: 20px; color: #fff;"></span>
         </div>
     </header>
@@ -275,6 +300,22 @@
             <p><strong>Token Type:</strong> <span id="account-token-type">Not available</span></p>
             <p><strong>Token Active:</strong> <span id="account-token-active">Not available</span></p>
         </section>
+
+        <div id="leaderboard-page" class="container hidden">
+            <h2 class="page-title">Leaderboard</h2>
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+        
     </main>
     <footer>
         <p>Made by Nathann and Jason</p>
@@ -699,22 +740,24 @@
 
 
         function showPage(pageName) {
-            const gameSections = document.querySelectorAll('#game-section, #game-maps-section, #game-answers-section');
-            const accountPage = document.getElementById('account-page');
-
+            currentPage = pageName;
+            document.getElementById('game-page').classList.add('hidden');
+            document.getElementById('account-page').classList.add('hidden');
+            document.getElementById('leaderboard-page').classList.add('hidden'); // NEW: Hide leaderboard page
 
             if (pageName === 'game') {
-                gameSections.forEach(section => section.style.display = 'block');
-                accountPage.style.display = 'none';
-                if (isAuthenticated && !mainMap) { // Re-initialize game if on game page and not initialized
-                    initializeGame();
-                }
+                document.getElementById('game-page').classList.remove('hidden');
             } else if (pageName === 'account') {
-                gameSections.forEach(section => section.style.display = 'none');
-                accountPage.style.display = 'block';
-                // No need to de-initialize maps here, just hide game sections
+                document.getElementById('account-page').classList.remove('hidden');
+                if (isAuthenticated) {
+                    fetchAccountDetails();
+                }
+            } else if (pageName === 'leaderboard') { // NEW: Handle leaderboard page
+                document.getElementById('leaderboard-page').classList.remove('hidden');
+                if (isAuthenticated) {
+                    fetchLeaderboardData(); // Fetch leaderboard data when shown
+                }
             }
-            currentPage = pageName;
         }
        
         // --- Original Game Functions ---
@@ -1169,15 +1212,97 @@
         }
 
 
-        // --- DOMContentLoaded ---
+        async function fetchAccountDetails() {
+            const token = getAuthToken();
+            if (!token) {
+                alert('Not authenticated.');
+                return;
+            }
+            try {
+                const [userRes, scoreRes] = await Promise.all([
+                    fetch(`${API_BASE_URL}/api/user`, { headers: { 'Authorization': `Bearer ${token}` }}),
+                    fetch(`${API_BASE_URL}/api/score`, { headers: { 'Authorization': `Bearer ${token}` }})
+                ]);
+
+                if (userRes.ok) {
+                    const userData = await userRes.json();
+                    document.getElementById('account-user-id').textContent = userData.user.id;
+                    document.getElementById('account-user-name').textContent = userData.user.name;
+                    document.getElementById('account-user-email').textContent = userData.user.email;
+                    document.getElementById('account-user-role').textContent = userData.user.role;
+                } else {
+                    console.error('Failed to fetch user details:', userRes.statusText);
+                    alert('Failed to fetch user details.');
+                }
+
+                if (scoreRes.ok) {
+                    const scoreData = await scoreRes.json();
+                    document.getElementById('account-user-score').textContent = scoreData.score;
+                } else {
+                    console.error('Failed to fetch score:', scoreRes.statusText);
+                    alert('Failed to fetch score.');
+                }
+
+            } catch (error) {
+                console.error('Error fetching account details:', error);
+                alert('Error fetching account details.');
+            }
+        }
+
+        async function fetchLeaderboardData() {
+            const token = getAuthToken();
+            if (!token) {
+                alert('Not authenticated to view leaderboard.');
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/leaderboard`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    renderLeaderboard(data.leaderboard);
+                } else {
+                    console.error('Failed to fetch leaderboard:', response.statusText);
+                    alert('Failed to fetch leaderboard.');
+                }
+            } catch (error) {
+                console.error('Error fetching leaderboard:', error);
+                alert('Error fetching leaderboard.');
+            }
+        }
+
+        function renderLeaderboard(leaderboardData) {
+            const tbody = document.querySelector('#leaderboard-table tbody');
+            tbody.innerHTML = ''; // Clear existing rows
+
+            if (leaderboardData && leaderboardData.length > 0) {
+                leaderboardData.forEach(entry => {
+                    const row = tbody.insertRow();
+                    row.insertCell().textContent = entry.rank;
+                    row.insertCell().textContent = entry.name;
+                    row.insertCell().textContent = entry.score;
+                });
+            } else {
+                const row = tbody.insertRow();
+                const cell = row.insertCell();
+                cell.colSpan = 3;
+                cell.textContent = 'No leaderboard data available.';
+                cell.style.textAlign = 'center';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('login-btn').addEventListener('click', startOAuthFlow);
-            document.getElementById('register-btn').addEventListener('click', startOAuthFlow); // Register can also start the same flow
+            document.getElementById('register-btn').addEventListener('click', startOAuthFlow);
             document.getElementById('logout-btn').addEventListener('click', appLogout);
             document.getElementById('my-account-btn').addEventListener('click', () => {
                 showPage(currentPage === 'account' ? 'game' : 'account');
             });
-
+            document.getElementById('leaderboard-btn').addEventListener('click', () => {
+                showPage(currentPage === 'leaderboard' ? 'game' : 'leaderboard');
+            });
 
             // Handle OAuth callback
             const urlParams = new URLSearchParams(window.location.search);
@@ -1185,17 +1310,15 @@
                 const success = await handleOAuthCallback();
                 if (success) {
                     isAuthenticated = true;
-                    // Clean URL - remove OAuth parameters
                     window.history.replaceState({}, document.title, window.location.pathname);
                 } else {
                     isAuthenticated = false;
-                    // Error already alerted in handleOAuthCallback
                 }
             } else {
-                // Regular page load, check if already logged in via stored token
                 isAuthenticated = await ensureValidToken();
             }
-            updateAuthUI(); // This will show/hide game content and init if authenticated
+            updateAuthUI();
+            showPage('game'); // Always start on the game page
         });
     </script>
 </body>
