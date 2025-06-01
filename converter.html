@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GTFS to Compact CSV Converter (Multi-Folder)</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #2c3e50; text-align: center; }
+    .upload-container { border: 2px dashed #ccc; border-radius: 5px; padding: 20px; margin-bottom: 20px; text-align: center; }
+    .folder-list { margin-top: 10px; text-align: left; }
+    .folder-item { margin-bottom: 5px; padding: 8px; border: 1px solid #eee; border-radius: 3px; background: #f9f9f9; }
+    .btn { background-color: #3498db; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin: 10px 5px; }
+    .btn:hover { background-color: #2980b9; }
+    .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+    .output-container { margin-top: 20px; }
+    #output { width: 100%; height: 300px; border: 1px solid #ccc; border-radius: 5px; padding: 10px; white-space: pre-wrap; overflow-y: auto; font-family: monospace; }
+    .download-btn { background-color: #27ae60; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+    .download-btn:hover { background-color: #219653; }
+    .download-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+    .status { margin-top: 10px; color: #e74c3c; }
+    .status.success { color: #27ae60; }
+    .status.warning { color: #f39c12; }
+    .precheck-container { border: 1px solid #ccc; border-radius: 5px; padding: 15px; margin-top: 20px; background-color: #f9f9f9; display: none; }
+    .mapping-container { border: 1px solid #ccc; border-radius: 5px; padding: 20px; margin: 20px 0; background-color: #f8f9fa; display: none; }
+    .checkbox-group { margin-bottom: 15px; }
+    .checkbox-group label { display: block; font-size: 14px; margin: 5px 0; }
+    .cleanup-option { margin-top: 10px; font-size: 14px; }
+    .progress-container { margin: 15px 0; }
+    .progress-bar { width: 100%; height: 20px; border: 1px solid #ccc; border-radius: 10px; overflow: hidden; background: #f0f0f0; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #3498db, #2980b9); transition: width 0.3s ease; }
+    .progress-text { text-align: center; margin-top: 5px; font-size: 14px; color: #666; }
+    .field-mapping { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; align-items: center; }
+    .field-mapping label { font-weight: bold; color: #2c3e50; }
+    .field-mapping select { padding: 5px; border: 1px solid #ccc; border-radius: 3px; }
+    .sample-data { background-color: #e8f4f8; padding: 10px; border-radius: 3px; font-family: monospace; font-size: 12px; overflow-x: auto; }
+    .header-preview { background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px; margin: 15px 0; }
+    .header-preview h4 { margin-top: 0; color: #856404; }
+    .detected-fields { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .field-tag { background-color: #007bff; color: white; padding: 3px 8px; border-radius: 12px; font-size: 12px; }
+    .bulk-controls { margin: 10px 0; }
+    .bulk-controls .btn { font-size: 12px; padding: 4px 8px; margin: 2px; }
+  </style>
+</head>
+<body>
+  <h1>GTFS to Compact CSV Converter (Multi-Folder)</h1>
+  <p>Click "Add Folder" to select GTFS folders. The tool will process shapes.txt, trips.txt, and routes.txt from each folder.</p>
+
+  <div class="upload-container">
+    <button class="btn" id="addFolderBtn">Add Folder</button>
+    <input type="file" id="folderInput" webkitdirectory directory style="display:none;" accept=".txt,.csv">
+    <button class="btn" id="analyzeBtn" disabled>Analyze Data</button>
+    <div class="status" id="status"></div>
+    <div class="folder-list" id="folderList"></div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-container" id="progressContainer" style="display:none;">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+    </div>
+    <div class="progress-text" id="progressText">Processing...</div>
+  </div>
+
+  <!-- Field Mapping Section -->
+  <div class="mapping-container" id="mappingContainer">
+    <h3>Field Mapping Configuration</h3>
+    <p>Map your GTFS fields to the standard format. Only mapped fields will appear in the output CSV:</p>
+    
+    <div class="header-preview" id="headerPreview"></div>
+    
+    <div id="fieldMappings"></div>
+  </div>
+
+  <!-- Pre-check Data Section -->
+  <div class="precheck-container" id="precheckContainer">
+    <h3>Data Filters</h3>
+    <div class="checkbox-group" id="agencyGroup">
+      <strong>Filter by Agency:</strong> <small>(Check agencies to INCLUDE in results)</small><br>
+      <div class="bulk-controls">
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('agencyGroup', true)">Select All</button>
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('agencyGroup', false)">Deselect All</button>
+      </div>
+    </div>
+    <div class="checkbox-group" id="routeNoShapeGroup">
+      <strong>Routes without Shapes:</strong> <small>(Check routes to INCLUDE in results)</small><br>
+      <div class="bulk-controls">
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('routeNoShapeGroup', true)">Select All</button>
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('routeNoShapeGroup', false)">Deselect All</button>
+      </div>
+    </div>
+    <div class="checkbox-group" id="shapeNoRouteGroup">
+      <strong>Shapes without Routes:</strong> <small>(Check shapes to INCLUDE in results)</small><br>
+      <div class="bulk-controls">
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('shapeNoRouteGroup', true)">Select All</button>
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('shapeNoRouteGroup', false)">Deselect All</button>
+      </div>
+    </div>
+    <div class="cleanup-option">
+      <label><input type="checkbox" id="cleanupShapes" checked> Remove true duplicate shapes (per-route)</label>
+      <div style="font-size:12px; color:#555; margin-top:4px;">Deduplicate shapes with identical geometry under each route.</div>
+    </div>
+    <button class="btn" id="convertBtn" disabled>Convert to Compact CSV</button>
+  </div>
+
+  <!-- Output Section -->
+  <div class="output-container">
+    <h2>Output:</h2>
+    <pre id="output">Conversion results will appear here...</pre>
+    <button class="download-btn" id="downloadBtn" disabled>Download CSV File</button>
+  </div>
+
+  <script>
+    // Global variables
+    let fileMap = {}; // { uniqueId: { name, shapes, trips, routes } }
+    let allRoutes = [];
+    let allTrips = [];
+    let allShapes = [];
+    let agencySet = new Set();
+    let outputData = "";
+    let detectedFields = {};
+    let fieldMapping = {};
+    let sampleData = {};
+
+    const addFolderBtn = document.getElementById('addFolderBtn');
+    const folderInput = document.getElementById('folderInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const convertBtn = document.getElementById('convertBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const statusEl = document.getElementById('status');
+    const folderListEl = document.getElementById('folderList');
+    const precheckContainer = document.getElementById('precheckContainer');
+    const mappingContainer = document.getElementById('mappingContainer');
+    const agencyGroup = document.getElementById('agencyGroup');
+    const routeNoShapeGroup = document.getElementById('routeNoShapeGroup');
+    const shapeNoRouteGroup = document.getElementById('shapeNoRouteGroup');
+    const outputArea = document.getElementById('output');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const headerPreview = document.getElementById('headerPreview');
+    const fieldMappings = document.getElementById('fieldMappings');
+
+    // Standard GTFS fields we want to map
+    const standardFields = {
+      'route_id': 'Route ID (required)',
+      'route_short_name': 'Route Short Name/Number', 
+      'route_long_name': 'Route Long Name',
+      'agency_id': 'Agency ID',
+      'route_type': 'Route Type (required)',
+      'route_color': 'Route Color',
+      'route_text_color': 'Route Text Color'
+    };
+
+    // Trigger hidden file input
+    addFolderBtn.addEventListener('click', () => folderInput.click());
+
+    folderInput.addEventListener('change', () => {
+      statusEl.textContent = '';
+      const files = Array.from(folderInput.files);
+      if (files.length === 0) return;
+
+      const uniqueId = `folder_${Date.now()}_${Math.random().toString(36).substring(2,8)}`;
+      const folderName = files[0].webkitRelativePath.split('/')[0];
+      const folderEntry = { name: folderName, shapes: null, trips: null, routes: null };
+
+      files.forEach(file => {
+        const parts = file.webkitRelativePath.split('/');
+        const fileName = parts[parts.length - 1].toLowerCase();
+        if (fileName === 'shapes.txt') folderEntry.shapes = file;
+        if (fileName === 'trips.txt')  folderEntry.trips  = file;
+        if (fileName === 'routes.txt') folderEntry.routes = file;
+      });
+
+      if (folderEntry.shapes || folderEntry.trips || folderEntry.routes) {
+        fileMap[uniqueId] = folderEntry;
+        const div = document.createElement('div');
+        div.className = 'folder-item';
+        const parts = [];
+        parts.push(`<strong>${folderName}</strong>`);
+        parts.push(`Shapes: ${folderEntry.shapes ? '✅' : '❌'}`);
+        parts.push(`Trips: ${folderEntry.trips ? '✅' : '❌'}`);
+        parts.push(`Routes: ${folderEntry.routes ? '✅' : '❌'}`);
+        div.innerHTML = parts.join(' | ');
+        folderListEl.appendChild(div);
+        updateAnalyzeState();
+      }
+      folderInput.value = null;
+    });
+
+    function updateAnalyzeState() {
+      const validCount = Object.values(fileMap).filter(f => f.shapes && f.trips && f.routes).length;
+      if (validCount > 0) {
+        analyzeBtn.disabled = false;
+        statusEl.className = 'status success';
+        statusEl.textContent = `${validCount} valid folder(s) ready to analyze.`;
+      } else {
+        analyzeBtn.disabled = true;
+        statusEl.className = 'status';
+        statusEl.textContent = `No valid GTFS folders (need shapes.txt, trips.txt, and routes.txt).`;
+      }
+    }
+
+    // Async analysis with progress
+    analyzeBtn.addEventListener('click', async () => {
+      statusEl.textContent = 'Starting analysis...';
+      statusEl.className = 'status warning';
+      progressContainer.style.display = 'block';
+      analyzeBtn.disabled = true;
+      
+      try {
+        await analyzeDataAsync();
+        statusEl.className = 'status success';
+        statusEl.textContent = 'Analysis complete! Review settings below.';
+      } catch (error) {
+        statusEl.className = 'status';
+        statusEl.textContent = 'Error during analysis: ' + error.message;
+        console.error(error);
+      } finally {
+        progressContainer.style.display = 'none';
+        analyzeBtn.disabled = false;
+      }
+    });
+
+    async function analyzeDataAsync() {
+      allRoutes = [];
+      allTrips = [];
+      allShapes = [];
+      agencySet.clear();
+      
+      const validFolders = Object.values(fileMap).filter(f => f.shapes && f.trips && f.routes);
+      let processed = 0;
+      
+      updateProgress(0, `Processing ${validFolders.length} folders...`);
+      
+      for (const folder of validFolders) {
+        updateProgress((processed / validFolders.length) * 50, `Processing ${folder.name}...`);
+        
+        try {
+          const [routesData, tripsData, shapesData] = await Promise.all([
+            readFilePromise(folder.routes),
+            readFilePromise(folder.trips),
+            readFilePromise(folder.shapes)
+          ]);
+
+          // Process in chunks to prevent blocking
+          await processDataChunk(routesData, tripsData, shapesData, folder.name);
+          
+          processed++;
+          updateProgress((processed / validFolders.length) * 50, `Processed ${folder.name}`);
+          
+          // Yield control to UI
+          await new Promise(resolve => setTimeout(resolve, 10));
+        } catch (error) {
+          console.error(`Error processing folder ${folder.name}:`, error);
+        }
+      }
+      
+      updateProgress(60, 'Analyzing field structure...');
+      await analyzeFieldStructure();
+      
+      updateProgress(80, 'Building filter options...');
+      await buildFilterUI();
+      
+      updateProgress(100, 'Analysis complete!');
+    }
+
+    async function processDataChunk(routesData, tripsData, shapesData, folderName) {
+      return new Promise((resolve) => {
+        // Process in next tick to prevent blocking
+        setTimeout(() => {
+          const routes = parseCsv(routesData);
+          const trips = parseCsv(tripsData);
+          const shapes = parseCsv(shapesData);
+
+          routes.forEach(r => { 
+            allRoutes.push({...r, _source: folderName}); 
+            // Handle missing agency_id by using a default agency
+            const agencyId = r.agency_id || 'Default Agency';
+            agencySet.add(agencyId);
+          });
+          trips.forEach(t => allTrips.push({...t, _source: folderName}));
+          shapes.forEach(s => allShapes.push({...s, _source: folderName}));
+          
+          resolve();
+        }, 0);
+      });
+    }
+
+    async function analyzeFieldStructure() {
+      if (allRoutes.length === 0) return;
+      
+      // Use first route to detect field structure
+      const firstRoute = allRoutes[0];
+      const headers = Object.keys(firstRoute).filter(key => !key.startsWith('_'));
+      
+      detectedFields = { routes: headers };
+      
+      // Get sample data
+      const sampleRoutes = allRoutes.slice(0, 3).map(route => 
+        headers.map(header => route[header] || '')
+      );
+      sampleData = { routes: sampleRoutes };
+      
+      // Auto-map fields
+      fieldMapping = {};
+      Object.keys(standardFields).forEach(stdField => {
+        fieldMapping[stdField] = findBestMatch(stdField, headers);
+      });
+      
+      displayHeaderAnalysis();
+      createFieldMappingInterface();
+      mappingContainer.style.display = 'block';
+    }
+
+    async function buildFilterUI() {
+      // Clear existing content while preserving labels and bulk controls
+      const agencyControlsHtml = agencyGroup.innerHTML.split('<div class="bulk-controls">')[0] + 
+        '<div class="bulk-controls">' + agencyGroup.innerHTML.split('<div class="bulk-controls">')[1];
+      agencyGroup.innerHTML = agencyControlsHtml;
+      
+      Array.from(agencySet).forEach(agency => {
+        const id = `agency_${agency.replace(/\s+/g, '_')}`;
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" id="${id}" value="${agency}" checked> ${agency}`;
+        agencyGroup.appendChild(label);
+      });
+
+      // Build route-shape mappings
+      const routeShapeMap = {};
+      allTrips.forEach(t => {
+        if (!routeShapeMap[t.route_id]) routeShapeMap[t.route_id] = new Set();
+        if (t.shape_id) routeShapeMap[t.route_id].add(t.shape_id);
+      });
+      const shapeIds = new Set(allShapes.map(s => s.shape_id).filter(Boolean));
+
+      // Clear and rebuild routes without shapes
+      const routeControlsHtml = routeNoShapeGroup.innerHTML.split('<div class="bulk-controls">')[0] + 
+        '<div class="bulk-controls">' + routeNoShapeGroup.innerHTML.split('<div class="bulk-controls">')[1];
+      routeNoShapeGroup.innerHTML = routeControlsHtml;
+      
+      const routeIds = new Set(allRoutes.map(r => r.route_id).filter(Boolean));
+      let hasRoutesWithoutShapes = false;
+      routeIds.forEach(rid => {
+        const hasShape = routeShapeMap[rid] && Array.from(routeShapeMap[rid]).some(sid => shapeIds.has(sid));
+        if (!hasShape) {
+          hasRoutesWithoutShapes = true;
+          const id = `routeNoShape_${rid}`;
+          const label = document.createElement('label');
+          label.innerHTML = `<input type="checkbox" id="${id}" value="${rid}" checked> ${rid}`;
+          routeNoShapeGroup.appendChild(label);
+        }
+      });
+      if (!hasRoutesWithoutShapes) {
+        const em = document.createElement('em');
+        em.textContent = 'None found';
+        routeNoShapeGroup.appendChild(em);
+      }
+
+      // Clear and rebuild shapes without routes
+      const shapeControlsHtml = shapeNoRouteGroup.innerHTML.split('<div class="bulk-controls">')[0] + 
+        '<div class="bulk-controls">' + shapeNoRouteGroup.innerHTML.split('<div class="bulk-controls">')[1];
+      shapeNoRouteGroup.innerHTML = shapeControlsHtml;
+      
+      const tripShapeIds = new Set(allTrips.map(t => t.shape_id).filter(Boolean));
+      let hasOrphanShapes = false;
+      shapeIds.forEach(sid => {
+        if (!tripShapeIds.has(sid)) {
+          hasOrphanShapes = true;
+          const id = `shapeNoRoute_${sid}`;
+          const label = document.createElement('label');
+          label.innerHTML = `<input type="checkbox" id="${id}" value="${sid}" checked> ${sid}`;
+          shapeNoRouteGroup.appendChild(label);
+        }
+      });
+      if (!hasOrphanShapes) {
+        const em = document.createElement('em');
+        em.textContent = 'None found';
+        shapeNoRouteGroup.appendChild(em);
+      }
+
+      precheckContainer.style.display = 'block';
+      convertBtn.disabled = false;
+    }
+
+    function updateProgress(percent, text) {
+      progressFill.style.width = percent + '%';
+      progressText.textContent = text;
+    }
+
+    function displayHeaderAnalysis() {
+      const headers = detectedFields.routes;
+      
+      let html = `
+        <h4>Detected Routes File Structure:</h4>
+        <div class="detected-fields">
+          ${headers.map(field => `<span class="field-tag">${field}</span>`).join('')}
+        </div>
+        <h5>Sample Data:</h5>
+        <div class="sample-data">
+          <div style="font-weight: bold;">${headers.join(' | ')}</div>
+      `;
+      
+      sampleData.routes.forEach((row, idx) => {
+        if (idx < 3) {
+          html += `<div>${row.join(' | ')}</div>`;
+        }
+      });
+      
+      html += '</div>';
+      headerPreview.innerHTML = html;
+    }
+
+    function createFieldMappingInterface() {
+      const headers = detectedFields.routes;
+      
+      let html = '';
+      Object.keys(standardFields).forEach(stdField => {
+        html += `
+          <div class="field-mapping">
+            <label>${standardFields[stdField]}:</label>
+            <select id="mapping_${stdField}" onchange="updateMapping('${stdField}', this.value)">
+              <option value="">-- Not Available --</option>
+              ${headers.map(header => 
+                `<option value="${header}" ${fieldMapping[stdField] === header ? 'selected' : ''}>${header}</option>`
+              ).join('')}
+            </select>
+            <div class="sample-data" style="font-size: 11px;">
+              ${getSampleForField(fieldMapping[stdField])}
+            </div>
+          </div>
+        `;
+      });
+      
+      fieldMappings.innerHTML = html;
+    }
+
+    function findBestMatch(standardField, availableFields) {
+      if (availableFields.includes(standardField)) {
+        return standardField;
+      }
+      
+      const variations = {
+        'route_id': ['route_id', 'routeid', 'id'],
+        'route_short_name': ['route_short_name', 'route_number', 'short_name', 'number', 'route_num'],
+        'route_long_name': ['route_long_name', 'long_name', 'name', 'route_name'],
+        'agency_id': ['agency_id', 'agencyid', 'agency'],
+        'route_type': ['route_type', 'type', 'mode'],
+        'route_color': ['route_color', 'color'],
+        'route_text_color': ['route_text_color', 'text_color', 'textcolor']
+      };
+      
+      if (variations[standardField]) {
+        for (let variation of variations[standardField]) {
+          const match = availableFields.find(field => 
+            field.toLowerCase().includes(variation.toLowerCase()) ||
+            variation.toLowerCase().includes(field.toLowerCase())
+          );
+          if (match) return match;
+        }
+      }
+      
+      return '';
+    }
+
+    function getSampleForField(fieldName) {
+      if (!fieldName || !sampleData.routes) return 'No data';
+      
+      const headers = detectedFields.routes;
+      const fieldIndex = headers.indexOf(fieldName);
+      
+      if (fieldIndex === -1) return 'Field not found';
+      
+      const samples = sampleData.routes
+        .map(row => row[fieldIndex])
+        .filter(val => val && val.trim())
+        .slice(0, 3);
+      
+      return samples.length > 0 ? samples.join(', ') : 'Empty/No data';
+    }
+
+    function updateMapping(standardField, selectedField) {
+      fieldMapping[standardField] = selectedField;
+      
+      const sampleDiv = document.querySelector(`#mapping_${standardField}`).parentNode.querySelector('.sample-data');
+      if (sampleDiv) {
+        sampleDiv.textContent = getSampleForField(selectedField);
+      }
+    }
+
+    // Convert with async processing
+    convertBtn.addEventListener('click', async () => {
+      statusEl.textContent = 'Converting with filters...';
+      statusEl.className = 'status warning';
+      progressContainer.style.display = 'block';
+      convertBtn.disabled = true;
+      
+      try {
+        await convertDataAsync();
+        statusEl.className = 'status success';
+        statusEl.textContent = 'Conversion complete!';
+        downloadBtn.disabled = false;
+      } catch (error) {
+        statusEl.className = 'status';
+        statusEl.textContent = 'Conversion error: ' + error.message;
+        console.error(error);
+      } finally {
+        progressContainer.style.display = 'none';
+        convertBtn.disabled = false;
+      }
+    });
+
+    async function convertDataAsync() {
+      updateProgress(0, 'Applying filters...');
+      
+      // Check if any fields are mapped
+      const availableFields = Object.keys(standardFields).filter(field => 
+        fieldMapping[field] && fieldMapping[field] !== ''
+      );
+      
+      if (availableFields.length === 0) {
+        throw new Error('No fields are mapped! Please map at least one field in the Field Mapping section.');
+      }
+      
+      const cleanup = document.getElementById('cleanupShapes').checked;
+
+      // Get selected agencies
+      const selectedAgencies = new Set();
+      agencySet.forEach(agency => {
+        const agencyId = agency.replace(/\s+/g, '_');
+        const chk = document.getElementById(`agency_${agencyId}`);
+        if (chk && chk.checked) selectedAgencies.add(agency);
+      });
+      
+      // Get excluded items
+      const excludedRoutes = new Set();
+      routeNoShapeGroup.querySelectorAll('input[type="checkbox"]').forEach(chk => { 
+        if (!chk.checked) excludedRoutes.add(chk.value); 
+      });
+      const excludedShapes = new Set();
+      shapeNoRouteGroup.querySelectorAll('input[type="checkbox"]').forEach(chk => { 
+        if (!chk.checked) excludedShapes.add(chk.value); 
+      });
+
+      updateProgress(20, 'Filtering data...');
+      
+      // Filter data - handle missing agency_id
+      const filteredRoutes = allRoutes.filter(r => {
+        const routeAgency = getFieldValue(r, 'agency_id') || r.agency_id || 'Default Agency';
+        return selectedAgencies.has(routeAgency) && !excludedRoutes.has(r.route_id);
+      });
+      const validRouteIds = new Set(filteredRoutes.map(r => r.route_id));
+      const filteredTrips = allTrips.filter(t => 
+        validRouteIds.has(t.route_id) && !excludedShapes.has(t.shape_id)
+      );
+
+      updateProgress(40, 'Processing shapes...');
+      
+      // Build shapes map
+      const shapesMap = {};
+      allShapes.forEach(s => {
+        if (!shapesMap[s.shape_id]) shapesMap[s.shape_id] = [];
+        shapesMap[s.shape_id].push({
+          lat: parseFloat(s.shape_pt_lat),
+          lon: parseFloat(s.shape_pt_lon),
+          seq: parseInt(s.shape_pt_sequence),
+          dist: s.shape_dist_traveled ? parseFloat(s.shape_dist_traveled) : 0
+        });
+      });
+      
+      Object.keys(shapesMap).forEach(id => 
+        shapesMap[id].sort((a,b) => a.seq - b.seq)
+      );
+
+      updateProgress(60, 'Cleaning up shapes...');
+      
+      let processedShapesMap = {};
+      if (cleanup) {
+        const tripsMap = {};
+        filteredTrips.forEach(t => {
+          if (!tripsMap[t.route_id]) tripsMap[t.route_id] = [];
+          tripsMap[t.route_id].push(t);
+        });
+        processedShapesMap = await cleanupShapeDataAsync(shapesMap, tripsMap, cleanup);
+      } else {
+        Object.keys(shapesMap).forEach(sid => {
+          if (filteredTrips.some(t => t.shape_id === sid)) {
+            processedShapesMap[sid] = shapesMap[sid];
+          }
+        });
+      }
+
+      updateProgress(80, 'Generating CSV...');
+      
+      // Generate CSV
+      outputData = generateCompactCsv(filteredRoutes, filteredTrips, processedShapesMap);
+      
+      updateProgress(100, 'Complete!');
+      displayOutput();
+    }
+
+    async function cleanupShapeDataAsync(shapesMap, tripsMap, cleanup) {
+      const result = {};
+      const routes = Object.keys(tripsMap);
+      
+      for (let i = 0; i < routes.length; i++) {
+        const routeId = routes[i];
+        updateProgress(60 + (i / routes.length) * 20, `Processing route ${routeId}...`);
+        
+        const arr = [];
+        tripsMap[routeId].forEach(tr => {
+          const sid = tr.shape_id;
+          if (shapesMap[sid] && !arr.find(o => o.shapeId === sid)) {
+            arr.push({ shapeId: sid, points: shapesMap[sid] });
+          }
+        });
+        
+        const unique = cleanup ? removeDuplicateShapes(arr) : arr;
+        unique.forEach(o => result[o.shapeId] = o.points);
+        
+        // Yield control periodically
+        if (i % 10 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 1));
+        }
+      }
+      
+      return result;
+    }
+
+    function removeDuplicateShapes(shapes) {
+      const seen = new Set();
+      const uniqueList = [];
+      
+      shapes.forEach(obj => {
+        const pts = obj.points;
+        if (!pts || pts.length === 0) return;
+        
+        const start = `${pts[0].lat.toFixed(6)},${pts[0].lon.toFixed(6)}`;
+        const end = `${pts[pts.length-1].lat.toFixed(6)},${pts[pts.length-1].lon.toFixed(6)}`;
+        const length = pts.length;
+        
+        let signature = `${start}|${end}|${length}`;
+        
+        // Add midpoint for better uniqueness detection
+        if (length > 2) {
+          const midIdx = Math.floor(length/2);
+          const mid = `${pts[midIdx].lat.toFixed(6)},${pts[midIdx].lon.toFixed(6)}`;
+          signature += `|${mid}`;
+        }
+        
+        if (!seen.has(signature)) { 
+          seen.add(signature); 
+          uniqueList.push(obj); 
+        }
+      });
+      
+      return uniqueList;
+    }
+
+    function generateCompactCsv(routes, trips, shapesMap) {
+      // Build CSV header based on available mappings
+      const availableFields = Object.keys(standardFields).filter(field => 
+        fieldMapping[field] && fieldMapping[field] !== ''
+      );
+      
+      let output = "# ROUTES\n";
+      
+      routes.forEach(r => {
+        const values = availableFields.map(field => {
+          let value = getFieldValue(r, field);
+          // Handle special defaults
+          if (field === 'agency_id' && !value) value = 'Default Agency';
+          if (field === 'route_type' && !value) value = '3';
+          return csvEscape(value);
+        });
+        
+        output += values.join(',') + '\n';
+      });
+      
+      output += "\n# SHAPES\n";
+      
+      Object.keys(shapesMap).forEach(sid => {
+        const tripEntries = trips.filter(t => t.shape_id === sid);
+        if (!tripEntries.length) return;
+        
+        const routeId = tripEntries[0].route_id;
+        const pts = shapesMap[sid];
+        
+        let ptsStr = '';
+        pts.forEach((p, i) => { 
+          if (i > 0) ptsStr += ';'; 
+          ptsStr += `${p.lat.toFixed(6)},${p.lon.toFixed(6)},${p.seq},${p.dist.toFixed(4)}`; 
+        });
+        
+        output += `${csvEscape(routeId)},${csvEscape(sid)},"${ptsStr}"\n`;
+      });
+      
+      return output;
+    }
+
+    function getFieldValue(row, standardField) {
+      const mappedField = fieldMapping[standardField];
+      if (!mappedField) return '';
+      return row[mappedField] || '';
+    }
+
+    function readFilePromise(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = e => reject(e);
+        reader.readAsText(file);
+      });
+    }
+
+    function parseCsv(data) {
+      const lines = data.split('\n');
+      if (!lines.length) return [];
+      const delimiter = lines[0].includes('\t') ? '\t' : ',';
+      const headers = lines[0].split(delimiter).map(h => h.trim().replace(/"/g, ''));
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const vals = lines[i].split(delimiter).map(v => v.trim().replace(/"/g, ''));
+        const obj = {};
+        headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });
+        rows.push(obj);
+      }
+      return rows;
+    }
+
+    function csvEscape(val) {
+      if (val == null) return '';
+      val = String(val);
+      if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+        return '"' + val.replace(/"/g, '""') + '"';
+      }
+      return val;
+    }
+
+    function displayOutput() {
+      if (outputData.length > 10000) {
+        outputArea.textContent = outputData.substring(0,10000) + '\n… (truncated; download full CSV)';
+      } else {
+        outputArea.textContent = outputData;
+      }
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if (!outputData) return;
+      const blob = new Blob([outputData], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'transit_data_compact.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Global functions for onclick handlers
+    window.updateMapping = updateMapping;
+    
+    window.toggleAllCheckboxes = function(groupId, checked) {
+      const group = document.getElementById(groupId);
+      const checkboxes = group.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => cb.checked = checked);
+    };
+  </script>
+</body>
+</html>
