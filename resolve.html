@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GTFS Converter with Route Long Name Resolver</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 1400px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    h1 { color: #2c3e50; text-align: center; }
+    .upload-container { border: 2px dashed #ccc; border-radius: 5px; padding: 20px; margin-bottom: 20px; }
+    .file-upload-section { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .file-upload-box { border: 1px solid #ddd; border-radius: 5px; padding: 15px; text-align: center; background: #f9f9f9; }
+    .file-upload-box.has-file { background: #e8f5e8; border-color: #4caf50; }
+    .file-upload-box h4 { margin-top: 0; color: #2c3e50; }
+    .file-input { display: none; }
+    .file-status { margin-top: 10px; font-size: 14px; }
+    .file-status.success { color: #27ae60; }
+    .file-status.error { color: #e74c3c; }
+    .btn { background-color: #3498db; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin: 10px 5px; }
+    .btn:hover { background-color: #2980b9; }
+    .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+    .btn-small { padding: 6px 12px; font-size: 14px; }
+    .btn-resolve { background-color: #e67e22; color: white; }
+    .btn-resolve:hover { background-color: #d35400; }
+    .output-container { margin-top: 20px; }
+    #output { width: 100%; height: 300px; border: 1px solid #ccc; border-radius: 5px; padding: 10px; white-space: pre-wrap; overflow-y: auto; font-family: monospace; }
+    .download-btn { background-color: #27ae60; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+    .download-btn:hover { background-color: #219653; }
+    .download-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+    .status { margin-top: 10px; color: #e74c3c; }
+    .status.success { color: #27ae60; }
+    .status.warning { color: #f39c12; }
+    .route-resolver-container { border: 1px solid #ccc; border-radius: 5px; padding: 20px; margin-top: 20px; background-color: #f8f9fa; display: none; }
+    .precheck-container { border: 1px solid #ccc; border-radius: 5px; padding: 15px; margin-top: 20px; background-color: #f9f9f9; display: none; }
+    .mapping-container { border: 1px solid #ccc; border-radius: 5px; padding: 20px; margin: 20px 0; background-color: #f8f9fa; display: none; }
+    .checkbox-group { margin-bottom: 15px; }
+    .checkbox-group label { display: block; font-size: 14px; margin: 5px 0; }
+    .cleanup-option { margin-top: 10px; font-size: 14px; }
+    .progress-container { margin: 15px 0; }
+    .progress-bar { width: 100%; height: 20px; border: 1px solid #ccc; border-radius: 10px; overflow: hidden; background: #f0f0f0; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #3498db, #2980b9); transition: width 0.3s ease; }
+    .progress-text { text-align: center; margin-top: 5px; font-size: 14px; color: #666; }
+    .field-mapping { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; align-items: center; }
+    .field-mapping label { font-weight: bold; color: #2c3e50; }
+    .field-mapping select { padding: 5px; border: 1px solid #ccc; border-radius: 3px; }
+    .sample-data { background-color: #e8f4f8; padding: 10px; border-radius: 3px; font-family: monospace; font-size: 12px; overflow-x: auto; }
+    .header-preview { background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px; margin: 15px 0; }
+    .header-preview h4 { margin-top: 0; color: #856404; }
+    .detected-fields { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .field-tag { background-color: #007bff; color: white; padding: 3px 8px; border-radius: 12px; font-size: 12px; }
+    .bulk-controls { margin: 10px 0; }
+    .bulk-controls .btn { font-size: 12px; padding: 4px 8px; margin: 2px; }
+    .overall-status { text-align: center; margin: 20px 0; padding: 15px; border-radius: 5px; }
+    .overall-status.ready { background-color: #e8f5e8; border: 1px solid #4caf50; color: #2e7d32; }
+    .overall-status.incomplete { background-color: #fff3e0; border: 1px solid #ff9800; color: #e65100; }
+    
+    .routes-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .routes-table th, .routes-table td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
+    .routes-table th { background-color: #f5f5f5; font-weight: bold; }
+    .routes-table tr:nth-child(even) { background-color: #f9f9f9; }
+    .routes-table tr:hover { background-color: #f0f0f0; }
+    .route-checkbox { margin-right: 8px; }
+    
+    .trip-resolver-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 1000; }
+    .trip-resolver-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 8px; padding: 20px; max-width: 800px; max-height: 80vh; overflow-y: auto; }
+    .trip-destinations { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin: 15px 0; }
+    .destination-item { padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; }
+    .destination-item input[type="checkbox"] { margin-right: 8px; }
+    .resolved-long-name { background-color: #e8f5e8; padding: 5px; border-radius: 3px; font-family: monospace; margin-top: 5px; }
+    .modal-buttons { text-align: right; margin-top: 20px; }
+    .btn-secondary { background-color: #6c757d; }
+    .btn-secondary:hover { background-color: #545b62; }
+  </style>
+</head>
+<body>
+  <h1>GTFS Converter with Route Long Name Resolver</h1>
+  <p>Upload your GTFS files individually, then optionally resolve route long names using trip destinations.</p>
+
+  <div class="upload-container">
+    <div class="file-upload-section">
+      <!-- Routes File -->
+      <div class="file-upload-box" id="routesBox">
+        <h4>📋 Routes File</h4>
+        <button class="btn btn-small" onclick="document.getElementById('routesInput').click()">
+          Choose routes.txt
+        </button>
+        <input type="file" id="routesInput" class="file-input" accept=".txt,.csv" />
+        <div class="file-status" id="routesStatus">No file selected</div>
+      </div>
+
+      <!-- Trips File -->
+      <div class="file-upload-box" id="tripsBox">
+        <h4>🚌 Trips File</h4>
+        <button class="btn btn-small" onclick="document.getElementById('tripsInput').click()">
+          Choose trips.txt
+        </button>
+        <input type="file" id="tripsInput" class="file-input" accept=".txt,.csv" />
+        <div class="file-status" id="tripsStatus">No file selected</div>
+      </div>
+
+      <!-- Shapes File -->
+      <div class="file-upload-box" id="shapesBox">
+        <h4>🗺️ Shapes File</h4>
+        <button class="btn btn-small" onclick="document.getElementById('shapesInput').click()">
+          Choose shapes.txt
+        </button>
+        <input type="file" id="shapesInput" class="file-input" accept=".txt,.csv" />
+        <div class="file-status" id="shapesStatus">No file selected</div>
+      </div>
+    </div>
+
+    <div class="overall-status incomplete" id="overallStatus">
+      Please upload all three files to continue
+    </div>
+
+    <div style="text-align: center;">
+      <button class="btn" id="analyzeBtn" disabled>Analyze Data</button>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-container" id="progressContainer" style="display:none;">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+    </div>
+    <div class="progress-text" id="progressText">Processing...</div>
+  </div>
+
+  <!-- Route Long Name Resolver Section -->
+  <div class="route-resolver-container" id="routeResolverContainer">
+    <h3>🔍 Route Long Name Resolver</h3>
+    <p>Select routes to resolve their long names using trip destinations. The resolver will find unique trip destinations and let you choose which ones to include.</p>
+    
+    <div class="bulk-controls">
+      <button type="button" class="btn btn-small" onclick="toggleAllRoutes(true)">Select All Routes</button>
+      <button type="button" class="btn btn-small" onclick="toggleAllRoutes(false)">Deselect All Routes</button>
+      <button type="button" class="btn btn-resolve" id="resolveSelectedBtn" onclick="resolveSelectedRoutes()">Resolve Selected Routes</button>
+    </div>
+    
+    <table class="routes-table" id="routesTable">
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Route ID</th>
+          <th>Route Short Name</th>
+          <th>Current Long Name</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="routesTableBody">
+      </tbody>
+    </table>
+    
+    <div style="text-align: center; margin-top: 20px;">
+      <button class="btn" id="proceedToMappingBtn">Proceed to Field Mapping</button>
+    </div>
+  </div>
+
+  <!-- Trip Resolver Modal -->
+  <div class="trip-resolver-modal" id="tripResolverModal">
+    <div class="trip-resolver-content">
+      <h3 id="modalRouteTitle">Resolve Route Long Name</h3>
+      <p>Select the trip destinations you want to include in the route long name:</p>
+      
+      <div id="tripDestinations" class="trip-destinations">
+      </div>
+      
+      <div>
+        <strong>Preview:</strong>
+        <div id="longNamePreview" class="resolved-long-name"></div>
+      </div>
+      
+      <div class="modal-buttons">
+        <button class="btn btn-secondary" onclick="closeTripResolver()">Cancel</button>
+        <button class="btn" onclick="applyResolvedLongName()">Apply Long Name</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Field Mapping Section -->
+  <div class="mapping-container" id="mappingContainer">
+    <h3>Field Mapping Configuration</h3>
+    <p>Map your GTFS fields to the standard format. Only mapped fields will appear in the output CSV:</p>
+    
+    <div class="header-preview" id="headerPreview"></div>
+    
+    <div id="fieldMappings"></div>
+  </div>
+
+  <!-- Pre-check Data Section -->
+  <div class="precheck-container" id="precheckContainer">
+    <h3>Data Filters</h3>
+    <div class="checkbox-group" id="agencyGroup">
+      <strong>Filter by Agency:</strong> <small>(Check agencies to INCLUDE in results)</small><br>
+      <div class="bulk-controls">
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('agencyGroup', true)">Select All</button>
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('agencyGroup', false)">Deselect All</button>
+      </div>
+    </div>
+    <div class="checkbox-group" id="routeNoShapeGroup">
+      <strong>Routes without Shapes:</strong> <small>(Check routes to INCLUDE in results)</small><br>
+      <div class="bulk-controls">
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('routeNoShapeGroup', true)">Select All</button>
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('routeNoShapeGroup', false)">Deselect All</button>
+      </div>
+    </div>
+    <div class="checkbox-group" id="shapeNoRouteGroup">
+      <strong>Shapes without Routes:</strong> <small>(Check shapes to INCLUDE in results)</small><br>
+      <div class="bulk-controls">
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('shapeNoRouteGroup', true)">Select All</button>
+        <button type="button" class="btn" onclick="toggleAllCheckboxes('shapeNoRouteGroup', false)">Deselect All</button>
+      </div>
+    </div>
+    <div class="cleanup-option">
+      <label><input type="checkbox" id="cleanupShapes" checked> Remove true duplicate shapes (per-route)</label>
+      <div style="font-size:12px; color:#555; margin-top:4px;">Deduplicate shapes with identical geometry under each route.</div>
+    </div>
+    <button class="btn" id="convertBtn" disabled>Convert to Compact CSV</button>
+  </div>
+
+  <!-- Output Section -->
+  <div class="output-container">
+    <h2>Output:</h2>
+    <pre id="output">Conversion results will appear here...</pre>
+    <button class="download-btn" id="downloadBtn" disabled>Download CSV File</button>
+  </div>
+
+  <script>
+    // Global variables
+    let uploadedFiles = {
+      routes: null,
+      trips: null,
+      shapes: null
+    };
+    let allRoutes = [];
+    let allTrips = [];
+    let allShapes = [];
+    let agencySet = new Set();
+    let outputData = "";
+    let detectedFields = {};
+    let fieldMapping = {};
+    let sampleData = {};
+    let currentResolveRoute = null;
+    let routeTripsMap = {};
+
+    // DOM elements
+    const routesInput = document.getElementById('routesInput');
+    const tripsInput = document.getElementById('tripsInput');
+    const shapesInput = document.getElementById('shapesInput');
+    const routesBox = document.getElementById('routesBox');
+    const tripsBox = document.getElementById('tripsBox');
+    const shapesBox = document.getElementById('shapesBox');
+    const routesStatus = document.getElementById('routesStatus');
+    const tripsStatus = document.getElementById('tripsStatus');
+    const shapesStatus = document.getElementById('shapesStatus');
+    const overallStatus = document.getElementById('overallStatus');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const routeResolverContainer = document.getElementById('routeResolverContainer');
+    const routesTableBody = document.getElementById('routesTableBody');
+    const proceedToMappingBtn = document.getElementById('proceedToMappingBtn');
+    const tripResolverModal = document.getElementById('tripResolverModal');
+    const convertBtn = document.getElementById('convertBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const precheckContainer = document.getElementById('precheckContainer');
+    const mappingContainer = document.getElementById('mappingContainer');
+    const agencyGroup = document.getElementById('agencyGroup');
+    const routeNoShapeGroup = document.getElementById('routeNoShapeGroup');
+    const shapeNoRouteGroup = document.getElementById('shapeNoRouteGroup');
+    const outputArea = document.getElementById('output');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const headerPreview = document.getElementById('headerPreview');
+    const fieldMappings = document.getElementById('fieldMappings');
+
+    // Standard GTFS fields we want to map
+    const standardFields = {
+      'route_id': 'Route ID (required)',
+      'route_short_name': 'Route Short Name/Number', 
+      'route_long_name': 'Route Long Name',
+      'agency_id': 'Agency ID',
+      'route_type': 'Route Type (required)',
+      'route_color': 'Route Color',
+      'route_text_color': 'Route Text Color'
+    };
+
+    // File input event listeners
+    routesInput.addEventListener('change', (e) => handleFileUpload('routes', e.target.files[0]));
+    tripsInput.addEventListener('change', (e) => handleFileUpload('trips', e.target.files[0]));
+    shapesInput.addEventListener('change', (e) => handleFileUpload('shapes', e.target.files[0]));
+
+    function handleFileUpload(fileType, file) {
+      if (!file) return;
+
+      const statusEl = document.getElementById(fileType + 'Status');
+      const boxEl = document.getElementById(fileType + 'Box');
+
+      // Validate file name
+      const fileName = file.name.toLowerCase();
+      const expectedName = fileType + '.txt';
+      
+      if (!fileName.includes(fileType)) {
+        statusEl.textContent = `⚠️ Expected ${expectedName}, got ${file.name}`;
+        statusEl.className = 'file-status error';
+        boxEl.classList.remove('has-file');
+        uploadedFiles[fileType] = null;
+      } else {
+        uploadedFiles[fileType] = file;
+        statusEl.textContent = `✅ ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        statusEl.className = 'file-status success';
+        boxEl.classList.add('has-file');
+      }
+
+      updateOverallStatus();
+    }
+
+    function updateOverallStatus() {
+      const hasAll = uploadedFiles.routes && uploadedFiles.trips && uploadedFiles.shapes;
+      
+      if (hasAll) {
+        overallStatus.textContent = '✅ All files uploaded - Ready to analyze!';
+        overallStatus.className = 'overall-status ready';
+        analyzeBtn.disabled = false;
+      } else {
+        const missing = [];
+        if (!uploadedFiles.routes) missing.push('routes.txt');
+        if (!uploadedFiles.trips) missing.push('trips.txt');
+        if (!uploadedFiles.shapes) missing.push('shapes.txt');
+        
+        overallStatus.textContent = `📁 Still needed: ${missing.join(', ')}`;
+        overallStatus.className = 'overall-status incomplete';
+        analyzeBtn.disabled = true;
+      }
+    }
+
+    // Async analysis with progress
+    analyzeBtn.addEventListener('click', async () => {
+      progressContainer.style.display = 'block';
+      analyzeBtn.disabled = true;
+      
+      try {
+        await analyzeDataAsync();
+        overallStatus.textContent = '✅ Analysis complete! Review routes below.';
+        overallStatus.className = 'overall-status ready';
+        buildRoutesTable();
+        routeResolverContainer.style.display = 'block';
+      } catch (error) {
+        overallStatus.textContent = '❌ Error during analysis: ' + error.message;
+        overallStatus.className = 'overall-status incomplete';
+        console.error(error);
+      } finally {
+        progressContainer.style.display = 'none';
+        analyzeBtn.disabled = false;
+      }
+    });
+
+    async function analyzeDataAsync() {
+      allRoutes = [];
+      allTrips = [];
+      allShapes = [];
+      agencySet.clear();
+      
+      updateProgress(0, 'Reading files...');
+      
+      try {
+        const [routesData, tripsData, shapesData] = await Promise.all([
+          readFilePromise(uploadedFiles.routes),
+          readFilePromise(uploadedFiles.trips),
+          readFilePromise(uploadedFiles.shapes)
+        ]);
+
+        updateProgress(30, 'Parsing data...');
+        await processDataChunk(routesData, tripsData, shapesData, 'Uploaded Files');
+        
+        updateProgress(60, 'Building route-trip mappings...');
+        await buildRouteTripsMapping();
+        
+        updateProgress(100, 'Analysis complete!');
+      } catch (error) {
+        throw new Error('Failed to process files: ' + error.message);
+      }
+    }
+
+    async function processDataChunk(routesData, tripsData, shapesData, source) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const routes = parseCsv(routesData);
+          const trips = parseCsv(tripsData);
+          const shapes = parseCsv(shapesData);
+
+          routes.forEach(r => { 
+            allRoutes.push({...r, _source: source}); 
+            const agencyId = r.agency_id || 'Default Agency';
+            agencySet.add(agencyId);
+          });
+          trips.forEach(t => allTrips.push({...t, _source: source}));
+          shapes.forEach(s => allShapes.push({...s, _source: source}));
+          
+          resolve();
+        }, 0);
+      });
+    }
+
+    async function buildRouteTripsMapping() {
+      routeTripsMap = {};
+      
+      allTrips.forEach(trip => {
+        const routeId = trip.route_id;
+        if (!routeTripsMap[routeId]) {
+          routeTripsMap[routeId] = [];
+        }
+        routeTripsMap[routeId].push(trip);
+      });
+    }
+
+    function buildRoutesTable() {
+      const tbody = routesTableBody;
+      tbody.innerHTML = '';
+      
+      allRoutes.forEach((route, index) => {
+        const row = document.createElement('tr');
+        
+        const routeId = route.route_id || '';
+        const shortName = route.route_short_name || '';
+        const longName = route.route_long_name || '';
+        const tripCount = routeTripsMap[routeId] ? routeTripsMap[routeId].length : 0;
+        
+        row.innerHTML = `
+          <td><input type="checkbox" class="route-checkbox" data-route-id="${routeId}" /></td>
+          <td>${routeId}</td>
+          <td>${shortName}</td>
+          <td id="longname-${routeId}">${longName}</td>
+          <td id="status-${routeId}">${tripCount} trips available</td>
+        `;
+        
+        tbody.appendChild(row);
+      });
+    }
+
+    function toggleAllRoutes(checked) {
+      const checkboxes = document.querySelectorAll('.route-checkbox');
+      checkboxes.forEach(cb => cb.checked = checked);
+    }
+
+    function resolveSelectedRoutes() {
+      const selectedCheckboxes = document.querySelectorAll('.route-checkbox:checked');
+      
+      if (selectedCheckboxes.length === 0) {
+        alert('Please select at least one route to resolve.');
+        return;
+      }
+      
+      // Process routes one by one
+      const routeIds = Array.from(selectedCheckboxes).map(cb => cb.getAttribute('data-route-id'));
+      resolveRouteSequentially(routeIds, 0);
+    }
+
+    function resolveRouteSequentially(routeIds, index) {
+      if (index >= routeIds.length) {
+        // All routes processed
+        alert('Route long name resolution complete!');
+        return;
+      }
+      
+      const routeId = routeIds[index];
+      openTripResolver(routeId, () => {
+        // Callback for when this route is done
+        resolveRouteSequentially(routeIds, index + 1);
+      });
+    }
+
+    function openTripResolver(routeId, callback) {
+      currentResolveRoute = { routeId, callback };
+      
+      const route = allRoutes.find(r => r.route_id === routeId);
+      const trips = routeTripsMap[routeId] || [];
+      
+      // Get unique trip destinations (trip_headsign)
+      const destinations = [...new Set(trips.map(t => t.trip_headsign).filter(h => h && h.trim()))];
+      
+      // Update modal
+      document.getElementById('modalRouteTitle').textContent = `Resolve Route ${routeId} - ${route.route_short_name || ''}`;
+      
+      const destinationsContainer = document.getElementById('tripDestinations');
+      destinationsContainer.innerHTML = '';
+      
+      if (destinations.length === 0) {
+        destinationsContainer.innerHTML = '<p><em>No trip destinations found for this route.</em></p>';
+      } else {
+        destinations.forEach((dest, index) => {
+          const destDiv = document.createElement('div');
+          destDiv.className = 'destination-item';
+          destDiv.innerHTML = `
+            <label>
+              <input type="checkbox" value="${dest}" onchange="updateLongNamePreview()"> 
+              ${dest}
+            </label>
+          `;
+          destinationsContainer.appendChild(destDiv);
+        });
+      }
+      
+      updateLongNamePreview();
+      tripResolverModal.style.display = 'block';
+    }
+
+    function updateLongNamePreview() {
+      const checkedDestinations = Array.from(document.querySelectorAll('#tripDestinations input:checked'))
+        .map(cb => cb.value);
+      
+      const preview = checkedDestinations.join(' / ');
+      document.getElementById('longNamePreview').textContent = preview || '(No destinations selected)';
+    }
+
+    function closeTripResolver() {
+      tripResolverModal.style.display = 'none';
+      if (currentResolveRoute && currentResolveRoute.callback) {
+        currentResolveRoute.callback();
+      }
+      currentResolveRoute = null;
+    }
+
+    function applyResolvedLongName() {
+      if (!currentResolveRoute) return;
+      
+      const checkedDestinations = Array.from(document.querySelectorAll('#tripDestinations input:checked'))
+        .map(cb => cb.value);
+      
+      if (checkedDestinations.length === 0) {
+        alert('Please select at least one destination.');
+        return;
+      }
+      
+      const newLongName = checkedDestinations.join(' / ');
+      const routeId = currentResolveRoute.routeId;
+      
+      // Update the route in our data
+      const route = allRoutes.find(r => r.route_id === routeId);
+      if (route) {
+        route.route_long_name = newLongName;
+      }
+      
+      // Update the table display
+      const longNameCell = document.getElementById(`longname-${routeId}`);
+      const statusCell = document.getElementById(`status-${routeId}`);
+      
+      if (longNameCell) {
+        longNameCell.textContent = newLongName;
+        longNameCell.style.backgroundColor = '#e8f5e8';
+      }
+      
+      if (statusCell) {
+        statusCell.textContent = '✅ Resolved';
+        statusCell.style.color = '#27ae60';
+      }
+      
+      closeTripResolver();
+    }
+
+    // Proceed to field mapping
+    proceedToMappingBtn.addEventListener('click', async () => {
+      progressContainer.style.display = 'block';
+      
+      try {
+        updateProgress(50, 'Analyzing field structure...');
+        await analyzeFieldStructure();
+        
+        updateProgress(80, 'Building filter options...');
+        await buildFilterUI();
+        
+        updateProgress(100, 'Ready for mapping!');
+        
+        overallStatus.textContent = '✅ Ready for field mapping and conversion!';
+        overallStatus.className = 'overall-status ready';
+      } catch (error) {
+        overallStatus.textContent = '❌ Error: ' + error.message;
+        overallStatus.className = 'overall-status incomplete';
+      } finally {
+        progressContainer.style.display = 'none';
+      }
+    });
+
+    async function analyzeFieldStructure() {
+      if (allRoutes.length === 0) return;
+      
+      const firstRoute = allRoutes[0];
+      const headers = Object.keys(firstRoute).filter(key => !key.startsWith('_'));
+      
+      detectedFields = { routes: headers };
+      
+      const sampleRoutes = allRoutes.slice(0, 3).map(route => 
+        headers.map(header => route[header] || '')
+      );
+      sampleData = { routes: sampleRoutes };
+      
+      fieldMapping = {};
+      Object.keys(standardFields).forEach(stdField => {
+        fieldMapping[stdField] = findBestMatch(stdField, headers);
+      });
+      
+      displayHeaderAnalysis();
+      createFieldMappingInterface();
+      mappingContainer.style.display = 'block';
+    }
+
+    async function buildFilterUI() {
+      // Clear existing content while preserving labels and bulk controls
+      const agencyControlsHtml = agencyGroup.innerHTML.split('<div class="bulk-controls">')[0] + 
+        '<div class="bulk-controls">' + agencyGroup.innerHTML.split('<div class="bulk-controls">')[1];
+      agencyGroup.innerHTML = agencyControlsHtml;
+      
+      Array.from(agencySet).forEach(agency => {
+        const id = `agency_${agency.replace(/\s+/g, '_')}`;
+        const label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" id="${id}" value="${agency}" checked> ${agency}`;
+        agencyGroup.appendChild(label);
+      });
+
+      // Build route-shape mappings
+      const routeShapeMap = {};
+      allTrips.forEach(t => {
+        if (!routeShapeMap[t.route_id]) routeShapeMap[t.route_id] = new Set();
+        if (t.shape_id) routeShapeMap[t.route_id].add(t.shape_id);
+      });
+      const shapeIds = new Set(allShapes.map(s => s.shape_id).filter(Boolean));
+
+      // Clear and rebuild routes without shapes
+      const routeControlsHtml = routeNoShapeGroup.innerHTML.split('<div class="bulk-controls">')[0] + 
+        '<div class="bulk-controls">' + routeNoShapeGroup.innerHTML.split('<div class="bulk-controls">')[1];
+      routeNoShapeGroup.innerHTML = routeControlsHtml;
+      
+      const routeIds = new Set(allRoutes.map(r => r.route_id).filter(Boolean));
+      let hasRoutesWithoutShapes = false;
+      routeIds.forEach(rid => {
+        const hasShape = routeShapeMap[rid] && Array.from(routeShapeMap[rid]).some(sid => shapeIds.has(sid));
+        if (!hasShape) {
+          hasRoutesWithoutShapes = true;
+          const id = `routeNoShape_${rid}`;
+          const label = document.createElement('label');
+          label.innerHTML = `<input type="checkbox" id="${id}" value="${rid}" checked> ${rid}`;
+          routeNoShapeGroup.appendChild(label);
+        }
+      });
+      if (!hasRoutesWithoutShapes) {
+        const em = document.createElement('em');
+        em.textContent = 'None found';
+        routeNoShapeGroup.appendChild(em);
+      }
+
+      // Clear and rebuild shapes without routes
+      const shapeControlsHtml = shapeNoRouteGroup.innerHTML.split('<div class="bulk-controls">')[0] + 
+        '<div class="bulk-controls">' + shapeNoRouteGroup.innerHTML.split('<div class="bulk-controls">')[1];
+      shapeNoRouteGroup.innerHTML = shapeControlsHtml;
+      
+      const tripShapeIds = new Set(allTrips.map(t => t.shape_id).filter(Boolean));
+      let hasOrphanShapes = false;
+      shapeIds.forEach(sid => {
+        if (!tripShapeIds.has(sid)) {
+          hasOrphanShapes = true;
+          const id = `shapeNoRoute_${sid}`;
+          const label = document.createElement('label');
+          label.innerHTML = `<input type="checkbox" id="${id}" value="${sid}" checked> ${sid}`;
+          shapeNoRouteGroup.appendChild(label);
+        }
+      });
+      if (!hasOrphanShapes) {
+        const em = document.createElement('em');
+        em.textContent = 'None found';
+        shapeNoRouteGroup.appendChild(em);
+      }
+
+      precheckContainer.style.display = 'block';
+      convertBtn.disabled = false;
+    }
+
+    function updateProgress(percent, text) {
+      progressFill.style.width = percent + '%';
+      progressText.textContent = text;
+    }
+
+    function displayHeaderAnalysis() {
+      const headers = detectedFields.routes;
+      
+      let html = `
+        <h4>Detected Routes File Structure:</h4>
+        <div class="detected-fields">
+          ${headers.map(field => `<span class="field-tag">${field}</span>`).join('')}
+        </div>
+        <h5>Sample Data:</h5>
+        <div class="sample-data">
+          <div style="font-weight: bold;">${headers.join(' | ')}</div>
+      `;
+      
+      sampleData.routes.forEach((row, idx) => {
+        if (idx < 3) {
+          html += `<div>${row.join(' | ')}</div>`;
+        }
+      });
+      
+      html += '</div>';
+      headerPreview.innerHTML = html;
+    }
+
+    function createFieldMappingInterface() {
+      const headers = detectedFields.routes;
+      
+      let html = '';
+      Object.keys(standardFields).forEach(stdField => {
+        html += `
+          <div class="field-mapping">
+            <label>${standardFields[stdField]}:</label>
+            <select id="mapping_${stdField}" onchange="updateMapping('${stdField}', this.value)">
+              <option value="">-- Not Available --</option>
+              ${headers.map(header => 
+                `<option value="${header}" ${fieldMapping[stdField] === header ? 'selected' : ''}>${header}</option>`
+              ).join('')}
+            </select>
+            <div class="sample-data" style="font-size: 11px;">
+              ${getSampleForField(fieldMapping[stdField])}
+            </div>
+          </div>
+        `;
+      });
+      
+      fieldMappings.innerHTML = html;
+    }
+
+    function findBestMatch(standardField, availableFields) {
+      if (availableFields.includes(standardField)) {
+        return standardField;
+      }
+      
+      const variations = {
+        'route_id': ['route_id', 'routeid', 'id'],
+        'route_short_name': ['route_short_name', 'route_number', 'short_name', 'number', 'route_num'],
+        'route_long_name': ['route_long_name', 'long_name', 'name', 'route_name'],
+        'agency_id': ['agency_id', 'agencyid', 'agency'],
+        'route_type': ['route_type', 'type', 'mode'],
+        'route_color': ['route_color', 'color'],
+        'route_text_color': ['route_text_color', 'text_color', 'textcolor']
+      };
+      
+      if (variations[standardField]) {
+        for (let variation of variations[standardField]) {
+          const match = availableFields.find(field => 
+            field.toLowerCase().includes(variation.toLowerCase()) ||
+            variation.toLowerCase().includes(field.toLowerCase())
+          );
+          if (match) return match;
+        }
+      }
+      
+      return '';
+    }
+
+    function getSampleForField(fieldName) {
+      if (!fieldName || !sampleData.routes) return 'No data';
+      
+      const headers = detectedFields.routes;
+      const fieldIndex = headers.indexOf(fieldName);
+      
+      if (fieldIndex === -1) return 'Field not found';
+      
+      const samples = sampleData.routes
+        .map(row => row[fieldIndex])
+        .filter(val => val && val.trim())
+        .slice(0, 3);
+      
+      return samples.length > 0 ? samples.join(', ') : 'Empty/No data';
+    }
+
+    function updateMapping(standardField, selectedField) {
+      fieldMapping[standardField] = selectedField;
+      
+      const sampleDiv = document.querySelector(`#mapping_${standardField}`).parentNode.querySelector('.sample-data');
+      if (sampleDiv) {
+        sampleDiv.textContent = getSampleForField(selectedField);
+      }
+    }
+
+    // Convert with async processing
+    convertBtn.addEventListener('click', async () => {
+      progressContainer.style.display = 'block';
+      convertBtn.disabled = true;
+      
+      try {
+        await convertDataAsync();
+        overallStatus.textContent = '✅ Conversion complete! Download your CSV below.';
+        overallStatus.className = 'overall-status ready';
+        downloadBtn.disabled = false;
+      } catch (error) {
+        overallStatus.textContent = '❌ Conversion error: ' + error.message;
+        overallStatus.className = 'overall-status incomplete';
+        console.error(error);
+      } finally {
+        progressContainer.style.display = 'none';
+        convertBtn.disabled = false;
+      }
+    });
+
+    async function convertDataAsync() {
+      updateProgress(0, 'Applying filters...');
+      
+      // Check if any fields are mapped
+      const availableFields = Object.keys(standardFields).filter(field => 
+        fieldMapping[field] && fieldMapping[field] !== ''
+      );
+      
+      if (availableFields.length === 0) {
+        throw new Error('No fields are mapped! Please map at least one field in the Field Mapping section.');
+      }
+      
+      const cleanup = document.getElementById('cleanupShapes').checked;
+
+      // Get selected agencies
+      const selectedAgencies = new Set();
+      agencySet.forEach(agency => {
+        const agencyId = agency.replace(/\s+/g, '_');
+        const chk = document.getElementById(`agency_${agencyId}`);
+        if (chk && chk.checked) selectedAgencies.add(agency);
+      });
+      
+      // Get excluded items
+      const excludedRoutes = new Set();
+      routeNoShapeGroup.querySelectorAll('input[type="checkbox"]').forEach(chk => { 
+        if (!chk.checked) excludedRoutes.add(chk.value); 
+      });
+      const excludedShapes = new Set();
+      shapeNoRouteGroup.querySelectorAll('input[type="checkbox"]').forEach(chk => { 
+        if (!chk.checked) excludedShapes.add(chk.value); 
+      });
+
+      updateProgress(20, 'Filtering data...');
+      
+      // Filter data - handle missing agency_id
+      const filteredRoutes = allRoutes.filter(r => {
+        const routeAgency = getFieldValue(r, 'agency_id') || r.agency_id || 'Default Agency';
+        return selectedAgencies.has(routeAgency) && !excludedRoutes.has(r.route_id);
+      });
+      const validRouteIds = new Set(filteredRoutes.map(r => r.route_id));
+      const filteredTrips = allTrips.filter(t => 
+        validRouteIds.has(t.route_id) && !excludedShapes.has(t.shape_id)
+      );
+
+      updateProgress(40, 'Processing shapes...');
+      
+      // Build shapes map
+      const shapesMap = {};
+      allShapes.forEach(s => {
+        if (!shapesMap[s.shape_id]) shapesMap[s.shape_id] = [];
+        shapesMap[s.shape_id].push({
+          lat: parseFloat(s.shape_pt_lat),
+          lon: parseFloat(s.shape_pt_lon),
+          seq: parseInt(s.shape_pt_sequence),
+          dist: s.shape_dist_traveled ? parseFloat(s.shape_dist_traveled) : 0
+        });
+      });
+      
+      Object.keys(shapesMap).forEach(id => 
+        shapesMap[id].sort((a,b) => a.seq - b.seq)
+      );
+
+      updateProgress(60, 'Cleaning up shapes...');
+      
+      let processedShapesMap = {};
+      if (cleanup) {
+        const tripsMap = {};
+        filteredTrips.forEach(t => {
+          if (!tripsMap[t.route_id]) tripsMap[t.route_id] = [];
+          tripsMap[t.route_id].push(t);
+        });
+        processedShapesMap = await cleanupShapeDataAsync(shapesMap, tripsMap, cleanup);
+      } else {
+        Object.keys(shapesMap).forEach(sid => {
+          if (filteredTrips.some(t => t.shape_id === sid)) {
+            processedShapesMap[sid] = shapesMap[sid];
+          }
+        });
+      }
+
+      updateProgress(80, 'Generating CSV...');
+      
+      // Generate CSV
+      outputData = generateCompactCsv(filteredRoutes, filteredTrips, processedShapesMap);
+      
+      updateProgress(100, 'Complete!');
+      displayOutput();
+    }
+
+    async function cleanupShapeDataAsync(shapesMap, tripsMap, cleanup) {
+      const result = {};
+      const routes = Object.keys(tripsMap);
+      
+      for (let i = 0; i < routes.length; i++) {
+        const routeId = routes[i];
+        updateProgress(60 + (i / routes.length) * 20, `Processing route ${routeId}...`);
+        
+        const arr = [];
+        tripsMap[routeId].forEach(tr => {
+          const sid = tr.shape_id;
+          if (shapesMap[sid] && !arr.find(o => o.shapeId === sid)) {
+            arr.push({ shapeId: sid, points: shapesMap[sid] });
+          }
+        });
+        
+        const unique = cleanup ? removeDuplicateShapes(arr) : arr;
+        unique.forEach(o => result[o.shapeId] = o.points);
+        
+        // Yield control periodically
+        if (i % 10 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 1));
+        }
+      }
+      
+      return result;
+    }
+
+    function removeDuplicateShapes(shapes) {
+      const seen = new Set();
+      const uniqueList = [];
+      
+      shapes.forEach(obj => {
+        const pts = obj.points;
+        if (!pts || pts.length === 0) return;
+        
+        const start = `${pts[0].lat.toFixed(6)},${pts[0].lon.toFixed(6)}`;
+        const end = `${pts[pts.length-1].lat.toFixed(6)},${pts[pts.length-1].lon.toFixed(6)}`;
+        const length = pts.length;
+        
+        let signature = `${start}|${end}|${length}`;
+        
+        // Add midpoint for better uniqueness detection
+        if (length > 2) {
+          const midIdx = Math.floor(length/2);
+          const mid = `${pts[midIdx].lat.toFixed(6)},${pts[midIdx].lon.toFixed(6)}`;
+          signature += `|${mid}`;
+        }
+        
+        if (!seen.has(signature)) { 
+          seen.add(signature); 
+          uniqueList.push(obj); 
+        }
+      });
+      
+      return uniqueList;
+    }
+
+    function generateCompactCsv(routes, trips, shapesMap) {
+      // Build CSV header based on available mappings
+      const availableFields = Object.keys(standardFields).filter(field => 
+        fieldMapping[field] && fieldMapping[field] !== ''
+      );
+      
+      let output = "# ROUTES\n";
+      
+      routes.forEach(r => {
+        const values = availableFields.map(field => {
+          let value = getFieldValue(r, field);
+          // Handle special defaults
+          if (field === 'agency_id' && !value) value = 'Default Agency';
+          if (field === 'route_type' && !value) value = '3';
+          return csvEscape(value);
+        });
+        
+        output += values.join(',') + '\n';
+      });
+      
+      output += "\n# SHAPES\n";
+      
+      Object.keys(shapesMap).forEach(sid => {
+        const tripEntries = trips.filter(t => t.shape_id === sid);
+        if (!tripEntries.length) return;
+        
+        const routeId = tripEntries[0].route_id;
+        const pts = shapesMap[sid];
+        
+        let ptsStr = '';
+        pts.forEach((p, i) => { 
+          if (i > 0) ptsStr += ';'; 
+          ptsStr += `${p.lat.toFixed(6)},${p.lon.toFixed(6)},${p.seq},${p.dist.toFixed(4)}`; 
+        });
+        
+        output += `${csvEscape(routeId)},${csvEscape(sid)},"${ptsStr}"\n`;
+      });
+      
+      return output;
+    }
+
+    function getFieldValue(row, standardField) {
+      const mappedField = fieldMapping[standardField];
+      if (!mappedField) return '';
+      return row[mappedField] || '';
+    }
+
+    function readFilePromise(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = e => reject(e);
+        reader.readAsText(file);
+      });
+    }
+
+    function parseCsv(data) {
+      const lines = data.split('\n');
+      if (!lines.length) return [];
+      const delimiter = lines[0].includes('\t') ? '\t' : ',';
+      const headers = lines[0].split(delimiter).map(h => h.trim().replace(/"/g, ''));
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const vals = lines[i].split(delimiter).map(v => v.trim().replace(/"/g, ''));
+        const obj = {};
+        headers.forEach((h, idx) => { obj[h] = vals[idx] || ''; });
+        rows.push(obj);
+      }
+      return rows;
+    }
+
+    function csvEscape(val) {
+      if (val == null) return '';
+      val = String(val);
+      if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+        return '"' + val.replace(/"/g, '""') + '"';
+      }
+      return val;
+    }
+
+    function displayOutput() {
+      if (outputData.length > 10000) {
+        outputArea.textContent = outputData.substring(0,10000) + '\n… (truncated; download full CSV)';
+      } else {
+        outputArea.textContent = outputData;
+      }
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if (!outputData) return;
+      const blob = new Blob([outputData], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'transit_data_compact.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Global functions for onclick handlers
+    window.updateMapping = updateMapping;
+    window.toggleAllRoutes = toggleAllRoutes;
+    window.resolveSelectedRoutes = resolveSelectedRoutes;
+    window.openTripResolver = openTripResolver;
+    window.updateLongNamePreview = updateLongNamePreview;
+    window.closeTripResolver = closeTripResolver;
+    window.applyResolvedLongName = applyResolvedLongName;
+    
+    window.toggleAllCheckboxes = function(groupId, checked) {
+      const group = document.getElementById(groupId);
+      const checkboxes = group.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => cb.checked = checked);
+    };
+  </script>
+</body>
+</html>
