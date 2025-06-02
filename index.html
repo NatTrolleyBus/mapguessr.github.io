@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Session Map Guessr</title>
+    <title>Map Guessr - Session Game</title>
     <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptiler-sdk.umd.min.js"></script>
     <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptilersdk.css" rel="stylesheet" />
     <style>
@@ -14,7 +14,6 @@
             padding: 0;
             color: #333;
         }
-
         header {
             background-color: #0cc0df;
             padding: 20px;
@@ -32,65 +31,83 @@
         section {
             margin-bottom: 30px;
         }
-
-        .join-section {
-            text-align: center;
-            padding: 40px;
-            border: 2px solid #0cc0df;
+        
+        /* Session Management Styles */
+        .session-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            border: 1px solid #ddd;
             border-radius: 10px;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        .session-form {
             margin: 20px 0;
         }
-
-        .join-section input {
+        .session-form input {
             padding: 10px;
-            font-size: 16px;
             margin: 10px;
+            font-size: 1.1em;
             border: 1px solid #ccc;
             border-radius: 5px;
+            width: 200px;
         }
-
-        .join-section button {
+        .session-form button {
+            padding: 12px 30px;
+            font-size: 1.1em;
             background-color: #0cc0df;
             color: white;
             border: none;
-            padding: 12px 30px;
-            font-size: 16px;
             border-radius: 5px;
             cursor: pointer;
             margin: 10px;
         }
-
-        .join-section button:hover {
+        .session-form button:hover {
             background-color: #0aa8c4;
         }
-
-        .waiting-section {
-            text-align: center;
-            padding: 40px;
-            background-color: #ffffcc;
-            border-radius: 10px;
+        .session-info {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 5px;
             margin: 20px 0;
+        }
+        .waiting-message {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #ffeaa7;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+        
+        /* Game Styles */
+        .game-container {
             display: none;
         }
-
-        .eliminated-section {
-            text-align: center;
-            padding: 40px;
-            background-color: #ffcccc;
-            border-radius: 10px;
-            margin: 20px 0;
-            display: none;
-        }
-
         .maps-container {
             position: relative;
             height: 900px;
             width: 100%;
             margin-bottom: 20px;
             overflow: hidden;
-            display: none;
         }
-
         #maptiler-map {
             position: relative;
             width: 100%;
@@ -100,7 +117,6 @@
             overflow: hidden;
             background-color: #eaeaea;
         }
-
         #overlay-map {
             position: absolute;
             bottom: 20px;
@@ -115,12 +131,10 @@
             z-index: 10;
             transition: all 0.4s ease-in-out;
         }
-
         #overlay-map:hover:not(.overlay-map-fullscreen) {
             width: 400px;
             height: 300px;
         }
-
         .overlay-map-fullscreen {
             position: absolute !important;
             top: 0 !important;
@@ -132,13 +146,11 @@
             border-radius: 0 !important;
             box-shadow: none !important;
         }
-
         .submit-container {
             text-align: center;
             margin-bottom: 30px;
         }
-
-        .submit-btn, .check-status-btn {
+        .submit-btn, .new-location-btn, .start-game-btn, .next-round-btn {
             background-color: #0cc0df;
             color: white;
             border: none;
@@ -149,47 +161,70 @@
             transition: background-color 0.3s;
             margin: 0 10px;
         }
-
-        .submit-btn:hover, .check-status-btn:hover {
+        .submit-btn:hover, .new-location-btn:hover, .start-game-btn:hover, .next-round-btn:hover {
             background-color: #0aa8c4;
         }
-
-        .submit-btn:disabled, .check-status-btn:disabled {
-            background-color: #cccccc;
+        .submit-btn:disabled, .new-location-btn:disabled, .start-game-btn:disabled {
+            background-color: #ccc;
             cursor: not-allowed;
         }
-
+        
+        /* Leaderboard Styles */
+        .leaderboard {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .leaderboard table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .leaderboard th, .leaderboard td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .leaderboard th {
+            background-color: #0cc0df;
+            color: white;
+        }
+        .leaderboard tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        footer {
+            background-color: #0cc0df;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-top: 40px;
+        }
         .maptiler-ctrl-group,
         .maptiler-ctrl,
         .maplibregl-ctrl-group,
         .maplibregl-ctrl {
             display: none !important;
         }
-
+        .guess-pin, .real-location-pin {
+            position: absolute;
+            width: 24px;
+            height: 36px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            transform: translate3d(-50%, -100%, 0);
+            pointer-events: none;
+        }
         .guess-pin {
-            position: absolute;
-            width: 24px;
-            height: 36px;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%23e53e3e" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
-            background-size: contain;
-            background-repeat: no-repeat;
-            transform: translate3d(-50%, -100%, 0);
             z-index: 101;
-            pointer-events: none;
         }
-
         .real-location-pin {
-            position: absolute;
-            width: 24px;
-            height: 36px;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36"><path fill="%2328a745" d="M12,0C5.373,0,0,5.373,0,12c0,8.75,12,24,12,24s12-15.25,12-24C24,5.373,18.627,0,12,0z M12,17.5 c-3.033,0-5.5-2.467-5.5-5.5s2.467-5.5,5.5-5.5s5.5,2.467,5.5,5.5S15.033,17.5,12,17.5z"/><circle fill="white" cx="12" cy="12" r="4"/></svg>');
-            background-size: contain;
-            background-repeat: no-repeat;
-            transform: translate3d(-50%, -100%, 0);
             z-index: 102;
-            pointer-events: none;
         }
-
         #next-round-btn {
             position: absolute;
             bottom: 20px;
@@ -206,11 +241,9 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: background-color 0.3s;
         }
-
         #next-round-btn:hover {
             background-color: #0aa8c4;
         }
-
         #round-score-display, #total-score-display {
             position: fixed;
             padding: 10px 15px;
@@ -224,651 +257,405 @@
             pointer-events: none;
             border: 1px solid white;
         }
-
         #round-score-display {
             bottom: 20px;
             left: 20px;
         }
-
         #total-score-display {
             bottom: 20px;
             right: 20px;
-        }
-
-        .game-info {
-            background-color: #f0f0f0;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-
-        .status-text {
-            font-weight: bold;
-            margin: 10px 0;
-        }
-
-        .error-text {
-            color: #d9534f;
-            font-weight: bold;
-        }
-
-        .success-text {
-            color: #5cb85c;
-            font-weight: bold;
-        }
-
-        footer {
-            background-color: #0cc0df;
-            padding: 10px;
-            text-align: center;
-            border-radius: 5px;
-            font-size: 0.9em;
-            margin-top: 40px;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Session Map Guessr</h1>
-        <p>Connect to a game session to play!</p>
+        <h1>Map Guessr - Session Game</h1>
+        <p>Connected Multiplayer Experience</p>
     </header>
     <main>
-        <!-- Join Session Section -->
-        <div id="join-section" class="join-section">
+        <!-- Session Join Screen -->
+        <div id="session-join" class="session-container">
             <h2>Join Game Session</h2>
-            <div>
-                <input type="text" id="session-code" placeholder="Enter Session Code" maxlength="10">
+            <p>Enter your session code and player name to join the game.</p>
+            <div class="session-form">
+                <input type="text" id="session-code" placeholder="Session Code" maxlength="10">
+                <br>
                 <input type="text" id="player-name" placeholder="Your Name" maxlength="30">
-            </div>
-            <div>
+                <br>
                 <button onclick="joinSession()">Join Session</button>
             </div>
-            <div id="join-status" class="status-text"></div>
+            <div id="join-message"></div>
         </div>
 
-        <!-- Waiting Section -->
-        <div id="waiting-section" class="waiting-section">
-            <h2>Waiting for Game</h2>
-            <div id="waiting-info">
-                <p>Connected to session: <span id="current-session"></span></p>
-                <p>Player: <span id="current-player"></span></p>
-                <p class="status-text" id="waiting-status">Waiting for admin to start the game...</p>
+        <!-- Session Waiting Screen -->
+        <div id="session-waiting" class="session-container" style="display: none;">
+            <h2>Session Joined!</h2>
+            <div id="session-info" class="session-info"></div>
+            <div class="waiting-message">
+                <h3>⏳ Please wait for instructions from the game administrator</h3>
+                <p><strong>Important:</strong> Do not press any game buttons until you are explicitly told the game has started. Wait for the administrator to open the current round.</p>
+                <p>Your progress will be synchronized with other players.</p>
             </div>
-            <button class="check-status-btn" onclick="checkGameStatus()">🔄 Check Status</button>
+            <button class="start-game-btn" onclick="checkGameState()" disabled>Check Game Status</button>
+            <button class="start-game-btn" onclick="startFirstGame()" id="start-button" style="display: none;">Start Playing</button>
+            <div id="wait-message"></div>
         </div>
 
-        <!-- Eliminated Section -->
-        <div id="eliminated-section" class="eliminated-section">
-            <h2>Game Over</h2>
-            <div id="eliminated-info">
-                <p>You have been eliminated from the game.</p>
-                <p id="elimination-reason"></p>
-                <p>Final Score: <span id="final-score">0</span> points</p>
-            </div>
-            <button class="check-status-btn" onclick="checkGameStatus()">🔄 Check for New Game</button>
-        </div>
-
-        <!-- Game Section -->
-        <div id="game-section" style="display: none;">
-            <div class="game-info">
-                <div id="game-info-display">
-                    <p><strong>Session:</strong> <span id="session-display"></span></p>
-                    <p><strong>Game Type:</strong> <span id="game-type-display"></span></p>
-                    <p><strong>Round:</strong> <span id="round-display"></span> | <strong>Game:</strong> <span id="game-display"></span></p>
-                    <p><strong>Total Score:</strong> <span id="total-score-text">0</span> points</p>
+        <!-- Game Screen -->
+        <div id="game-container" class="game-container">
+            <section>
+                <h2>Current Game</h2>
+                <div id="game-status"></div>
+                <div class="maps-container">
+                    <div id="maptiler-map"></div>
+                    <div id="overlay-map"></div>
                 </div>
-            </div>
-
-            <div class="maps-container">
-                <div id="maptiler-map"></div>
-                <div id="overlay-map"></div>
-            </div>
-            
-            <div class="submit-container">
-                <button class="submit-btn" id="submit-guess" disabled>Submit Guess</button>
-                <button class="check-status-btn" onclick="checkGameStatus()">🔄 Check Status</button>
-            </div>
+                <div class="submit-container">
+                    <button class="submit-btn" id="submit-guess">Submit Guess</button>
+                </div>
+            </section>
             
             <section>
-                <h3>Current Game</h3>
+                <h2>Game Progress</h2>
                 <ul>
-                    <li id="location-text">Loading city...</li>
-                    <li id="guessed-coords">Make your guess on the map</li>
-                    <li id="submit-status">Place your guess on the overlay map</li>
-                    <li id="points-score">Points: 0</li>
+                    <li id="location-text">Waiting for location...</li>
+                    <li id="guessed-coords">Make your guess on the overlay map...</li>
+                    <li id="submit-status">Place your guess on the overlay map...</li>
+                    <li id="points-score">Points: - | Total: 0 points</li>
+                    <li id="round-count">Round: 1 | Game: 1</li>
                 </ul>
             </section>
+
+            <div id="leaderboard-container" style="display: none;">
+                <div class="leaderboard">
+                    <h3>🏆 Round Complete - Leaderboard</h3>
+                    <div id="leaderboard-content"></div>
+                    <button class="next-round-btn" onclick="proceedToNextGame()">Continue to Next Game</button>
+                </div>
+            </div>
         </div>
     </main>
-    
     <footer>
-        <p>Session-based Map Guessr</p>
+        <p>Session-Based Map Guessr Game</p>
     </footer>
 
     <div id="round-score-display"></div>
     <div id="total-score-display"></div>
 
     <script>
-        // Configuration
-        const apiKey = 'ZS9RHHRim7f1OZRKuI6n';
-        const API_BASE_URL = 'https://dashboard-mapguessr.games-6cb.workers.dev';
-        maptilersdk.config.apiKey = apiKey;
+        // --- Configuration ---
+        const API_BASE_URL = window.location.origin; // Use same origin as the dashboard
+        const INITIAL_ZOOM_LEVEL = 15;
+        const OVERLAY_INITIAL_CENTER = [0, 0];
+        const OVERLAY_INITIAL_ZOOM = -0.5;
+        const MAX_SCORE_PER_ROUND = 5000;
+        const PERFECT_SCORE_THRESHOLD_METERS = 100;
+        const SCORE_DECAY_FACTOR = 2000000;
 
-        // Game state variables
+        // --- Session State Variables ---
         let sessionCode = null;
-        let playerId = null;
         let playerName = null;
-        let currentRound = null;
-        let currentGame = null;
-        let currentCity = null;
-        let gameData = null;
-        let playerStatus = 'waiting'; // waiting, active, eliminated, kicked, left
-        let totalScore = 0;
-
-        // Map variables
+        let playerId = null;
+        let sessionData = null;
+        let currentRound = 1;
+        let currentGame = 1;
+        
+        // --- Game State Variables ---
         let mainMap = null;
         let overlayMap = null;
-        let currentMarker = null;
+        let currentSdkMarker = null;
         let userGuessLngLat = null;
         let guessPinElement = null;
-        let currentLocationCoords = null;
         let realLocationPinElement = null;
+        let actualLocationCoords = null;
+        let totalScore = 0;
         let lineLayerVisible = false;
+        let gameInProgress = false;
 
-        // Map styles
-        const customStyleUrl = 'https://api.maptiler.com/maps/0196cb69-f55f-71f8-9a8f-90fa083f0f67/style.json?key=' + apiKey;
-        const overlayStyleUrl = 'https://api.maptiler.com/maps/0196cb7f-9914-7a9b-aed1-8bfa7b9a0705/style.json?key=' + apiKey;
-        const initialCenter = [0, 0];
-        const initialZoom = -0.5;
-        const zoomLevel = 15;
+        // --- DOM Element Cache ---
+        const DOM = {};
+        function cacheDOMElements() {
+            DOM.sessionJoin = document.getElementById('session-join');
+            DOM.sessionWaiting = document.getElementById('session-waiting');
+            DOM.gameContainer = document.getElementById('game-container');
+            DOM.sessionInfo = document.getElementById('session-info');
+            DOM.waitMessage = document.getElementById('wait-message');
+            DOM.joinMessage = document.getElementById('join-message');
+            DOM.startButton = document.getElementById('start-button');
+            DOM.locationText = document.getElementById('location-text');
+            DOM.guessedCoordsText = document.getElementById('guessed-coords');
+            DOM.submitStatusText = document.getElementById('submit-status');
+            DOM.pointsScoreText = document.getElementById('points-score');
+            DOM.roundCountText = document.getElementById('round-count');
+            DOM.submitGuessBtn = document.getElementById('submit-guess');
+            DOM.overlayMapElement = document.getElementById('overlay-map');
+            DOM.roundScoreDisplay = document.getElementById('round-score-display');
+            DOM.totalScoreDisplay = document.getElementById('total-score-display');
+            DOM.mapsContainer = document.querySelector('.maps-container');
+            DOM.leaderboardContainer = document.getElementById('leaderboard-container');
+            DOM.leaderboardContent = document.getElementById('leaderboard-content');
+            DOM.gameStatus = document.getElementById('game-status');
+        }
 
-        // Session management functions
+        // --- API Functions ---
+        function getAuthHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'X-Session-Code': sessionCode
+            };
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const defaultOptions = {
+                headers: getAuthHeaders(),
+                ...options
+            };
+            
+            try {
+                const response = await fetch(url, defaultOptions);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                }
+                
+                return data;
+            } catch (error) {
+                console.error(`API call failed for ${endpoint}:`, error);
+                throw error;
+            }
+        }
+
         async function joinSession() {
-            const sessionInput = document.getElementById('session-code').value.trim().toUpperCase();
-            const nameInput = document.getElementById('player-name').value.trim();
-            const statusDiv = document.getElementById('join-status');
-
-            if (!sessionInput || !nameInput) {
-                statusDiv.innerHTML = '<span class="error-text">Please enter both session code and your name</span>';
+            const code = document.getElementById('session-code').value.trim().toUpperCase();
+            const name = document.getElementById('player-name').value.trim();
+            
+            if (!code || !name) {
+                showMessage('join-message', 'Please enter both session code and your name.', 'error');
                 return;
             }
-
-            statusDiv.innerHTML = 'Joining session...';
-
+            
+            sessionCode = code;
+            playerName = name;
+            playerId = generatePlayerId();
+            
             try {
-                // Generate unique player ID
-                playerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                showMessage('join-message', 'Joining session...', 'info');
                 
-                const response = await fetch(API_BASE_URL + '/api/player/join', {
+                // Join the session
+                await apiCall('/api/player/join', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Session-Code': sessionInput
-                    },
                     body: JSON.stringify({
                         playerId: playerId,
-                        playerName: nameInput
+                        playerName: playerName
                     })
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    sessionCode = sessionInput;
-                    playerName = nameInput;
-                    statusDiv.innerHTML = '<span class="success-text">Successfully joined session!</span>';
-                    
-                    // Update UI
-                    document.getElementById('current-session').textContent = sessionCode;
-                    document.getElementById('current-player').textContent = playerName;
-                    
-                    // Hide join section, show waiting section
-                    document.getElementById('join-section').style.display = 'none';
-                    document.getElementById('waiting-section').style.display = 'block';
-                    
-                    // Start checking game status
-                    checkGameStatus();
-                } else {
-                    statusDiv.innerHTML = '<span class="error-text">Error: ' + data.error + '</span>';
-                }
+                
+                // Get session details
+                sessionData = await apiCall('/api/game/details');
+                
+                showSessionWaiting();
+                startStatusPolling();
+                
             } catch (error) {
-                statusDiv.innerHTML = '<span class="error-text">Connection error: ' + error.message + '</span>';
+                showMessage('join-message', `Failed to join session: ${error.message}`, 'error');
             }
         }
 
-        async function checkGameStatus() {
-            if (!sessionCode) return;
-
-            try {
-                const response = await fetch('/api/game/details', {
-                    headers: { 'X-Session-Code': sessionCode }
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    gameData = data;
-                    handleGameState(data);
-                } else {
-                    console.error('Failed to get game details:', data.error);
-                    document.getElementById('waiting-status').innerHTML = '<span class="error-text">Error: ' + data.error + '</span>';
-                }
-            } catch (error) {
-                console.error('Connection error:', error);
-                document.getElementById('waiting-status').innerHTML = '<span class="error-text">Connection error</span>';
-            }
-        }
-
-        function handleGameState(data) {
-            // Find current player
-            const player = data.players.find(p => p.id === playerId);
-            if (!player) {
-                document.getElementById('waiting-status').innerHTML = '<span class="error-text">Player not found in session</span>';
-                return;
-            }
-
-            playerStatus = player.status;
+        function showSessionWaiting() {
+            DOM.sessionJoin.style.display = 'none';
+            DOM.sessionWaiting.style.display = 'block';
             
-            // Update total score from player data
-            totalScore = player.score || 0;
-            document.getElementById('total-score-text').textContent = totalScore;
+            DOM.sessionInfo.innerHTML = `
+                <h3>Session: ${sessionCode}</h3>
+                <p><strong>Player:</strong> ${playerName}</p>
+                <p><strong>Game Type:</strong> ${sessionData.gameType}</p>
+                <p><strong>Status:</strong> ${sessionData.status}</p>
+                <p><strong>Players in session:</strong> ${sessionData.players ? sessionData.players.length : 0}</p>
+            `;
+        }
 
-            // Handle different player statuses
-            if (playerStatus === 'eliminated' || playerStatus === 'kicked' || playerStatus === 'left') {
-                showEliminatedScreen(player);
-                return;
+        async function checkGameState() {
+            try {
+                sessionData = await apiCall('/api/game/details');
+                
+                if (sessionData.status === 'active') {
+                    // Check if any round is open
+                    const hasOpenRound = sessionData.rounds && sessionData.rounds.some(round => round.open);
+                    if (hasOpenRound) {
+                        DOM.startButton.style.display = 'block';
+                        DOM.startButton.disabled = false;
+                        showMessage('wait-message', 'Game is active! You can start playing.', 'success');
+                    } else {
+                        showMessage('wait-message', 'Game is active but no rounds are currently open. Wait for administrator.', 'waiting');
+                    }
+                } else {
+                    showMessage('wait-message', `Game status: ${sessionData.status}. Please wait for the game to become active.`, 'waiting');
+                }
+                
+            } catch (error) {
+                showMessage('wait-message', `Error checking game state: ${error.message}`, 'error');
             }
+        }
 
-            // Handle different game states
-            if (data.status === 'waiting') {
-                showWaitingScreen('Waiting for more players to join...');
-                return;
-            }
+        async function startStatusPolling() {
+            // Enable the check button
+            document.querySelector('.session-container button[onclick="checkGameState()"]').disabled = false;
+            
+            // Poll every 5 seconds for status updates
+            const pollInterval = setInterval(async () => {
+                try {
+                    await checkGameState();
+                    
+                    // Stop polling if game started
+                    if (gameInProgress) {
+                        clearInterval(pollInterval);
+                    }
+                } catch (error) {
+                    console.error('Status polling error:', error);
+                }
+            }, 5000);
+        }
 
-            if (data.status === 'pending_cities') {
-                showWaitingScreen('Admin is setting up the game...');
-                return;
-            }
-
-            if (data.status === 'active') {
-                // Find current open round and game
-                const openRound = data.rounds.find(r => r.open);
+        async function startFirstGame() {
+            try {
+                // Final check of game state
+                sessionData = await apiCall('/api/game/details');
+                
+                if (sessionData.status !== 'active') {
+                    showMessage('wait-message', 'Game is not active yet. Please wait.', 'error');
+                    return;
+                }
+                
+                // Find the first open round and game
+                const openRound = sessionData.rounds.find(round => round.open);
                 if (!openRound) {
-                    showWaitingScreen('Waiting for admin to open a round...');
+                    showMessage('wait-message', 'No rounds are currently open. Please wait for administrator.', 'error');
                     return;
                 }
-
-                const openGame = openRound.games.find(g => g.open);
+                
+                const openGame = openRound.games.find(game => game.open);
                 if (!openGame) {
-                    showWaitingScreen('Waiting for admin to open a game in round ' + openRound.id + '...');
+                    showMessage('wait-message', 'No games are currently open in this round. Please wait for administrator.', 'error');
                     return;
                 }
-
-                // Start the game
+                
                 currentRound = openRound.id;
                 currentGame = openGame.id;
-                startGame(openGame.city);
-                return;
-            }
-
-            showWaitingScreen('Game status: ' + data.status);
-        }
-
-        function showWaitingScreen(message) {
-            document.getElementById('waiting-status').textContent = message;
-            document.getElementById('waiting-section').style.display = 'block';
-            document.getElementById('eliminated-section').style.display = 'none';
-            document.getElementById('game-section').style.display = 'none';
-        }
-
-        function showEliminatedScreen(player) {
-            document.getElementById('elimination-reason').textContent = player.note || 'No reason provided';
-            document.getElementById('final-score').textContent = totalScore;
-            document.getElementById('waiting-section').style.display = 'none';
-            document.getElementById('eliminated-section').style.display = 'block';
-            document.getElementById('game-section').style.display = 'none';
-        }
-
-        async function startGame(city) {
-            currentCity = city;
-            
-            // Update UI
-            document.getElementById('session-display').textContent = sessionCode;
-            document.getElementById('game-type-display').textContent = gameData.gameType;
-            document.getElementById('round-display').textContent = currentRound;
-            document.getElementById('game-display').textContent = currentGame;
-            
-            // Show game section
-            document.getElementById('waiting-section').style.display = 'none';
-            document.getElementById('eliminated-section').style.display = 'none';
-            document.getElementById('game-section').style.display = 'block';
-            document.querySelector('.maps-container').style.display = 'block';
-
-            // Initialize maps if not already done
-            if (!mainMap) {
-                initializeMaps();
-            }
-
-            // Load the city location
-            await loadCityLocation(city);
-        }
-
-        async function loadCityLocation(cityName) {
-            document.getElementById('location-text').textContent = 'Loading ' + cityName + '...';
-            document.getElementById('submit-status').textContent = 'Loading location...';
-
-            try {
-                // Get city coordinates using geocoding
-                const geocodingUrl = `https://api.maptiler.com/geocoding/${encodeURIComponent(cityName)}.json?key=${apiKey}`;
-                const response = await fetch(geocodingUrl);
-                const data = await response.json();
-
-                if (data.features && data.features.length > 0) {
-                    const feature = data.features[0];
-                    const bounds = feature.bbox;
-                    const center = feature.center;
-
-                    let randomCoords;
-                    if (bounds) {
-                        randomCoords = getRandomCoordinateInBounds(bounds);
-                    } else if (center) {
-                        const randomLng = center[0] + (Math.random() - 0.5) * 0.02;
-                        const randomLat = center[1] + (Math.random() - 0.5) * 0.02;
-                        randomCoords = [randomLng, randomLat];
-                    } else {
-                        throw new Error('No location data found for city');
-                    }
-
-                    // Set up the game location
-                    setupGameLocation(randomCoords, feature.place_name || cityName);
-                } else {
-                    throw new Error('City not found in geocoding results');
-                }
-            } catch (error) {
-                console.error('Error loading city:', error);
-                document.getElementById('location-text').textContent = 'Error loading ' + cityName;
-                document.getElementById('submit-status').textContent = 'Error: ' + error.message;
-            }
-        }
-
-        function setupGameLocation(coords, placeName) {
-            // Update main map
-            if (mainMap) {
-                mainMap.jumpTo({
-                    center: coords,
-                    zoom: zoomLevel,
-                    essential: true
-                });
-            }
-
-            // Set up marker (initially hidden)
-            addOrUpdateMarker(coords);
-
-            // Update UI
-            document.getElementById('location-text').textContent = 'Location: ' + placeName;
-            document.getElementById('guessed-coords').textContent = 'Make your guess on the overlay map';
-            document.getElementById('submit-status').textContent = 'Click on the overlay map to place your guess';
-            document.getElementById('points-score').textContent = 'Points: 0 | Total: ' + totalScore;
-
-            // Reset guess state
-            userGuessLngLat = null;
-            if (guessPinElement) {
-                guessPinElement.remove();
-                guessPinElement = null;
-            }
-            if (realLocationPinElement) {
-                realLocationPinElement.remove();
-                realLocationPinElement = null;
-            }
-
-            // Hide line layer
-            if (overlayMap && overlayMap.getLayer('line-layer')) {
-                overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
-                lineLayerVisible = false;
-            }
-
-            // Enable submit button when guess is placed
-            document.getElementById('submit-guess').disabled = true;
-        }
-
-        function initializeMaps() {
-            // Initialize main map
-            mainMap = new maptilersdk.Map({
-                container: 'maptiler-map',
-                style: customStyleUrl,
-                center: [0, 0],
-                zoom: 1,
-                interactive: false
-            });
-
-            // Initialize overlay map
-            overlayMap = new maptilersdk.Map({
-                container: 'overlay-map',
-                style: overlayStyleUrl,
-                center: initialCenter,
-                zoom: initialZoom,
-                interactive: true
-            });
-
-            // Set up event listeners
-            mainMap.on('style.load', () => {
-                console.log('Main map loaded');
-                // Remove controls
-                try {
-                    mainMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
-                } catch (e) {
-                    console.warn("Could not remove controls:", e);
-                }
-            });
-
-            overlayMap.on('style.load', () => {
-                console.log('Overlay map loaded');
-                // Remove controls
-                try {
-                    overlayMap.getContainer().querySelectorAll('.maptiler-ctrl, .maplibregl-ctrl').forEach(ctrl => ctrl.remove());
-                } catch (e) {
-                    console.warn("Could not remove controls:", e);
-                }
-
-                // Add line source and layer
-                overlayMap.addSource('line-source', {
-                    'type': 'geojson',
-                    'data': {
-                        'type': 'Feature',
-                        'geometry': {
-                            'type': 'LineString',
-                            'coordinates': []
-                        }
-                    }
-                });
-
-                overlayMap.addLayer({
-                    'id': 'line-layer',
-                    'type': 'line',
-                    'source': 'line-source',
-                    'layout': {
-                        'line-join': 'round',
-                        'line-cap': 'round',
-                        'visibility': 'none'
-                    },
-                    'paint': {
-                        'line-color': '#000',
-                        'line-width': 2,
-                        'line-dasharray': [0.5, 2]
-                    }
-                });
-
-                overlayMap.on('move', updateLineBetweenPins);
-            });
-
-            // Click handlers for placing guesses
-            overlayMap.on('click', (e) => {
-                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
-                    placeCustomGuessPinOnOverlay(e.lngLat);
-                }
-            });
-
-            overlayMap.on('contextmenu', (e) => {
-                e.preventDefault();
-                if (!overlayMap.getContainer().classList.contains('overlay-map-fullscreen')) {
-                    placeCustomGuessPinOnOverlay(e.lngLat);
-                }
-            });
-
-            // Handle overlay map resize
-            const overlayMapElement = document.getElementById('overlay-map');
-            overlayMapElement.addEventListener('transitionend', () => {
-                if (overlayMap) {
-                    overlayMap.resize();
-                    if (guessPinElement && userGuessLngLat) {
-                        updateGuessPinPosition();
-                    }
-                    if (realLocationPinElement && currentLocationCoords) {
-                        updateRealLocationPinPosition();
-                    }
-                    updateLineBetweenPins();
-                }
-            });
-
-            // Submit button handler
-            document.getElementById('submit-guess').addEventListener('click', submitGuess);
-        }
-
-        function getRandomCoordinateInBounds(bounds) {
-            const minLng = bounds[0];
-            const minLat = bounds[1];
-            const maxLng = bounds[2];
-            const maxLat = bounds[3];
-            const buffer = 0.001;
-            
-            const bufferedMinLng = minLng + (maxLng - minLng) * buffer;
-            const bufferedMinLat = minLat + (maxLat - minLat) * buffer;
-            const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer;
-            const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
-
-            const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
-            const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * Math.random();
-
-            return [randomLng, randomLat];
-        }
-
-        function addOrUpdateMarker(coords) {
-            const lngLatObject = Array.isArray(coords) ? new maptilersdk.LngLat(coords[0], coords[1]) : coords;
-            
-            if (currentMarker) {
-                currentMarker.remove();
-            }
-            
-            currentMarker = new maptilersdk.Marker()
-                .setLngLat(lngLatObject)
-                .addTo(mainMap);
+                gameInProgress = true;
                 
-            currentLocationCoords = lngLatObject;
-
-            // Initially hide the marker
-            if (currentMarker && currentMarker.getElement()) {
-                currentMarker.getElement().style.display = 'none';
+                // Switch to game view
+                DOM.sessionWaiting.style.display = 'none';
+                DOM.gameContainer.style.display = 'block';
+                
+                // Initialize maps
+                await initializeMaps();
+                await loadGameLocation();
+                
+            } catch (error) {
+                showMessage('wait-message', `Failed to start game: ${error.message}`, 'error');
             }
         }
 
-        function placeCustomGuessPinOnOverlay(lngLat) {
-            userGuessLngLat = lngLat;
-            
-            if (guessPinElement) {
-                guessPinElement.remove();
-            }
-
-            guessPinElement = document.createElement('div');
-            guessPinElement.className = 'guess-pin';
-            overlayMap.getCanvasContainer().appendChild(guessPinElement);
-
-            updateGuessPinPosition();
-            
-            document.getElementById('guessed-coords').textContent = `Guessed: ${lngLat.lng.toFixed(6)}, ${lngLat.lat.toFixed(6)}`;
-            document.getElementById('submit-status').textContent = 'Guess placed. Click Submit!';
-            document.getElementById('submit-guess').disabled = false;
-
-            overlayMap.off('move', updateGuessPinPosition);
-            overlayMap.on('move', updateGuessPinPosition);
-        }
-
-        function updateGuessPinPosition() {
-            if (!overlayMap || !userGuessLngLat || !guessPinElement) return;
-            
-            const pixelCoords = overlayMap.project(userGuessLngLat);
-            guessPinElement.style.left = `${pixelCoords.x}px`;
-            guessPinElement.style.top = `${pixelCoords.y}px`;
-            guessPinElement.style.display = 'block';
-        }
-
-        function placeCustomRealLocationPinOnOverlay(lngLat) {
-            if (realLocationPinElement) {
-                realLocationPinElement.remove();
-            }
-
-            realLocationPinElement = document.createElement('div');
-            realLocationPinElement.className = 'real-location-pin';
-            overlayMap.getCanvasContainer().appendChild(realLocationPinElement);
-
-            updateRealLocationPinPosition();
-            
-            overlayMap.off('move', updateRealLocationPinPosition);
-            overlayMap.on('move', updateRealLocationPinPosition);
-        }
-
-        function updateRealLocationPinPosition() {
-            if (!overlayMap || !currentLocationCoords || !realLocationPinElement) return;
-            
-            const pixelCoords = overlayMap.project(currentLocationCoords);
-            realLocationPinElement.style.left = `${pixelCoords.x}px`;
-            realLocationPinElement.style.top = `${pixelCoords.y}px`;
-            realLocationPinElement.style.display = 'block';
-        }
-
-        function updateLineBetweenPins() {
-            if (!lineLayerVisible || !overlayMap || !userGuessLngLat || !currentLocationCoords) return;
-
-            const lineGeoJSON = {
-                'type': 'Feature',
-                'geometry': {
-                    'type': 'LineString',
-                    'coordinates': [
-                        [userGuessLngLat.lng, userGuessLngLat.lat],
-                        [currentLocationCoords.lng, currentLocationCoords.lat]
-                    ]
+        async function loadGameLocation() {
+            try {
+                DOM.locationText.textContent = 'Loading location...';
+                
+                // Get city for current round/game
+                const cityData = await apiCall(`/api/cities?round=${currentRound}&game=${currentGame}`);
+                const cityName = cityData.city;
+                
+                DOM.locationText.textContent = `Finding a spot in ${cityName}...`;
+                
+                // Geocode the city using our proxy
+                const geocodingData = await apiCall(`/api/geocode?city=${encodeURIComponent(cityName)}`);
+                
+                if (!geocodingData.features || geocodingData.features.length === 0) {
+                    throw new Error(`Could not find location for ${cityName}`);
                 }
-            };
-
-            if (overlayMap.getSource('line-source')) {
-                overlayMap.getSource('line-source').setData(lineGeoJSON);
+                
+                const feature = geocodingData.features[0];
+                const bounds = feature.bbox;
+                const center = feature.center;
+                
+                let randomLngLatArray;
+                if (bounds) {
+                    randomLngLatArray = getRandomCoordinateInBounds(bounds);
+                } else if (center) {
+                    randomLngLatArray = [center[0] + (Math.random() - 0.5) * 0.02, center[1] + (Math.random() - 0.5) * 0.02];
+                } else {
+                    throw new Error(`No location data for ${cityName}`);
+                }
+                
+                if (mainMap) {
+                    mainMap.jumpTo({ center: randomLngLatArray, zoom: INITIAL_ZOOM_LEVEL, essential: true });
+                }
+                
+                DOM.locationText.textContent = `Location: ${feature.place_name || cityName}`;
+                addOrUpdateSdkMarker(randomLngLatArray);
+                updateGameStatus();
+                
+            } catch (error) {
+                DOM.locationText.textContent = `Error loading location: ${error.message}`;
+                console.error('Location loading error:', error);
             }
+        }
+
+        function updateGameStatus() {
+            DOM.roundCountText.textContent = `Round: ${currentRound} | Game: ${currentGame}`;
+            DOM.gameStatus.innerHTML = `
+                <p><strong>Current Game:</strong> Round ${currentRound}, Game ${currentGame}</p>
+                <p><strong>Your Score:</strong> ${totalScore} points</p>
+                <p><strong>Session:</strong> ${sessionCode} | <strong>Player:</strong> ${playerName}</p>
+            `;
         }
 
         async function submitGuess() {
-            if (!userGuessLngLat || !currentLocationCoords) {
-                alert('Please place a guess first');
+            console.log("Submit button clicked.");
+            const guess = convertToLngLat(userGuessLngLat);
+            const actual = convertToLngLat(actualLocationCoords);
+
+            if (!guess) {
+                DOM.submitStatusText.textContent = 'Please make a guess by clicking on the overlay map.';
+                return;
+            }
+            if (!actual) {
+                DOM.submitStatusText.textContent = 'Error: No actual location set for scoring.';
                 return;
             }
 
-            // Calculate score
-            const scoreResult = calculateGeoGuessrScore(
-                currentLocationCoords.lat,
-                currentLocationCoords.lng,
-                userGuessLngLat.lat,
-                userGuessLngLat.lng
-            );
-
-            // Update local total score
-            totalScore += scoreResult.score;
+            const scoreResult = calculateGeoGuessrScore(actual.lat, actual.lng, guess.lat, guess.lng);
             
-            // Submit score to API
+            if (isNaN(scoreResult.score) || isNaN(scoreResult.distance)) {
+                DOM.submitStatusText.textContent = 'Error: Score calculation failed.';
+                return;
+            }
+
+            totalScore += scoreResult.score;
+            DOM.pointsScoreText.textContent = `Round Score: ${scoreResult.score} points (${(scoreResult.distance / 1000).toFixed(2)} km) | Total Score: ${totalScore} points`;
+            DOM.submitStatusText.textContent = `Guess submitted! You were ${(scoreResult.distance / 1000).toFixed(2)} km away.`;
+
+            if (currentSdkMarker && currentSdkMarker.getElement()) {
+                currentSdkMarker.getElement().style.display = 'block';
+            }
+            
+            setOverlayMapFullscreen(true, { guess: guess, actual: actual });
+            placeRealLocationPin(actual);
+
+            if (overlayMap.getLayer('line-layer')) {
+                overlayMap.setLayoutProperty('line-layer', 'visibility', 'visible');
+            }
+            lineLayerVisible = true;
+            updateLineBetweenPins();
+
+            displayScoresPopup(scoreResult.score, totalScore);
+            DOM.submitGuessBtn.disabled = true;
+
+            // Post score to session
             try {
-                const response = await fetch('/api/scores', {
+                await apiCall('/api/scores', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Session-Code': sessionCode
-                    },
                     body: JSON.stringify({
                         playerId: playerId,
                         score: scoreResult.score,
@@ -876,174 +663,397 @@
                         gameId: currentGame
                     })
                 });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    console.error('Failed to submit score:', error);
-                }
+                
+                // Get updated leaderboard
+                const scoresData = await apiCall('/api/scores');
+                displayLeaderboard(scoresData.scores);
+                
             } catch (error) {
-                console.error('Error submitting score:', error);
+                console.error('Failed to post score:', error);
+                DOM.submitStatusText.textContent += ' (Warning: Score may not have been saved)';
             }
-
-            // Show results
-            showResults(scoreResult);
         }
 
-        function showResults(scoreResult) {
-            // Update UI
-            document.getElementById('points-score').textContent = 
-                `Round Score: ${scoreResult.score} points (${(scoreResult.distance/1000).toFixed(2)} km) | Total: ${totalScore} points`;
-            document.getElementById('submit-status').textContent = 
-                `You were ${(scoreResult.distance/1000).toFixed(2)} km away!`;
-
-            // Show actual location marker
-            if (currentMarker && currentMarker.getElement()) {
-                currentMarker.getElement().style.display = 'block';
-            }
-
-            // Fullscreen overlay map
-            const overlayMapElement = document.getElementById('overlay-map');
-            overlayMapElement.classList.add('overlay-map-fullscreen');
-            overlayMap.resize();
-
-            // Fit both points in view
-            const bounds = new maptilersdk.LngLatBounds();
-            bounds.extend(userGuessLngLat);
-            bounds.extend(currentLocationCoords);
+        function displayLeaderboard(scores) {
+            let html = '<table><tr><th>Rank</th><th>Player</th><th>Score</th><th>Status</th></tr>';
+            scores.forEach((score, index) => {
+                const isCurrentPlayer = score.playerId === playerId;
+                const rowClass = isCurrentPlayer ? 'style="background-color: #fff3cd;"' : '';
+                html += `<tr ${rowClass}>
+                    <td>${index + 1}</td>
+                    <td>${score.playerName}${isCurrentPlayer ? ' (You)' : ''}</td>
+                    <td>${score.score}</td>
+                    <td>${score.status}</td>
+                </tr>`;
+            });
+            html += '</table>';
             
-            setTimeout(() => {
-                overlayMap.fitBounds(bounds, {
-                    padding: 50,
-                    duration: 1000,
-                    essential: true
-                });
-            }, 300);
-
-            // Show real location pin and line
-            placeCustomRealLocationPinOnOverlay(currentLocationCoords);
-            updateLineBetweenPins();
-            if (overlayMap.getLayer('line-layer')) {
-                overlayMap.setLayoutProperty('line-layer', 'visibility', 'visible');
-                lineLayerVisible = true;
-            }
-
-            // Show score displays
-            document.getElementById('round-score-display').textContent = `Round Score: ${scoreResult.score} points`;
-            document.getElementById('total-score-display').textContent = `Total Score: ${totalScore} points`;
-            document.getElementById('round-score-display').style.display = 'block';
-            document.getElementById('total-score-display').style.display = 'block';
-
-            // Add next button
-            addNextButton();
-
-            // Disable submit button
-            document.getElementById('submit-guess').disabled = true;
+            DOM.leaderboardContent.innerHTML = html;
+            DOM.leaderboardContainer.style.display = 'block';
         }
 
-        function addNextButton() {
-            let nextButton = document.getElementById('next-round-btn');
-            if (!nextButton) {
-                nextButton = document.createElement('button');
-                nextButton.textContent = 'Continue';
-                nextButton.id = 'next-round-btn';
-                document.querySelector('.maps-container').appendChild(nextButton);
-
-                nextButton.addEventListener('click', () => {
-                    // Reset UI
-                    const overlayMapElement = document.getElementById('overlay-map');
-                    overlayMapElement.classList.remove('overlay-map-fullscreen');
+        async function proceedToNextGame() {
+            try {
+                // Check session state to find next available game
+                sessionData = await apiCall('/api/game/details');
+                
+                const currentRoundData = sessionData.rounds.find(r => r.id === currentRound);
+                if (!currentRoundData) {
+                    showWaitingState('Current round not found. Please wait for administrator instructions.');
+                    return;
+                }
+                
+                // Look for next game in current round
+                const nextGameInRound = currentRoundData.games.find(g => g.id > currentGame && g.open);
+                
+                if (nextGameInRound) {
+                    // Move to next game in same round
+                    currentGame = nextGameInRound.id;
+                    resetGameUI();
+                    await loadGameLocation();
+                } else {
+                    // Look for next round
+                    const nextRound = sessionData.rounds.find(r => r.id > currentRound && r.open);
                     
-                    overlayMap.flyTo({
-                        center: initialCenter,
-                        zoom: initialZoom,
-                        essential: true,
-                        duration: 0
-                    });
-
-                    // Clean up pins
-                    if (realLocationPinElement) {
-                        realLocationPinElement.remove();
-                        realLocationPinElement = null;
+                    if (nextRound && nextRound.games.some(g => g.open)) {
+                        currentRound = nextRound.id;
+                        currentGame = nextRound.games.find(g => g.open).id;
+                        resetGameUI();
+                        await loadGameLocation();
+                    } else {
+                        // No more games available
+                        showWaitingState('No more games are currently available. Please wait for administrator instructions or the next round to open.');
                     }
-                    if (guessPinElement) {
-                        guessPinElement.remove();
-                        guessPinElement = null;
-                    }
-
-                    userGuessLngLat = null;
-
-                    // Hide line and score displays
-                    if (overlayMap.getLayer('line-layer')) {
-                        overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
-                        lineLayerVisible = false;
-                    }
-                    
-                    document.getElementById('round-score-display').style.display = 'none';
-                    document.getElementById('total-score-display').style.display = 'none';
-
-                    nextButton.remove();
-
-                    setTimeout(() => {
-                        overlayMap.resize();
-                    }, 500);
-
-                    // Go back to waiting/checking for next game
-                    document.getElementById('game-section').style.display = 'none';
-                    document.getElementById('waiting-section').style.display = 'block';
-                    document.getElementById('waiting-status').textContent = 'Checking for next game...';
-                    
-                    // Check game status
-                    setTimeout(checkGameStatus, 1000);
-                });
+                }
+                
+            } catch (error) {
+                console.error('Error proceeding to next game:', error);
+                showWaitingState(`Error loading next game: ${error.message}`);
             }
+        }
+
+        function showWaitingState(message) {
+            DOM.gameContainer.style.display = 'none';
+            DOM.sessionWaiting.style.display = 'block';
+            DOM.startButton.style.display = 'none';
+            showMessage('wait-message', message, 'waiting');
+            
+            // Resume polling for game state
+            startStatusPolling();
+        }
+
+        function resetGameUI() {
+            DOM.leaderboardContainer.style.display = 'none';
+            DOM.locationText.textContent = 'Loading new location...';
+            DOM.guessedCoordsText.textContent = 'Make your guess on the overlay map...';
+            DOM.submitStatusText.textContent = 'Place your guess on the overlay map...';
+            hideScoresPopup();
+
+            if (currentSdkMarker) {
+                currentSdkMarker.remove();
+                currentSdkMarker = null;
+            }
+            if (guessPinElement) {
+                guessPinElement.remove();
+                guessPinElement = null;
+            }
+            userGuessLngLat = null;
+            overlayMap.off('move', updateGuessPinPositionHandler);
+
+            if (realLocationPinElement) {
+                realLocationPinElement.remove();
+                realLocationPinElement = null;
+            }
+            overlayMap.off('move', updateRealLocationPinPositionHandler);
+            
+            actualLocationCoords = null;
+
+            if (overlayMap && overlayMap.getLayer('line-layer')) {
+                overlayMap.setLayoutProperty('line-layer', 'visibility', 'none');
+            }
+            lineLayerVisible = false;
+
+            setOverlayMapFullscreen(false);
+            DOM.submitGuessBtn.disabled = false;
+        }
+
+        // --- Utility Functions ---
+        function generatePlayerId() {
+            return 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            const className = type === 'error' ? 'error-message' : 
+                             type === 'success' ? 'success-message' : 
+                             type === 'waiting' ? 'waiting-message' : 
+                             'session-info';
+            element.innerHTML = `<div class="${className}">${message}</div>`;
+        }
+
+        function getRandomCoordinateInBounds(bounds) {
+            const [minLng, minLat, maxLng, maxLat] = bounds;
+            const buffer = 0.001;
+            const bufferedMinLng = minLng + (maxLng - minLng) * buffer;
+            const bufferedMinLat = minLat + (maxLat - minLat) * buffer;
+            const bufferedMaxLng = maxLng - (maxLng - minLng) * buffer;
+            const bufferedMaxLat = maxLat - (maxLat - minLat) * buffer;
+            const randomLng = bufferedMinLng + (bufferedMaxLng - bufferedMinLng) * Math.random();
+            const randomLat = bufferedMinLat + (bufferedMaxLat - bufferedMinLat) * buffer;
+            return [randomLng, randomLat];
         }
 
         function calculateDistanceInMeters(lat1, lon1, lat2, lon2) {
+            if ([lat1, lon1, lat2, lon2].some(coord => typeof coord !== 'number')) {
+                console.error("Invalid input types for calculateDistanceInMeters:", lat1, lon1, lat2, lon2);
+                return NaN;
+            }
             const R = 6371e3;
             const φ1 = lat1 * Math.PI / 180;
             const φ2 = lat2 * Math.PI / 180;
             const Δφ = (lat2 - lat1) * Math.PI / 180;
             const Δλ = (lon2 - lon1) * Math.PI / 180;
-            
             const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                     Math.cos(φ1) * Math.cos(φ2) *
-                     Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                      Math.cos(φ1) * Math.cos(φ2) *
+                      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
             const c = 2 * Math.atan2(Math.sqrt(Math.max(0, a)), Math.sqrt(Math.max(0, 1 - a)));
-            
             return R * c;
         }
 
         function calculateGeoGuessrScore(lat1, lon1, lat2, lon2) {
-            const MAX_SCORE = 5000;
-            const FIVE_K_THRESHOLD_METERS = 100;
-            
             const distance = calculateDistanceInMeters(lat1, lon1, lat2, lon2);
             if (isNaN(distance)) {
+                console.error("Distance calculation returned NaN.");
                 return { distance: NaN, score: NaN };
             }
-
             let score;
-            if (distance <= FIVE_K_THRESHOLD_METERS) {
-                score = MAX_SCORE;
+            if (distance <= PERFECT_SCORE_THRESHOLD_METERS) {
+                score = MAX_SCORE_PER_ROUND;
             } else {
-                const decayFactor = 2000000;
-                score = MAX_SCORE * Math.exp(-distance / decayFactor);
+                score = MAX_SCORE_PER_ROUND * Math.exp(-distance / SCORE_DECAY_FACTOR);
                 score = Math.max(0, Math.round(score));
             }
-
-            return { distance: distance, score: score };
+            return { distance, score };
         }
 
-        // Auto-check game status periodically
-        setInterval(() => {
-            if (sessionCode && (playerStatus === 'waiting' || playerStatus === 'active')) {
-                checkGameStatus();
+        function convertToLngLat(lngLatInput) {
+            if (lngLatInput instanceof maptilersdk.LngLat) {
+                return lngLatInput;
             }
-        }, 10000); // Check every 10 seconds
+            if (Array.isArray(lngLatInput) && lngLatInput.length === 2 &&
+                typeof lngLatInput[0] === 'number' && typeof lngLatInput[1] === 'number') {
+                return new maptilersdk.LngLat(lngLatInput[0], lngLatInput[1]);
+            }
+            console.error("convertToLngLat received invalid LngLat data:", lngLatInput);
+            return null;
+        }
 
-        // Initialize page
+        // --- Pin Management ---
+        function createPinElement(className) {
+            const element = document.createElement('div');
+            element.className = className;
+            return element;
+        }
+
+        function updatePinPosition(mapInstance, pinEl, lngLat) {
+            if (!mapInstance || !pinEl || !lngLat) return;
+            const validLngLat = convertToLngLat(lngLat);
+            if (!validLngLat) {
+                 console.error("Invalid LngLat object for pin positioning:", lngLat);
+                 return;
+            }
+            const pixelCoords = mapInstance.project(validLngLat);
+            pinEl.style.left = `${pixelCoords.x}px`;
+            pinEl.style.top = `${pixelCoords.y}px`;
+            pinEl.style.display = 'block';
+        }
+
+        function placeGuessPin(lngLat) {
+            console.log('Attempting to place custom guess pin at LngLat:', lngLat);
+            userGuessLngLat = convertToLngLat(lngLat);
+            if (!userGuessLngLat) return;
+
+            if (guessPinElement) guessPinElement.remove();
+            guessPinElement = createPinElement('guess-pin');
+            overlayMap.getCanvasContainer().appendChild(guessPinElement);
+            updatePinPosition(overlayMap, guessPinElement, userGuessLngLat);
+
+            DOM.guessedCoordsText.textContent = `Guessed Location: Lng: ${userGuessLngLat.lng.toFixed(6)}, Lat: ${userGuessLngLat.lat.toFixed(6)}`;
+            DOM.submitStatusText.textContent = 'Guess placed. Click Submit!';
+
+            overlayMap.off('move', updateGuessPinPositionHandler);
+            overlayMap.on('move', updateGuessPinPositionHandler);
+            console.log("Guess pin placed. userGuessLngLat:", userGuessLngLat);
+        }
+        
+        const updateGuessPinPositionHandler = () => updatePinPosition(overlayMap, guessPinElement, userGuessLngLat);
+        
+        function placeRealLocationPin(lngLat) {
+            console.log('Attempting to place custom real location pin at LngLat:', lngLat);
+            const validLngLat = convertToLngLat(lngLat);
+            if(!validLngLat) return;
+            if (realLocationPinElement) realLocationPinElement.remove();
+            realLocationPinElement = createPinElement('real-location-pin');
+            overlayMap.getCanvasContainer().appendChild(realLocationPinElement);
+            updatePinPosition(overlayMap, realLocationPinElement, validLngLat);
+
+            overlayMap.off('move', updateRealLocationPinPositionHandler);
+            overlayMap.on('move', updateRealLocationPinPositionHandler);
+            console.log("Real location pin placed. actualLocationCoords:", actualLocationCoords);
+        }
+        
+        const updateRealLocationPinPositionHandler = () => updatePinPosition(overlayMap, realLocationPinElement, actualLocationCoords);
+
+        // --- Map Interaction & UI Updates ---
+        function updateLineBetweenPins() {
+            if (!lineLayerVisible || !overlayMap || !userGuessLngLat || !actualLocationCoords) return;
+
+            const validUserGuess = convertToLngLat(userGuessLngLat);
+            const validActualLocation = convertToLngLat(actualLocationCoords);
+
+            if (!validUserGuess || !validActualLocation) {
+                console.error("Invalid LngLat objects for drawing line:", userGuessLngLat, actualLocationCoords);
+                return;
+            }
+
+            const lineGeoJSON = {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'LineString',
+                    'coordinates': [
+                        [validUserGuess.lng, validUserGuess.lat],
+                        [validActualLocation.lng, validActualLocation.lat]
+                    ]
+                }
+            };
+            const source = overlayMap.getSource('line-source');
+            if (source) {
+                source.setData(lineGeoJSON);
+            }
+        }
+
+        function displayScoresPopup(roundScore, currentTotalScore) {
+            DOM.roundScoreDisplay.textContent = `Round Score: ${roundScore} points`;
+            DOM.totalScoreDisplay.textContent = `Total Score: ${currentTotalScore} points`;
+            DOM.roundScoreDisplay.style.display = 'block';
+            DOM.totalScoreDisplay.style.display = 'block';
+        }
+
+        function hideScoresPopup() {
+            DOM.roundScoreDisplay.style.display = 'none';
+            DOM.totalScoreDisplay.style.display = 'none';
+        }
+
+        function setOverlayMapFullscreen(isFullscreen, fitBoundsLocations = null) {
+            if (isFullscreen) {
+                DOM.overlayMapElement.classList.add('overlay-map-fullscreen');
+                overlayMap.resize();
+                if (fitBoundsLocations && fitBoundsLocations.guess && fitBoundsLocations.actual) {
+                    const bounds = new maptilersdk.LngLatBounds();
+                    bounds.extend(fitBoundsLocations.guess);
+                    bounds.extend(fitBoundsLocations.actual);
+                    setTimeout(() => {
+                        overlayMap.fitBounds(bounds, { padding: 50, duration: 1000, essential: true });
+                    }, 300);
+                }
+            } else {
+                DOM.overlayMapElement.classList.remove('overlay-map-fullscreen');
+                overlayMap.flyTo({ center: OVERLAY_INITIAL_CENTER, zoom: OVERLAY_INITIAL_ZOOM, essential: true, duration: 0 });
+                setTimeout(() => overlayMap.resize(), 450);
+            }
+        }
+
+        function addOrUpdateSdkMarker(lngLatArray) {
+            const lngLatObject = convertToLngLat(lngLatArray);
+            if (!lngLatObject) {
+                console.error("addOrUpdateSdkMarker received invalid LngLat data:", lngLatArray);
+                return;
+            }
+
+            if (currentSdkMarker) currentSdkMarker.remove();
+            currentSdkMarker = new maptilersdk.Marker().setLngLat(lngLatObject).addTo(mainMap);
+            actualLocationCoords = lngLatObject;
+
+            if (currentSdkMarker && currentSdkMarker.getElement()) {
+                currentSdkMarker.getElement().style.display = 'none';
+            }
+            console.log("actualLocationCoords set to LngLat object:", actualLocationCoords);
+        }
+
+        // --- Map Initialization ---
+        async function initializeMaps() {
+            try {
+                // Get map styles using our proxy
+                const mainMapStyle = await apiCall('/api/mapstyle?style=0196cb69-f55f-71f8-9a8f-90fa083f0f67');
+                const overlayMapStyle = await apiCall('/api/mapstyle?style=0196cb7f-9914-7a9b-aed1-8bfa7b9a0705');
+
+                // Set up MapTiler SDK with a dummy key (we're using proxied styles)
+                maptilersdk.config.apiKey = 'dummy';
+
+                mainMap = new maptilersdk.Map({
+                    container: 'maptiler-map',
+                    style: mainMapStyle,
+                    center: [0, 0],
+                    zoom: 1,
+                    interactive: false
+                });
+
+                overlayMap = new maptilersdk.Map({
+                    container: 'overlay-map',
+                    style: overlayMapStyle,
+                    center: OVERLAY_INITIAL_CENTER,
+                    zoom: OVERLAY_INITIAL_ZOOM,
+                    interactive: true
+                });
+
+                overlayMap.on('style.load', () => {
+                    // Add line layer for showing distance
+                    overlayMap.addSource('line-source', {
+                        'type': 'geojson',
+                        'data': { 'type': 'Feature', 'geometry': { 'type': 'LineString', 'coordinates': [] } }
+                    });
+                    overlayMap.addLayer({
+                        'id': 'line-layer', 'type': 'line', 'source': 'line-source',
+                        'layout': { 'line-join': 'round', 'line-cap': 'round', 'visibility': 'none' },
+                        'paint': { 'line-color': '#000', 'line-width': 2, 'line-dasharray': [0.5, 2] }
+                    });
+                    overlayMap.on('move', updateLineBetweenPins);
+
+                    // Add click handlers for placing guess pins
+                    const placeGuessPinHandler = (e) => {
+                        if (e.type === 'contextmenu') e.preventDefault();
+                        if (!DOM.overlayMapElement.classList.contains('overlay-map-fullscreen')) {
+                            placeGuessPin(e.lngLat);
+                        }
+                    };
+                    overlayMap.on('click', placeGuessPinHandler);
+                    overlayMap.on('contextmenu', placeGuessPinHandler);
+                });
+
+                // Handle overlay map transitions
+                DOM.overlayMapElement.addEventListener('transitionend', () => {
+                    if (overlayMap) {
+                        overlayMap.resize();
+                        if (guessPinElement && userGuessLngLat) updateGuessPinPositionHandler();
+                        if (realLocationPinElement && actualLocationCoords) updateRealLocationPinPositionHandler();
+                        updateLineBetweenPins();
+                    }
+                });
+
+                // Add submit button handler
+                DOM.submitGuessBtn.addEventListener('click', submitGuess);
+
+                console.log('Maps initialized successfully');
+                
+            } catch (error) {
+                console.error('Failed to initialize maps:', error);
+                DOM.locationText.textContent = `Failed to load maps: ${error.message}`;
+            }
+        }
+
+        // --- Initialization ---
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Session Map Guessr loaded');
+            cacheDOMElements();
         });
     </script>
 </body>
