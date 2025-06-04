@@ -555,8 +555,9 @@
             connect() {
                 try {
                     updateConnectionStatus('connecting');
-                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                    const wsUrl = `${protocol}//${window.location.host}/ws?session=${this.sessionCode}`;
+                    const WS_BASE_URL = 'wss://game-session-worker.games-6cb.workers.dev';
+                    const wsUrl = `${WS_BASE_URL}/ws?session=${this.sessionCode}`;
+
                     
                     this.ws = new WebSocket(wsUrl);
                     
