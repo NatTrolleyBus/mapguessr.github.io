@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Map Guessr - Session Game</title>
+    <title>Map Guessr - Live Session Game</title>
     <script src="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptiler-sdk.umd.min.js"></script>
     <link href="https://cdn.maptiler.com/maptiler-sdk-js/v3.2.0/maptilersdk.css" rel="stylesheet" />
     <style>
@@ -30,6 +30,52 @@
         }
         section {
             margin-bottom: 30px;
+        }
+        
+        /* Connection Status */
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .status-connected { background: #d4edda; color: #155724; }
+        .status-connecting { background: #fff3cd; color: #856404; }
+        .status-disconnected { background: #f8d7da; color: #721c24; }
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            padding: 10px 15px;
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            color: #0c5460;
+            font-size: 14px;
+            z-index: 1000;
+            max-width: 300px;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         /* Session Management Styles */
@@ -66,6 +112,10 @@
         .session-form button:hover {
             background-color: #0aa8c4;
         }
+        .session-form button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
         .session-info {
             background-color: #e8f4f8;
             padding: 20px;
@@ -95,6 +145,37 @@
             border-radius: 5px;
             margin: 20px 0;
             border: 1px solid #c3e6cb;
+        }
+        
+        /* Live Player List */
+        .live-players {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            text-align: left;
+        }
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin: 4px 0;
+            background-color: white;
+            border-radius: 3px;
+            border-left: 4px solid #28a745;
+        }
+        .player-item.you {
+            border-left-color: #007cba;
+            background-color: #e6f3ff;
+        }
+        .player-item.left {
+            border-left-color: #ffc107;
+            background-color: #fff3cd;
+        }
+        .player-item.kicked {
+            border-left-color: #dc3545;
+            background-color: #f8d7da;
         }
         
         /* Game Styles */
@@ -169,7 +250,7 @@
             cursor: not-allowed;
         }
         
-        /* Leaderboard Styles */
+        /* Live Leaderboard Styles */
         .leaderboard {
             background-color: #f8f9fa;
             padding: 20px;
@@ -192,6 +273,10 @@
         }
         .leaderboard tr:nth-child(even) {
             background-color: #f2f2f2;
+        }
+        .leaderboard tr.current-player {
+            background-color: #fff3cd !important;
+            font-weight: bold;
         }
         
         footer {
@@ -265,47 +350,99 @@
             bottom: 20px;
             right: 20px;
         }
+        
+        /* Game Status */
+        .game-status-bar {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 14px;
+        }
+        .status-value {
+            font-weight: bold;
+            font-size: 16px;
+            color: #007cba;
+        }
     </style>
 </head>
 <body>
+    <div id="connectionStatus" class="connection-status status-connecting">
+        <span class="live-indicator"></span>
+        <span id="statusText">Not Connected</span>
+    </div>
+    
+    <div id="notification" class="notification"></div>
+    
     <header>
-        <h1>Map Guessr - Session Game</h1>
-        <p>Connected Multiplayer Experience</p>
+        <h1>Map Guessr - Live Session Game</h1>
+        <p>Real-time Connected Multiplayer Experience</p>
     </header>
     <main>
         <!-- Session Join Screen -->
         <div id="session-join" class="session-container">
-            <h2>Join Game Session</h2>
-            <p>Enter your session code and player name to join the game.</p>
+            <h2>Join Live Game Session</h2>
+            <p>Enter your session code and player name to join the live game.</p>
             <div class="session-form">
                 <input type="text" id="session-code" placeholder="Session Code" maxlength="10">
                 <br>
                 <input type="text" id="player-name" placeholder="Your Name" maxlength="30">
                 <br>
-                <button onclick="joinSession()">Join Session</button>
+                <button onclick="joinSession()" id="join-button">Join Live Session</button>
             </div>
             <div id="join-message"></div>
         </div>
 
         <!-- Session Waiting Screen -->
         <div id="session-waiting" class="session-container" style="display: none;">
-            <h2>Session Joined!</h2>
+            <h2>🔴 Live Session Joined!</h2>
             <div id="session-info" class="session-info"></div>
-            <div class="waiting-message">
-                <h3>⏳ Please wait for instructions from the game administrator</h3>
-                <p><strong>Important:</strong> Do not press any game buttons until you are explicitly told the game has started. Wait for the administrator to open the current round.</p>
-                <p>Your progress will be synchronized with other players.</p>
+            
+            <div class="live-players">
+                <h4>👥 Live Players</h4>
+                <div id="players-list"></div>
             </div>
-            <button class="start-game-btn" onclick="checkGameState()" disabled>Check Game Status</button>
-            <button class="start-game-btn" onclick="startFirstGame()" id="start-button" style="display: none;">Start Playing</button>
+            
+            <div class="waiting-message">
+                <h3>⏳ Waiting for game to start...</h3>
+                <p><strong>Live Status:</strong> Connected and waiting for administrator instructions</p>
+                <p>You'll be automatically notified when the game becomes available!</p>
+            </div>
+            
+            <div class="game-status-bar">
+                <div class="status-item">
+                    <span class="status-value" id="live-status">waiting</span>
+                    <span>Status</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-value" id="live-players-count">0</span>
+                    <span>Players</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-value" id="live-connections">0</span>
+                    <span>Connected</span>
+                </div>
+            </div>
+            
+            <button class="start-game-btn" onclick="startGame()" id="start-button" style="display: none;">🎮 Start Playing</button>
             <div id="wait-message"></div>
         </div>
 
         <!-- Game Screen -->
         <div id="game-container" class="game-container">
             <section>
-                <h2>Current Game</h2>
-                <div id="game-status"></div>
+                <h2>🎯 Live Game in Progress</h2>
+                <div id="game-status" class="game-status-bar"></div>
                 <div class="maps-container">
                     <div id="maptiler-map"></div>
                     <div id="overlay-map"></div>
@@ -316,7 +453,7 @@
             </section>
             
             <section>
-                <h2>Game Progress</h2>
+                <h2>📊 Game Progress</h2>
                 <ul>
                     <li id="location-text">Waiting for location...</li>
                     <li id="guessed-coords">Make your guess on the overlay map...</li>
@@ -326,17 +463,18 @@
                 </ul>
             </section>
 
-            <div id="leaderboard-container" style="display: none;">
+            <div id="leaderboard-container">
                 <div class="leaderboard">
-                    <h3>🏆 Round Complete - Leaderboard</h3>
-                    <div id="leaderboard-content"></div>
-                    <button class="next-round-btn" onclick="proceedToNextGame()">Continue to Next Game</button>
+                    <h3>🏆 Live Leaderboard</h3>
+                    <div id="leaderboard-content">
+                        <p>Waiting for scores...</p>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
     <footer>
-        <p>Session-Based Map Guessr Game</p>
+        <p>Live WebSocket-Based Map Guessr Game</p>
     </footer>
 
     <div id="round-score-display"></div>
@@ -344,7 +482,7 @@
 
     <script>
         // --- Configuration ---
-        const API_BASE_URL = 'https://dashboard-mapguessr.games-6cb.workers.dev'; // Worker API endpoint
+        const API_BASE_URL = 'https://dashboard-mapguessr.games-6cb.workers.dev';
         const INITIAL_ZOOM_LEVEL = 15;
         const OVERLAY_INITIAL_CENTER = [0, 0];
         const OVERLAY_INITIAL_ZOOM = -0.5;
@@ -359,6 +497,7 @@
         let sessionData = null;
         let currentRound = 1;
         let currentGame = 1;
+        let gameWebSocket = null;
         
         // --- Game State Variables ---
         let mainMap = null;
@@ -395,39 +534,336 @@
             DOM.leaderboardContainer = document.getElementById('leaderboard-container');
             DOM.leaderboardContent = document.getElementById('leaderboard-content');
             DOM.gameStatus = document.getElementById('game-status');
+            DOM.playersListElement = document.getElementById('players-list');
+            DOM.liveStatus = document.getElementById('live-status');
+            DOM.livePlayersCount = document.getElementById('live-players-count');
+            DOM.liveConnections = document.getElementById('live-connections');
+            DOM.joinButton = document.getElementById('join-button');
         }
 
-        // --- API Functions ---
-        function getAuthHeaders() {
-            return {
-                'Content-Type': 'application/json',
-                'X-Session-Code': sessionCode
-            };
-        }
+        // --- WebSocket Management ---
+        class GameWebSocket {
+            constructor(sessionCode) {
+                this.sessionCode = sessionCode;
+                this.ws = null;
+                this.reconnectDelay = 1000;
+                this.maxReconnectDelay = 30000;
+                this.reconnectAttempts = 0;
+                this.connect();
+            }
 
-        async function apiCall(endpoint, options = {}) {
-            const url = `${API_BASE_URL}${endpoint}`;
-            const defaultOptions = {
-                headers: getAuthHeaders(),
-                ...options
-            };
-            
-            try {
-                const response = await fetch(url, defaultOptions);
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.error || `HTTP ${response.status}`);
+            connect() {
+                try {
+                    updateConnectionStatus('connecting');
+                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                    const wsUrl = `${protocol}//${window.location.host}/ws?session=${this.sessionCode}`;
+                    
+                    this.ws = new WebSocket(wsUrl);
+                    
+                    this.ws.onopen = () => {
+                        console.log('WebSocket connected');
+                        updateConnectionStatus('connected');
+                        this.reconnectAttempts = 0;
+                        this.reconnectDelay = 1000;
+                        
+                        // Request initial session update
+                        this.send({ type: 'request_update' });
+                        
+                        // Send ping every 30 seconds
+                        this.pingInterval = setInterval(() => {
+                            if (this.ws?.readyState === WebSocket.OPEN) {
+                                this.send({ type: 'ping' });
+                            }
+                        }, 30000);
+                    };
+                    
+                    this.ws.onmessage = (event) => {
+                        try {
+                            const message = JSON.parse(event.data);
+                            this.handleMessage(message);
+                        } catch (error) {
+                            console.error('Error parsing WebSocket message:', error);
+                        }
+                    };
+                    
+                    this.ws.onclose = () => {
+                        console.log('WebSocket disconnected');
+                        updateConnectionStatus('disconnected');
+                        if (this.pingInterval) {
+                            clearInterval(this.pingInterval);
+                        }
+                        this.scheduleReconnect();
+                    };
+                    
+                    this.ws.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                        updateConnectionStatus('disconnected');
+                    };
+                    
+                } catch (error) {
+                    console.error('Error creating WebSocket:', error);
+                    updateConnectionStatus('disconnected');
+                    this.scheduleReconnect();
                 }
+            }
+
+            send(message) {
+                if (this.ws?.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify(message));
+                } else {
+                    console.warn('WebSocket not connected, message not sent:', message);
+                }
+            }
+
+            handleMessage(message) {
+                switch (message.type) {
+                    case 'session_update':
+                        handleSessionUpdate(message.data);
+                        if (message.event) {
+                            handleSessionEvent(message.event);
+                        }
+                        break;
+                        
+                    case 'join_success':
+                        showNotification('Successfully joined the game!', 'success');
+                        break;
+                        
+                    case 'score_success':
+                        showNotification(`Score posted! Total: ${message.totalScore}`, 'success');
+                        break;
+                        
+                    case 'session_deleted':
+                        showNotification('Session was deleted by admin', 'error');
+                        resetToJoinScreen();
+                        break;
+                        
+                    case 'error':
+                        showNotification(`Error: ${message.message}`, 'error');
+                        break;
+                        
+                    case 'pong':
+                        // Server responded to ping
+                        break;
+                        
+                    case 'connected':
+                        console.log('WebSocket:', message.message);
+                        break;
+                        
+                    default:
+                        console.log('Unknown message type:', message.type, message);
+                }
+            }
+            
+            scheduleReconnect() {
+                if (!sessionCode) return; // Don't reconnect if we've left the session
                 
-                return data;
-            } catch (error) {
-                console.error(`API call failed for ${endpoint}:`, error);
-                throw error;
+                this.reconnectAttempts++;
+                const delay = Math.min(this.reconnectDelay * Math.pow(2, this.reconnectAttempts), this.maxReconnectDelay);
+                
+                console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
+                
+                setTimeout(() => {
+                    if (sessionCode) {
+                        this.connect();
+                    }
+                }, delay);
+            }
+
+            close() {
+                if (this.pingInterval) {
+                    clearInterval(this.pingInterval);
+                }
+                if (this.ws) {
+                    this.ws.close();
+                }
             }
         }
 
-        async function joinSession() {
+        // --- WebSocket Event Handlers ---
+        function handleSessionUpdate(data) {
+            sessionData = data;
+            updateLiveSessionInfo();
+            updateLivePlayersList();
+            updateLiveLeaderboard();
+            
+            // Check if game state changed
+            checkGameAvailability();
+        }
+
+        function handleSessionEvent(event) {
+            let message = null;
+            switch (event.type) {
+                case 'player_joined':
+                    message = `${event.playerName} joined the game`;
+                    break;
+                case 'player_left':
+                    message = 'A player left the game';
+                    break;
+                case 'player_kicked':
+                    message = `A player was kicked: ${event.reason || 'No reason given'}`;
+                    break;
+                case 'score_updated':
+                    message = `Score update: ${event.score} points`;
+                    break;
+                case 'round_toggled':
+                    message = `Round ${event.roundId} ${event.open ? 'opened' : 'closed'}`;
+                    checkGameAvailability(); // Re-check availability
+                    break;
+                case 'game_toggled':
+                    message = `Game ${event.gameId} ${event.open ? 'opened' : 'closed'}`;
+                    checkGameAvailability(); // Re-check availability
+                    break;
+                case 'session_started':
+                    message = 'Session started - cities generated';
+                    break;
+                case 'cities_approved':
+                    message = 'Cities approved - game is now active';
+                    checkGameAvailability();
+                    break;
+                case 'session_ended':
+                    message = `Session ended: ${event.reason || 'No reason given'}`;
+                    break;
+            }
+            
+            if (message) {
+                showNotification(message);
+            }
+        }
+
+        function updateLiveSessionInfo() {
+            if (!sessionData) return;
+            
+            DOM.sessionInfo.innerHTML = `
+                <h3>Session: ${sessionData.joinCode}</h3>
+                <p><strong>Player:</strong> ${playerName}</p>
+                <p><strong>Game Type:</strong> ${sessionData.gameType}</p>
+                <p><strong>Status:</strong> ${sessionData.status}</p>
+            `;
+            
+            DOM.liveStatus.textContent = sessionData.status;
+            DOM.livePlayersCount.textContent = sessionData.players ? sessionData.players.length : 0;
+            DOM.liveConnections.textContent = sessionData.connectionCount || 0;
+        }
+
+        function updateLivePlayersList() {
+            if (!sessionData || !sessionData.players) return;
+            
+            let html = '';
+            sessionData.players.forEach(player => {
+                const isCurrentPlayer = player.id === playerId;
+                let statusClass = player.status === 'active' ? '' : player.status;
+                if (isCurrentPlayer) statusClass += ' you';
+                
+                html += `<div class="player-item ${statusClass}">
+                    <div>
+                        <strong>${player.name}</strong>${isCurrentPlayer ? ' (You)' : ''} - ${player.status}
+                        ${player.note ? ` - <em>${player.note}</em>` : ''}
+                    </div>
+                    <div>${player.score || 0} pts</div>
+                </div>`;
+            });
+            
+            DOM.playersListElement.innerHTML = html || '<p>No players yet</p>';
+        }
+
+        function updateLiveLeaderboard() {
+            if (!sessionData || !sessionData.scores) {
+                DOM.leaderboardContent.innerHTML = '<p>Waiting for scores...</p>';
+                return;
+            }
+            
+            let html = '<table><tr><th>Rank</th><th>Player</th><th>Score</th><th>Status</th></tr>';
+            sessionData.scores.forEach((score, index) => {
+                const isCurrentPlayer = score.playerId === playerId;
+                const rowClass = isCurrentPlayer ? 'current-player' : '';
+                html += `<tr class="${rowClass}">
+                    <td>${index + 1}</td>
+                    <td>${score.playerName}${isCurrentPlayer ? ' (You)' : ''}</td>
+                    <td>${score.score}</td>
+                    <td>${score.status}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            
+            DOM.leaderboardContent.innerHTML = html;
+        }
+
+        function checkGameAvailability() {
+            if (!sessionData) return;
+            
+            if (sessionData.status === 'active') {
+                // Check if any round is open
+                const hasOpenRound = sessionData.rounds && sessionData.rounds.some(round => round.open);
+                if (hasOpenRound) {
+                    DOM.startButton.style.display = 'block';
+                    showMessage('wait-message', 'Game is active! You can start playing.', 'success');
+                } else {
+                    DOM.startButton.style.display = 'none';
+                    showMessage('wait-message', 'Game is active but no rounds are currently open. Waiting for administrator...', 'waiting');
+                }
+            } else if (sessionData.status === 'ended') {
+                showMessage('wait-message', 'Game has ended. Thank you for playing!', 'info');
+                DOM.startButton.style.display = 'none';
+            } else {
+                DOM.startButton.style.display = 'none';
+                showMessage('wait-message', `Game status: ${sessionData.status}. Waiting for game to start...`, 'waiting');
+            }
+        }
+
+        // --- Connection Status Management ---
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connectionStatus');
+            const textElement = document.getElementById('statusText');
+            
+            statusElement.className = 'connection-status';
+            
+            switch (status) {
+                case 'connected':
+                    statusElement.classList.add('status-connected');
+                    textElement.innerHTML = '<span class="live-indicator" style="background: #28a745;"></span>Live';
+                    break;
+                case 'connecting':
+                    statusElement.classList.add('status-connecting');
+                    textElement.innerHTML = '<span class="live-indicator" style="background: #ffc107;"></span>Connecting...';
+                    break;
+                case 'disconnected':
+                    statusElement.classList.add('status-disconnected');
+                    textElement.innerHTML = '🔴 Disconnected';
+                    break;
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            if (!message) return;
+            
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            
+            // Update styles based on type
+            notification.className = 'notification';
+            if (type === 'error') {
+                notification.style.background = '#f8d7da';
+                notification.style.borderColor = '#f5c6cb';
+                notification.style.color = '#721c24';
+            } else if (type === 'success') {
+                notification.style.background = '#d4edda';
+                notification.style.borderColor = '#c3e6cb';
+                notification.style.color = '#155724';
+            } else {
+                notification.style.background = '#d1ecf1';
+                notification.style.borderColor = '#bee5eb';
+                notification.style.color = '#0c5460';
+            }
+            
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 4000);
+        }
+
+        // --- Session Management ---
+        function joinSession() {
             const code = document.getElementById('session-code').value.trim().toUpperCase();
             const name = document.getElementById('player-name').value.trim();
             
@@ -440,136 +876,121 @@
             playerName = name;
             playerId = generatePlayerId();
             
+            DOM.joinButton.disabled = true;
+            DOM.joinButton.textContent = 'Connecting...';
+            
             try {
-                showMessage('join-message', 'Joining session...', 'info');
+                // Connect to WebSocket
+                gameWebSocket = new GameWebSocket(sessionCode);
                 
-                // Join the session
-                await apiCall('/api/player/join', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        playerId: playerId,
-                        playerName: playerName
-                    })
-                });
-                
-                // Get session details
-                sessionData = await apiCall('/api/game/details');
-                
-                showSessionWaiting();
-                startStatusPolling();
+                // Send join player message after connection
+                setTimeout(() => {
+                    if (gameWebSocket?.ws?.readyState === WebSocket.OPEN) {
+                        gameWebSocket.send({
+                            type: 'join_player',
+                            playerId: playerId,
+                            playerName: playerName
+                        });
+                        
+                        showSessionWaiting();
+                    } else {
+                        showMessage('join-message', 'Failed to connect to session. Please try again.', 'error');
+                        DOM.joinButton.disabled = false;
+                        DOM.joinButton.textContent = 'Join Live Session';
+                    }
+                }, 1000);
                 
             } catch (error) {
                 showMessage('join-message', `Failed to join session: ${error.message}`, 'error');
+                DOM.joinButton.disabled = false;
+                DOM.joinButton.textContent = 'Join Live Session';
             }
         }
 
         function showSessionWaiting() {
             DOM.sessionJoin.style.display = 'none';
             DOM.sessionWaiting.style.display = 'block';
-            
-            DOM.sessionInfo.innerHTML = `
-                <h3>Session: ${sessionCode}</h3>
-                <p><strong>Player:</strong> ${playerName}</p>
-                <p><strong>Game Type:</strong> ${sessionData.gameType}</p>
-                <p><strong>Status:</strong> ${sessionData.status}</p>
-                <p><strong>Players in session:</strong> ${sessionData.players ? sessionData.players.length : 0}</p>
-            `;
         }
 
-        async function checkGameState() {
-            try {
-                sessionData = await apiCall('/api/game/details');
-                
-                if (sessionData.status === 'active') {
-                    // Check if any round is open
-                    const hasOpenRound = sessionData.rounds && sessionData.rounds.some(round => round.open);
-                    if (hasOpenRound) {
-                        DOM.startButton.style.display = 'block';
-                        DOM.startButton.disabled = false;
-                        showMessage('wait-message', 'Game is active! You can start playing.', 'success');
-                    } else {
-                        showMessage('wait-message', 'Game is active but no rounds are currently open. Wait for administrator.', 'waiting');
-                    }
-                } else {
-                    showMessage('wait-message', `Game status: ${sessionData.status}. Please wait for the game to become active.`, 'waiting');
-                }
-                
-            } catch (error) {
-                showMessage('wait-message', `Error checking game state: ${error.message}`, 'error');
+        function resetToJoinScreen() {
+            if (gameWebSocket) {
+                gameWebSocket.close();
+                gameWebSocket = null;
             }
-        }
-
-        async function startStatusPolling() {
-            // Enable the check button
-            document.querySelector('.session-container button[onclick="checkGameState()"]').disabled = false;
             
-            // Poll every 5 seconds for status updates
-            const pollInterval = setInterval(async () => {
-                try {
-                    await checkGameState();
-                    
-                    // Stop polling if game started
-                    if (gameInProgress) {
-                        clearInterval(pollInterval);
-                    }
-                } catch (error) {
-                    console.error('Status polling error:', error);
-                }
-            }, 5000);
+            sessionCode = null;
+            playerName = null;
+            playerId = null;
+            sessionData = null;
+            gameInProgress = false;
+            
+            DOM.gameContainer.style.display = 'none';
+            DOM.sessionWaiting.style.display = 'none';
+            DOM.sessionJoin.style.display = 'block';
+            DOM.joinButton.disabled = false;
+            DOM.joinButton.textContent = 'Join Live Session';
+            
+            updateConnectionStatus('disconnected');
         }
 
-        async function startFirstGame() {
-            try {
-                // Final check of game state
-                sessionData = await apiCall('/api/game/details');
-                
-                if (sessionData.status !== 'active') {
-                    showMessage('wait-message', 'Game is not active yet. Please wait.', 'error');
-                    return;
-                }
-                
-                // Find the first open round and game
-                const openRound = sessionData.rounds.find(round => round.open);
-                if (!openRound) {
-                    showMessage('wait-message', 'No rounds are currently open. Please wait for administrator.', 'error');
-                    return;
-                }
-                
-                const openGame = openRound.games.find(game => game.open);
-                if (!openGame) {
-                    showMessage('wait-message', 'No games are currently open in this round. Please wait for administrator.', 'error');
-                    return;
-                }
-                
-                currentRound = openRound.id;
-                currentGame = openGame.id;
-                gameInProgress = true;
-                
-                // Switch to game view
-                DOM.sessionWaiting.style.display = 'none';
-                DOM.gameContainer.style.display = 'block';
-                
-                // Initialize maps
-                await initializeMaps();
-                await loadGameLocation();
-                
-            } catch (error) {
-                showMessage('wait-message', `Failed to start game: ${error.message}`, 'error');
+        // --- Game Functions ---
+        function startGame() {
+            if (!sessionData || sessionData.status !== 'active') {
+                showNotification('Game is not active yet. Please wait.', 'error');
+                return;
             }
+            
+            // Find the first open round and game
+            const openRound = sessionData.rounds.find(round => round.open);
+            if (!openRound) {
+                showNotification('No rounds are currently open. Please wait for administrator.', 'error');
+                return;
+            }
+            
+            const openGame = openRound.games.find(game => game.open);
+            if (!openGame) {
+                showNotification('No games are currently open in this round. Please wait for administrator.', 'error');
+                return;
+            }
+            
+            currentRound = openRound.id;
+            currentGame = openGame.id;
+            gameInProgress = true;
+            
+            // Switch to game view
+            DOM.sessionWaiting.style.display = 'none';
+            DOM.gameContainer.style.display = 'block';
+            
+            // Initialize maps
+            initializeMaps().then(() => {
+                loadGameLocation();
+            });
         }
 
         async function loadGameLocation() {
             try {
                 DOM.locationText.textContent = 'Loading location...';
                 
-                // Get city for current round/game
-                const cityData = await apiCall(`/api/cities?round=${currentRound}&game=${currentGame}`);
+                // Get city for current round/game using REST API
+                const response = await fetch(`${API_BASE_URL}/api/cities?round=${currentRound}&game=${currentGame}`, {
+                    headers: { 'X-Session-Code': sessionCode }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const cityData = await response.json();
                 const cityName = cityData.city;
                 
                 DOM.locationText.textContent = `Finding a spot in ${cityName}...`;
                 
                 // Geocode the city using our proxy
-                const geocodingData = await apiCall(`/api/geocode?city=${encodeURIComponent(cityName)}`);
+                const geocodingResponse = await fetch(`${API_BASE_URL}/api/geocode?city=${encodeURIComponent(cityName)}`, {
+                    headers: { 'X-Session-Code': sessionCode }
+                });
+                
+                const geocodingData = await geocodingResponse.json();
                 
                 if (!geocodingData.features || geocodingData.features.length === 0) {
                     throw new Error(`Could not find location for ${cityName}`);
@@ -605,9 +1026,22 @@
         function updateGameStatus() {
             DOM.roundCountText.textContent = `Round: ${currentRound} | Game: ${currentGame}`;
             DOM.gameStatus.innerHTML = `
-                <p><strong>Current Game:</strong> Round ${currentRound}, Game ${currentGame}</p>
-                <p><strong>Your Score:</strong> ${totalScore} points</p>
-                <p><strong>Session:</strong> ${sessionCode} | <strong>Player:</strong> ${playerName}</p>
+                <div class="status-item">
+                    <span class="status-value">Round ${currentRound}</span>
+                    <span>Current Round</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-value">Game ${currentGame}</span>
+                    <span>Current Game</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-value">${totalScore}</span>
+                    <span>Your Score</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-value">${sessionCode}</span>
+                    <span>Session</span>
+                </div>
             `;
         }
 
@@ -652,98 +1086,74 @@
             displayScoresPopup(scoreResult.score, totalScore);
             DOM.submitGuessBtn.disabled = true;
 
-            // Post score to session
-            try {
-                await apiCall('/api/scores', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        playerId: playerId,
-                        score: scoreResult.score,
-                        roundId: currentRound,
-                        gameId: currentGame
-                    })
+            // Post score via WebSocket
+            if (gameWebSocket?.ws?.readyState === WebSocket.OPEN) {
+                gameWebSocket.send({
+                    type: 'post_score',
+                    playerId: playerId,
+                    score: scoreResult.score,
+                    roundId: currentRound,
+                    gameId: currentGame
                 });
-                
-                // Get updated leaderboard
-                const scoresData = await apiCall('/api/scores');
-                displayLeaderboard(scoresData.scores);
-                
-            } catch (error) {
-                console.error('Failed to post score:', error);
-                DOM.submitStatusText.textContent += ' (Warning: Score may not have been saved)';
+            } else {
+                showNotification('Warning: Could not save score - connection lost', 'error');
             }
+
+            // Show continue button or auto-continue based on game state
+            setTimeout(() => {
+                checkForNextGame();
+            }, 3000);
         }
 
-        function displayLeaderboard(scores) {
-            let html = '<table><tr><th>Rank</th><th>Player</th><th>Score</th><th>Status</th></tr>';
-            scores.forEach((score, index) => {
-                const isCurrentPlayer = score.playerId === playerId;
-                const rowClass = isCurrentPlayer ? 'style="background-color: #fff3cd;"' : '';
-                html += `<tr ${rowClass}>
-                    <td>${index + 1}</td>
-                    <td>${score.playerName}${isCurrentPlayer ? ' (You)' : ''}</td>
-                    <td>${score.score}</td>
-                    <td>${score.status}</td>
-                </tr>`;
-            });
-            html += '</table>';
+        function checkForNextGame() {
+            if (!sessionData) return;
             
-            DOM.leaderboardContent.innerHTML = html;
-            DOM.leaderboardContainer.style.display = 'block';
-        }
-
-        async function proceedToNextGame() {
-            try {
-                // Check session state to find next available game
-                sessionData = await apiCall('/api/game/details');
+            const currentRoundData = sessionData.rounds.find(r => r.id === currentRound);
+            if (!currentRoundData) {
+                showWaitingForNextGame('Current round not found. Please wait for administrator instructions.');
+                return;
+            }
+            
+            // Look for next game in current round
+            const nextGameInRound = currentRoundData.games.find(g => g.id > currentGame && g.open);
+            
+            if (nextGameInRound) {
+                showContinueButton(() => proceedToNextGame(nextGameInRound.id, currentRound));
+            } else {
+                // Look for next round
+                const nextRound = sessionData.rounds.find(r => r.id > currentRound && r.open);
                 
-                const currentRoundData = sessionData.rounds.find(r => r.id === currentRound);
-                if (!currentRoundData) {
-                    showWaitingState('Current round not found. Please wait for administrator instructions.');
-                    return;
-                }
-                
-                // Look for next game in current round
-                const nextGameInRound = currentRoundData.games.find(g => g.id > currentGame && g.open);
-                
-                if (nextGameInRound) {
-                    // Move to next game in same round
-                    currentGame = nextGameInRound.id;
-                    resetGameUI();
-                    await loadGameLocation();
+                if (nextRound && nextRound.games.some(g => g.open)) {
+                    const firstGameInRound = nextRound.games.find(g => g.open);
+                    showContinueButton(() => proceedToNextGame(firstGameInRound.id, nextRound.id));
                 } else {
-                    // Look for next round
-                    const nextRound = sessionData.rounds.find(r => r.id > currentRound && r.open);
-                    
-                    if (nextRound && nextRound.games.some(g => g.open)) {
-                        currentRound = nextRound.id;
-                        currentGame = nextRound.games.find(g => g.open).id;
-                        resetGameUI();
-                        await loadGameLocation();
-                    } else {
-                        // No more games available
-                        showWaitingState('No more games are currently available. Please wait for administrator instructions or the next round to open.');
-                    }
+                    showWaitingForNextGame('No more games are currently available. Waiting for administrator...');
                 }
-                
-            } catch (error) {
-                console.error('Error proceeding to next game:', error);
-                showWaitingState(`Error loading next game: ${error.message}`);
             }
         }
 
-        function showWaitingState(message) {
-            DOM.gameContainer.style.display = 'none';
-            DOM.sessionWaiting.style.display = 'block';
-            DOM.startButton.style.display = 'none';
-            showMessage('wait-message', message, 'waiting');
-            
-            // Resume polling for game state
-            startStatusPolling();
+        function showContinueButton(callback) {
+            DOM.submitStatusText.innerHTML = `
+                Guess submitted! 
+                <button onclick="continueToNext()" style="margin-left: 10px; padding: 8px 16px; background: #0cc0df; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Continue to Next Game
+                </button>
+            `;
+            window.continueToNext = callback;
+        }
+
+        function showWaitingForNextGame(message) {
+            DOM.submitStatusText.textContent = message;
+        }
+
+        function proceedToNextGame(gameId, roundId) {
+            currentGame = gameId;
+            currentRound = roundId;
+            resetGameUI();
+            loadGameLocation();
         }
 
         function resetGameUI() {
-            DOM.leaderboardContainer.style.display = 'none';
             DOM.locationText.textContent = 'Loading new location...';
             DOM.guessedCoordsText.textContent = 'Make your guess on the overlay map...';
             DOM.submitStatusText.textContent = 'Place your guess on the overlay map...';
@@ -984,8 +1394,15 @@
         async function initializeMaps() {
             try {
                 // Get map styles using our proxy
-                const mainMapStyle = await apiCall('/api/mapstyle?style=0196cb69-f55f-71f8-9a8f-90fa083f0f67');
-                const overlayMapStyle = await apiCall('/api/mapstyle?style=0196cb7f-9914-7a9b-aed1-8bfa7b9a0705');
+                const mainMapStyleResponse = await fetch(`${API_BASE_URL}/api/mapstyle?style=0196cb69-f55f-71f8-9a8f-90fa083f0f67`, {
+                    headers: { 'X-Session-Code': sessionCode }
+                });
+                const overlayMapStyleResponse = await fetch(`${API_BASE_URL}/api/mapstyle?style=0196cb7f-9914-7a9b-aed1-8bfa7b9a0705`, {
+                    headers: { 'X-Session-Code': sessionCode }
+                });
+
+                const mainMapStyle = await mainMapStyleResponse.json();
+                const overlayMapStyle = await overlayMapStyleResponse.json();
 
                 // Set up MapTiler SDK with a dummy key (we're using proxied styles)
                 maptilersdk.config.apiKey = 'dummy';
@@ -1054,6 +1471,14 @@
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', function() {
             cacheDOMElements();
+            updateConnectionStatus('disconnected');
+        });
+
+        // --- Cleanup on page unload ---
+        window.addEventListener('beforeunload', () => {
+            if (gameWebSocket) {
+                gameWebSocket.close();
+            }
         });
     </script>
 </body>
