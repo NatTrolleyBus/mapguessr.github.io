@@ -13,20 +13,26 @@
             margin: 0;
             padding: 0;
             color: #333;
+            background-color: #f4f7f6;
         }
         header {
             background-color: #0cc0df;
             padding: 20px;
             border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         h1 {
             color: #444;
             margin-top: 0;
+            text-align: center;
         }
         main {
             padding: 20px;
             max-width: 1980px;
-            margin: 0 auto;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
         section {
             margin-bottom: 30px;
@@ -81,6 +87,7 @@
         label {
             display: block;
             margin-bottom: 5px;
+            font-weight: bold;
         }
         input[type="text"],
         input[type="number"],
@@ -91,6 +98,7 @@
             border: 1px solid #ddd;
             box-sizing: border-box; /* Include padding in width */
             margin-bottom: 10px;
+            font-size: 1em;
         }
         button {
             background-color: #007bff;
@@ -104,6 +112,7 @@
         button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
+            color: #666;
         }
 
         /* Session Display */
@@ -130,6 +139,7 @@
             padding: 20px;
             border-radius: 8px;
             background-color: #fff;
+            margin-top: 20px;
         }
         #game-screen h2 {
             margin-top: 0;
@@ -201,7 +211,7 @@
             font-weight: bold;
         }
 
-        /* Battle Royale Status Bar (NEW) */
+        /* Battle Royale Status Bar */
         .battle-royale-status-bar {
             background-color: #f0f8ff; /* Lighter blue background */
             padding: 20px;
@@ -224,9 +234,22 @@
             display: block; /* Ensures value is on its own line */
         }
 
-        /* Live Player List */
+        /* Waiting for Others UI */
+        #waiting-for-others-message {
+            background-color: #fff3cd; /* Light yellow background */
+            color: #856404; /* Dark yellow text */
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.1em;
+            display: none; /* Hidden by default */
+        }
+
+        /* Live Player List / Leaderboard */
         #live-player-list {
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
             border: 1px solid #eee;
             padding: 10px;
@@ -236,35 +259,64 @@
         .player-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 8px 12px;
             margin-bottom: 5px;
             background-color: #f0f0f0;
             border-left: 5px solid #007bff;
             border-radius: 5px;
-            align-items: center;
         }
         .player-item.you {
             background-color: #e6ffe6;
             border-left-color: #28a745; /* Green for current player */
+            font-weight: bold;
         }
         .player-item.left {
             border-left-color: #ffc107; /* Orange for left players */
             background-color: #fff5e0;
             opacity: 0.8;
             text-decoration: line-through;
+            font-style: italic;
         }
         .player-item.kicked {
             border-left-color: #dc3545; /* Red for kicked players */
             background-color: #ffe6e6;
             opacity: 0.6;
             text-decoration: line-through;
+            font-style: italic;
         }
-        /* NEW: Eliminated status for Battle Royale */
+        /* Eliminated status for Battle Royale */
         .player-item.eliminated {
             border-left-color: #6c757d; /* Grey border */
             background-color: #e9ecef; /* Light grey background */
             opacity: 0.7;
             text-decoration: line-through;
+            font-style: italic;
+        }
+        .player-item .rank {
+            font-weight: bold;
+            margin-right: 10px;
+            min-width: 25px; /* Ensure space for rank number */
+            text-align: right;
+        }
+        .player-item .name {
+            flex-grow: 1;
+        }
+        .player-item .score {
+            font-weight: bold;
+            min-width: 60px; /* Ensure space for score */
+            text-align: right;
+        }
+        .player-item .status {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 10px;
+            min-width: 70px;
+            text-align: right;
+        }
+        .player-item.first {
+            background-color: #fff2e0; /* Golden hue */
+            border-left-color: #ffcc00;
         }
 
 
@@ -275,24 +327,15 @@
             padding: 20px;
             border-radius: 8px;
             display: none; /* Hidden until game ends */
+            margin-top: 20px;
         }
         #leaderboard h2 {
             margin-top: 0;
             color: #007bff;
+            text-align: center;
         }
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 12px;
-            margin-bottom: 5px;
-            background-color: #e6f7ff;
-            border-left: 5px solid #007bff;
-            border-radius: 5px;
-        }
-        .leaderboard-item.first {
-            background-color: #ffe0b2; /* Gold color */
-            border-left-color: #ff9800;
-            font-weight: bold;
+        #leaderboard-list .leaderboard-item {
+            /* Inherits player-item styles, customize if needed */
         }
     </style>
 </head>
@@ -340,9 +383,17 @@
                         <span class="status-value" id="time-remaining">--:--</span>
                         <span>Time Left</span>
                     </div>
+                    <div class="status-item">
+                        <span class="status-value" id="current-round-display">--</span>
+                        <span>Round</span>
+                    </div>
                 </div>
 
-                <div class="map-container">
+                <div id="waiting-for-others-message">
+                    Waiting for other players to submit their guesses...
+                </div>
+
+                <div class="map-container" id="map-container">
                     <div id="map"></div>
                     <div id="overlay-map"></div>
                     <div id="guess-pin" class="guess-pin" style="display: none;"></div>
@@ -351,7 +402,7 @@
                 </div>
 
                 <div class="form-group">
-                    <button id="submit-guess-btn" disabled>Submit Guess</button>
+                    <button id="submit-guess-btn">Submit Guess</button>
                 </div>
                 <div class="form-group">
                     <p>Current Location: <span id="location-text">Loading map...</span></p>
@@ -359,14 +410,14 @@
             </div>
 
             <section id="live-players-section">
-                <h3>Live Players:</h3>
+                <h3>🏆 Live Leaderboard</h3>
                 <div id="live-player-list">
                     </div>
             </section>
         </section>
 
         <section id="leaderboard">
-            <h2>Leaderboard</h2>
+            <h2>Final Leaderboard</h2>
             <div id="leaderboard-list">
                 </div>
             <button id="new-game-btn">Start New Game</button>
@@ -390,6 +441,7 @@
         let realLocationPinElement;
         let lineBetweenPinsElement;
         let sessionData = {}; // Cache for current session data
+        let hasSubmittedGuess = false; // Track if current player has submitted for the round
 
         const DOM = {}; // Object to cache DOM elements
 
@@ -421,9 +473,12 @@
             DOM.leaderboardList = document.getElementById('leaderboard-list');
             DOM.newGameBtn = document.getElementById('new-game-btn');
 
-            // NEW: Battle Royale UI elements
+            // Battle Royale UI elements
             DOM.playersRemaining = document.getElementById('players-remaining');
             DOM.timeRemaining = document.getElementById('time-remaining');
+            DOM.currentRoundDisplay = document.getElementById('current-round-display');
+            DOM.waitingForOthersMessage = document.getElementById('waiting-for-others-message');
+            DOM.mapContainer = document.getElementById('map-container');
         }
 
         // --- WebSocket Handling ---
@@ -455,6 +510,9 @@
                     console.log('WebSocket disconnected');
                     updateConnectionStatus('disconnected');
                     if (this.onClose) this.onClose();
+                    // If disconnected, try to reconnect after a delay, or show a reconnect button
+                    showNotification('Disconnected from session. Attempting to reconnect...', 'error', 0);
+                    setTimeout(() => this.connect(), 5000); // Attempt to reconnect after 5 seconds
                 };
                 this.ws.onerror = (error) => {
                     console.error('WebSocket error:', error);
@@ -492,14 +550,17 @@
             notification.textContent = message;
             DOM.notificationContainer.appendChild(notification);
 
-            // Trigger reflow to enable transition
-            void notification.offsetWidth;
+            void notification.offsetWidth; // Trigger reflow
             notification.classList.add('show');
 
-            setTimeout(() => {
-                notification.classList.remove('show');
-                notification.addEventListener('transitionend', () => notification.remove());
-            }, duration);
+            if (duration > 0) {
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    notification.addEventListener('transitionend', () => notification.remove());
+                }, duration);
+            } else {
+                // Persistent notification if duration is 0
+            }
         }
 
         // --- Session and Game Logic ---
@@ -509,6 +570,7 @@
                 showNotification('Please enter your name.', 'error');
                 return;
             }
+            localStorage.setItem('playerName', playerName); // Save name
 
             try {
                 const response = await fetch(`${API_BASE_URL}/create-session`, {
@@ -519,6 +581,8 @@
                 const data = await response.json();
                 if (response.ok) {
                     sessionId = data.sessionId;
+                    localStorage.setItem('sessionId', sessionId); // Save session ID
+                    localStorage.setItem('playerId', data.playerId); // Save player ID
                     showNotification(`Session created! ID: ${sessionId}`, 'success');
                     connectToWebSocket(sessionId, playerName);
                     displaySessionControls();
@@ -538,6 +602,8 @@
                 showNotification('Please enter your name and session ID.', 'error');
                 return;
             }
+            localStorage.setItem('playerName', playerName); // Save name
+            localStorage.setItem('sessionId', sessionId); // Save session ID
 
             try {
                 const response = await fetch(`${API_BASE_URL}/join-session`, {
@@ -547,6 +613,7 @@
                 });
                 const data = await response.json();
                 if (response.ok) {
+                    localStorage.setItem('playerId', data.playerId); // Save player ID
                     showNotification(`Joined session: ${sessionId}`, 'success');
                     connectToWebSocket(sessionId, playerName);
                     displaySessionControls();
@@ -563,7 +630,7 @@
             if (gameWebSocket) {
                 gameWebSocket.close(); // Close existing connection if any
             }
-            const wsUrl = `${WS_BASE_URL}?sessionId=${sId}&playerName=${pName}`;
+            const wsUrl = `${WS_BASE_URL}?sessionId=${sId}&playerName=${pName}&playerId=${getPlayerId()}`;
             gameWebSocket = new GameWebSocket(
                 wsUrl,
                 () => { /* onOpen, no specific action here */ },
@@ -596,15 +663,21 @@
                     handleSessionUpdate(sessionData);
                     break;
                 case 'player_kicked':
+                    // This event from server means a player was kicked by server-side logic (e.g. host kick)
                     showNotification(`${message.playerName} was kicked!`, 'info');
-                    // Refresh player list to reflect the kicked status
                     if (sessionData && sessionData.players) {
                         const kickedPlayer = sessionData.players.find(p => p.id === message.playerId);
                         if (kickedPlayer) {
-                            kickedPlayer.status = 'kicked'; // Mark client-side as kicked
+                            kickedPlayer.status = 'kicked';
                         }
                     }
                     updateLivePlayersList();
+                    // If the current player was kicked by the server
+                    if (message.playerId === getPlayerId()) {
+                        disableGameInteraction(true);
+                        showNotification("You have been disconnected from the session!", 'error', 0);
+                        // Optionally close WebSocket here, but `onclose` handler will trigger reconnect
+                    }
                     break;
                 case 'game_start':
                     showNotification('Game started!', 'success');
@@ -612,55 +685,58 @@
                     resetGameUI();
                     break;
                 case 'new_round':
-                    showNotification(`Round ${message.data.roundNumber} started!`, 'info');
+                    showNotification(`Round ${message.data.roundNumber} started! Guess the location!`, 'info');
+                    sessionData.roundNumber = message.data.roundNumber; // Update round number
                     resetGameUI();
                     updateGameStatus(`Round ${message.data.roundNumber} - Guess the location!`);
-                    // NEW: You might trigger client-side kickout here or after a round ends
-                    // For example: if (message.data.roundEnded) performBattleRoyaleClientKickout();
+                    DOM.currentRoundDisplay.textContent = sessionData.roundNumber;
                     break;
                 case 'round_end':
                     showNotification('Round ended! Calculating scores...', 'info');
                     updateGameStatus('Round ended!');
                     hideOverlayMap();
+                    hasSubmittedGuess = true; // Mark that current player has submitted their guess
+                    DOM.waitingForOthersMessage.style.display = 'none'; // Hide if previously shown
+                    disableGameInteraction(true); // Disable interaction until next round or game end
+
                     // Display real location and score for the round
                     actualLocationCoords = message.data.actualLocation;
                     if (actualLocationCoords) {
                         displayRealLocationPin(actualLocationCoords);
                     }
+                    // Update scores in sessionData from server-provided roundScores
                     if (message.data.roundScores) {
-                        updateGameStatus(`Your score this round: ${message.data.roundScores[getPlayerId()] || 0} pts`);
+                        sessionData.players.forEach(player => {
+                            if (message.data.roundScores[player.id] !== undefined) {
+                                player.score = (player.score || 0) + message.data.roundScores[player.id];
+                            }
+                        });
                     }
-                    // NEW: This is a good place to trigger client-side kickout
-                    // based on round end and current player data
-                    if (message.data.isBattleRoyaleRoundEnd) { // Assume server sends this flag
+
+                    // This is where client-side battle royale kickout occurs
+                    // Only perform kickout if the current player is still active
+                    const currentPlayerStatus = sessionData.players.find(p => p.id === getPlayerId())?.status;
+                    if (currentPlayerStatus === 'active') {
                         performBattleRoyaleClientKickout();
                     }
+
+                    updateLivePlayersList(); // Refresh leaderboard after scores and potential kickouts
                     break;
                 case 'game_end':
                     showNotification('Game ended! Final scores...', 'success');
                     updateGameStatus('Game Over!');
                     hideGameScreen();
-                    showLeaderboard(message.data.finalScores);
+                    showFinalLeaderboard(message.data.finalScores); // Show final leaderboard
                     break;
                 case 'error':
                     showNotification(`Error: ${message.message}`, 'error');
                     break;
-                case 'kickout_countdown': // NEW: If server provides countdown info
-                    updateBattleRoyaleUI(sessionData.players.length, message.data.timeLeft);
-                    break;
-                case 'player_eliminated': // NEW: If server sends specific elimination event
-                    showNotification(`${message.playerName} was eliminated!`, 'info');
-                    // Find and mark player as eliminated in sessionData
-                    if (sessionData && sessionData.players) {
-                        const eliminatedPlayer = sessionData.players.find(p => p.id === message.playerId);
-                        if (eliminatedPlayer) {
-                            eliminatedPlayer.status = 'eliminated';
-                        }
+                case 'kickout_countdown': // If server provides countdown info (not directly used for client-side kickout logic)
+                    if (message.data.timeLeft !== undefined) {
+                        updateBattleRoyaleUI(null, message.data.timeLeft);
                     }
-                    updateLivePlayersList(); // Refresh UI
-                    // Update battle royale status
-                    updateBattleRoyaleUI(sessionData.players.filter(p => p.status !== 'eliminated' && p.status !== 'kicked' && p.status !== 'left').length, null);
                     break;
+                // No explicit 'player_eliminated' case needed from server, as client calculates its own eliminations
             }
         }
 
@@ -671,15 +747,20 @@
                 DOM.startGameBtn.style.display = data.isHost ? 'block' : 'none';
                 DOM.gameScreen.style.display = 'none';
                 DOM.leaderboardSection.style.display = 'none';
+                DOM.waitingForOthersMessage.style.display = 'none'; // Ensure hidden
             } else if (data.status === 'in-game') {
                 showGameScreen();
                 DOM.waitingRoom.style.display = 'none';
                 DOM.leaderboardSection.style.display = 'none';
-                updateGameStatus(`Round ${data.roundNumber} - Guess the location!`);
+                updateGameStatus(`Round ${data.roundNumber || '--'} - Guess the location!`);
+                DOM.currentRoundDisplay.textContent = data.roundNumber || '--';
+                // Reset hasSubmittedGuess for new round
+                hasSubmittedGuess = false;
+                disableGameInteraction(false); // Enable interaction for active players
             } else if (data.status === 'finished') {
                 hideGameScreen();
                 DOM.waitingRoom.style.display = 'none';
-                showLeaderboard(data.finalScores);
+                showFinalLeaderboard(data.finalScores);
             }
             updateLivePlayersList();
         }
@@ -688,51 +769,60 @@
             DOM.gameStatusBar.textContent = message;
         }
 
-        // NEW: Update Battle Royale UI for players remaining and time
         function updateBattleRoyaleUI(playersLeft, timeLeft) {
-            if (DOM.playersRemaining) DOM.playersRemaining.textContent = playersLeft;
-            if (DOM.timeRemaining) {
-                if (timeLeft !== null) {
-                    const minutes = Math.floor(timeLeft / 60);
-                    const seconds = timeLeft % 60;
-                    DOM.timeRemaining.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                } else {
-                    DOM.timeRemaining.textContent = '--:--'; // Clear if no time provided
-                }
+            if (playersLeft !== null && DOM.playersRemaining) DOM.playersRemaining.textContent = playersLeft;
+            if (timeLeft !== null && DOM.timeRemaining) {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                DOM.timeRemaining.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else if (DOM.timeRemaining) {
+                DOM.timeRemaining.textContent = '--:--'; // Clear if no time provided
+            }
+            if (sessionData.roundNumber !== undefined && DOM.currentRoundDisplay) {
+                 DOM.currentRoundDisplay.textContent = sessionData.roundNumber;
             }
         }
-
 
         function updateLivePlayersList() {
             if (!sessionData || !sessionData.players) return;
 
             let html = '';
-            const playerId = getPlayerId(); // Get current player's ID
+            const playerId = getPlayerId();
 
-            sessionData.players.forEach(player => {
-                const isCurrentPlayer = player.id === playerId;
-                let statusClass = '';
-                if (player.status === 'active') {
-                    statusClass = '';
-                } else if (player.status === 'eliminated') { // NEW: Handle 'eliminated' status
-                    statusClass = 'eliminated';
-                } else {
-                    statusClass = player.status; // 'left', 'kicked'
+            // Filter out 'left' or 'kicked' players who are truly out of the game
+            const playablePlayers = sessionData.players.filter(p => p.status === 'active' || p.status === 'eliminated');
+
+            // Sort players for live leaderboard: active first, then by score descending, then eliminated
+            const sortedPlayers = [...playablePlayers].sort((a, b) => {
+                // Prioritize active players
+                if (a.status === 'active' && b.status !== 'active') return -1;
+                if (b.status === 'active' && a.status !== 'active') return 1;
+
+                // For players with same status (e.g., both active or both eliminated), sort by score
+                if (b.score !== a.score) {
+                    return b.score - a.score; // Higher score first
                 }
+
+                return 0; // Maintain original order if scores are same
+            });
+
+            sortedPlayers.forEach((player, index) => {
+                const isCurrentPlayer = player.id === playerId;
+                let statusClass = player.status;
                 if (isCurrentPlayer) statusClass += ' you';
+                if (index === 0 && player.status === 'active') statusClass += ' first'; // Mark the current top active player
 
                 html += `<div class="player-item ${statusClass}">
-                    <div>
-                        <strong>${player.name}</strong>${isCurrentPlayer ? ' (You)' : ''} - ${player.status}
-                        ${player.note ? ` - <em>${player.note}</em>` : ''}
-                    </div>
-                    <div>${player.score || 0} pts</div>
+                    <div class="rank">${index + 1}.</div>
+                    <div class="name"><strong>${player.name}</strong>${isCurrentPlayer ? ' (You)' : ''}</div>
+                    <div class="score">${player.score || 0} pts</div>
+                    <div class="status">${player.status === 'active' ? 'active' : (player.status === 'eliminated' ? 'eliminated' : player.status)}</div>
                 </div>`;
             });
             DOM.livePlayerList.innerHTML = html;
-            // Update the Battle Royale players remaining count
-            const activePlayers = sessionData.players.filter(p => p.status === 'active');
-            updateBattleRoyaleUI(activePlayers.length, null); // Time left should come from server
+
+            const activePlayersCount = sessionData.players.filter(p => p.status === 'active').length;
+            updateBattleRoyaleUI(activePlayersCount, null); // Time left should come from server
         }
 
         function showGameScreen() {
@@ -748,18 +838,20 @@
         }
 
         function resetGameUI() {
-            // Reset map pins and line
             if (guessPinElement) guessPinElement.style.display = 'none';
             if (realLocationPinElement) realLocationPinElement.style.display = 'none';
             if (lineBetweenPinsElement) lineBetweenPinsElement.style.display = 'none';
             userGuessLngLat = null;
             actualLocationCoords = null;
             DOM.locationText.textContent = 'Guess the location!';
-            DOM.submitGuessBtn.disabled = true;
+            DOM.submitGuessBtn.disabled = false; // Re-enable for new round
             showOverlayMap();
+            hasSubmittedGuess = false; // Reset submission status for new round
+            DOM.waitingForOthersMessage.style.display = 'none'; // Hide waiting message
+            disableGameInteraction(false); // Ensure interaction is enabled for new round
         }
 
-        function showLeaderboard(finalScores) {
+        function showFinalLeaderboard(finalScores) {
             DOM.leaderboardSection.style.display = 'block';
             let html = '';
             const sortedScores = Object.entries(finalScores)
@@ -768,20 +860,36 @@
 
             sortedScores.forEach((player, index) => {
                 const isFirst = index === 0 ? 'first' : '';
-                html += `<div class="leaderboard-item ${isFirst}">
-                    <div>${index + 1}. <strong>${player.name}</strong></div>
-                    <div>${player.score} pts</div>
-                </div>`;
+                html += `<div class="player-item ${isFirst}">
+                    <div class="rank">${index + 1}.</div>
+                    <div class="name"><strong>${player.name}</strong></div>
+                    <div class="score">${player.score} pts</div>
+                    <div class="status"></div> </div>`;
             });
             DOM.leaderboardList.innerHTML = html;
         }
 
         function getPlayerId() {
-            // This is a client-side UUID, needs to be consistently set and retrieved
-            // For now, let's assume it's part of the session data passed on join/create
-            // You might need a more robust way to manage player IDs
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('playerId') || localStorage.getItem('playerId');
+            return localStorage.getItem('playerId');
+        }
+
+        function disableGameInteraction(isDisabled) {
+            // Disable/enable map clicks
+            if (overlayMap) {
+                if (isDisabled) {
+                    overlayMap.off('click', placeGuessPinHandler);
+                    overlayMap.off('contextmenu', placeGuessPinHandler);
+                    DOM.mapContainer.style.pointerEvents = 'none'; // Visually disable map area
+                    DOM.mapContainer.style.opacity = '0.7';
+                } else {
+                    overlayMap.on('click', placeGuessPinHandler);
+                    overlayMap.on('contextmenu', placeGuessPinHandler);
+                    DOM.mapContainer.style.pointerEvents = 'auto';
+                    DOM.mapContainer.style.opacity = '1';
+                }
+            }
+            // Disable submit button
+            DOM.submitGuessBtn.disabled = isDisabled;
         }
 
         // --- Map Handling ---
@@ -801,7 +909,7 @@
                     style: maptilersdk.MapStyle.STREETS,
                     center: [0, 0], // Default center
                     zoom: 1,
-                    interactive: true // Make overlay interactive for placing pins
+                    interactive: true
                 });
 
                 guessPinElement = DOM.guessPin;
@@ -809,8 +917,12 @@
                 lineBetweenPinsElement = DOM.lineBetweenPins;
 
                 overlayMap.on('load', () => {
-                    overlayMap.on('click', placeGuessPinHandler);
-                    overlayMap.on('contextmenu', placeGuessPinHandler);
+                    // Handlers are attached/detached by disableGameInteraction
+                    if (!hasSubmittedGuess) { // Only enable if not already submitted
+                        disableGameInteraction(false);
+                    } else {
+                        disableGameInteraction(true);
+                    }
                 });
 
                 // Handle overlay map transitions
@@ -823,7 +935,6 @@
                     }
                 });
 
-                // Add submit button handler
                 DOM.submitGuessBtn.addEventListener('click', submitGuess);
 
                 console.log('Maps initialized successfully');
@@ -903,94 +1014,74 @@
                     lat: userGuessLngLat.lat
                 }
             });
-            DOM.submitGuessBtn.disabled = true;
+            DOM.submitGuessBtn.disabled = true; // Disable after submitting
+            hasSubmittedGuess = true;
+            DOM.waitingForOthersMessage.style.display = 'block'; // Show waiting message
+            disableGameInteraction(true); // Disable interaction while waiting for others
         }
 
         // --- NEW: Client-side Battle Royale Kickout Logic ---
         function performBattleRoyaleClientKickout() {
-            if (!sessionData || !sessionData.players || sessionData.players.length <= 1) {
-                console.log("Not enough players for battle royale kickout or session data missing.");
-                return;
-            }
-
-            // Filter for active players who can be kicked
             const activePlayers = sessionData.players.filter(p => p.status === 'active');
+            
             if (activePlayers.length <= 1) {
-                console.log("Only one or zero active players remaining, no kickout needed.");
+                console.log("Battle Royale: Only one or zero active players remaining, game should end or no more kickouts needed.");
+                // If only one player left, declare winner and end game
+                if (activePlayers.length === 1) {
+                    showNotification(`${activePlayers[0].name} is the last one standing!`, 'success', 5000);
+                    // Trigger game_end logic if not already handled by server
+                    gameWebSocket.send({ type: 'game_end_client_trigger', finalScores: sessionData.players.reduce((acc, p) => ({ ...acc, [p.id]: p.score }), {}) });
+                }
                 return;
             }
 
             // Sort players by score in ascending order for elimination
-            // Assuming higher score is better, so lower scores get kicked
+            // Lower scores are eliminated first
             const playersForElimination = [...activePlayers].sort((a, b) => a.score - b.score);
 
-            const numPlayersToKick = Math.floor(playersForElimination.length / 2); // Half the people
-            let actualPlayersToKick = numPlayersToKick;
+            // Calculate how many players to kick: half the active players, rounded down.
+            // This rule (Math.floor(N/2)) handles both even and odd cases as per your clarification:
+            // - If 4 players: floor(4/2) = 2 players kicked.
+            // - If 3 players: floor(3/2) = 1 player kicked (matching "in the case of 3, kick 1").
+            const numPlayersToKick = Math.floor(playersForElimination.length / 2);
 
-            // Apply the "if uneven like 3, kickout half but 1 less, like in the case of 3, kick 1" rule
-            if (playersForElimination.length % 2 !== 0 && numPlayersToKick > 0) {
-                actualPlayersToKick = numPlayersToKick - 1; // If 3 players, numPlayersToKick = 1, actual = 0. This rule is a bit ambiguous.
-                                                            // Reinterpreting "kickout half but 1 less" when odd:
-                                                            // e.g., 3 players -> half = 1.5 -> floor = 1. "1 less" would mean 0.
-                                                            // A more common BR rule for odd numbers is to kick 'floor(N/2)' or 'ceil(N/2)'
-                                                            // Let's stick to the interpretation of "kickout half (rounded down) but 1 less if odd"
-                                                            // For 3 players, floor(3/2) = 1. 1 less is 0. So 1 player is safe.
-                                                            // If 5 players, floor(5/2) = 2. 1 less is 1. So 4 players are safe.
-                                                            // This rule effectively means `floor(N/2) - 1` if N is odd and > 1.
-                                                            // Or, simpler, `ceil(N/2)` players survive.
-                                                            // If N=3, ceil(3/2) = 2 survive, 1 kicked. So 1 player kicked.
-                                                            // If N=5, ceil(5/2) = 3 survive, 2 kicked. So 2 players kicked.
-                                                            // Let's go with the more common 'kick `floor(N/2)`' behavior for even, and `floor(N/2)` for odd,
-                                                            // which means `N - ceil(N/2)` kicked.
-                                                            // User's specific rule: "if uneven like 3, kickout half but 1 less, like in the case of 3, kick 1".
-                                                            // This means if 3 players, kick 1. (3/2 = 1.5, floor = 1). So 1 kicked.
-                                                            // If 5 players, (5/2 = 2.5, floor = 2). The rule "but 1 less" might apply, making it 1 kicked.
-                                                            // This rule is unusual. If "kickout half but 1 less" means take `floor(N/2)` then subtract 1 if N is odd,
-                                                            // for 3 players, floor(3/2) = 1, 1 - 1 = 0 kicked.
-                                                            // For 5 players, floor(5/2) = 2, 2 - 1 = 1 kicked.
-                                                            // This seems to contradict "kick 1" for 3 players.
-
-            // Let's re-interpret the user's explicit example: "in the case of 3, kick 1".
-            // If N=3, want to kick 1.
-            // If N=even, want to kick N/2.
-            // This means: `Math.floor(activePlayers.length / 2)` players are kicked.
-            // This covers "half the people" for even numbers.
-            // For 3 players, Math.floor(3/2) = 1. This matches "kick 1".
-            // So, `Math.floor(activePlayers.length / 2)` seems to be the consistent rule.
-            actualPlayersToKick = Math.floor(playersForElimination.length / 2);
-
-            if (actualPlayersToKick === 0) {
-                console.log("No players to kick based on current rules.");
+            if (numPlayersToKick === 0) {
+                console.log("Battle Royale: No players to kick based on current rules or too few players to kick.");
                 return;
             }
 
-            const kickedPlayers = playersForElimination.slice(0, actualPlayersToKick);
+            const kickedPlayers = playersForElimination.slice(0, numPlayersToKick);
 
             kickedPlayers.forEach(player => {
-                // Find the player in the main sessionData.players array and update their status
                 const originalPlayer = sessionData.players.find(p => p.id === player.id);
                 if (originalPlayer) {
                     originalPlayer.status = 'eliminated';
                     showNotification(`${originalPlayer.name} has been eliminated!`, 'info');
-                    // If the kicked player is *this* client, close their WebSocket
-                    // This simulates being kicked from the game.
+                    // If the eliminated player is *this* client
                     if (originalPlayer.id === getPlayerId()) {
                         showNotification("You have been eliminated!", 'error', 5000);
-                        if (gameWebSocket) {
-                            gameWebSocket.close(); // Disconnect client from WebSocket
-                        }
-                        // Optionally, redirect to a game over screen or disable further interaction
-                        hideGameScreen();
-                        DOM.sessionDisplay.style.display = 'none';
-                        showLeaderboard(sessionData.finalScores || {}); // Show current scores as "final"
+                        disableGameInteraction(true); // Permanently disable interaction for this client
+                        // Do NOT close WebSocket unless the server is also going to close it,
+                        // otherwise this client just silently disappears from server's perspective.
+                        // The player's UI is now just a spectator/leaderboard view.
                     }
                 }
             });
 
-            // Update the UI to reflect the changes
-            updateLivePlayersList();
-            updateBattleRoyaleUI(sessionData.players.filter(p => p.status === 'active').length, null);
-
+            // After potential eliminations, check if only one active player remains
+            const remainingActivePlayers = sessionData.players.filter(p => p.status === 'active').length;
+            if (remainingActivePlayers <= 1) {
+                console.log("Battle Royale: Game over, one or zero active players remaining after kickout.");
+                const winner = sessionData.players.find(p => p.status === 'active');
+                if (winner) {
+                    showNotification(`${winner.name} wins the Battle Royale!`, 'success', 5000);
+                } else {
+                     showNotification("No winner found or all players eliminated!", 'info', 5000);
+                }
+                gameWebSocket.send({ type: 'game_end_client_trigger', finalScores: sessionData.players.reduce((acc, p) => ({ ...acc, [p.id]: p.score }), {}) });
+            }
+            
+            updateLivePlayersList(); // Re-render leaderboard to show eliminated players
             console.log(`Battle Royale: Kicked ${kickedPlayers.length} players.`);
         }
 
@@ -999,23 +1090,20 @@
             cacheDOMElements();
             updateConnectionStatus('disconnected');
 
-            // Retrieve player name and session ID from localStorage or URL params
-            const savedPlayerName = localStorage.getItem('playerName');
-            if (savedPlayerName) {
-                DOM.playerNameInput.value = savedPlayerName;
-                playerName = savedPlayerName;
-            }
+            // Retrieve player name and session ID/player ID from localStorage
+            playerName = localStorage.getItem('playerName') || '';
+            sessionId = localStorage.getItem('sessionId') || '';
+            const playerId = localStorage.getItem('playerId') || '';
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlSessionId = urlParams.get('sessionId');
-            const urlPlayerId = urlParams.get('playerId'); // If you plan to pass player ID in URL
-            if (urlSessionId) {
-                DOM.sessionIdInput.value = urlSessionId;
-                sessionId = urlSessionId;
-                // If sessionId and playerName are present, auto-join
-                if (playerName) {
-                    joinSession();
-                }
+            DOM.playerNameInput.value = playerName;
+            DOM.sessionIdInput.value = sessionId;
+
+            // If a session ID and player ID are found, attempt to auto-reconnect
+            if (sessionId && playerId) {
+                console.log(`Attempting to reconnect to session ${sessionId} as ${playerName} (ID: ${playerId})...`);
+                showNotification('Attempting to reconnect to session...', 'info', 0); // Persistent until connected/error
+                connectToWebSocket(sessionId, playerName);
+                displaySessionControls(); // Show session UI immediately
             }
 
             // Event Listeners
@@ -1024,13 +1112,17 @@
             DOM.startGameBtn.addEventListener('click', startGame);
             DOM.copySessionIdBtn.addEventListener('click', copySessionId);
             DOM.newGameBtn.addEventListener('click', () => {
-                // Reset UI to allow creating/joining new session
+                // Clear local storage for a fresh start
+                localStorage.removeItem('playerName');
+                localStorage.removeItem('sessionId');
+                localStorage.removeItem('playerId');
                 location.reload(); // Simple reload for fresh start
             });
 
-            // Store player name for next visit
+            // Store player name on input change
             DOM.playerNameInput.addEventListener('change', (e) => {
-                localStorage.setItem('playerName', e.target.value);
+                playerName = e.target.value;
+                localStorage.setItem('playerName', playerName);
             });
         });
 
